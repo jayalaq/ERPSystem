@@ -136,6 +136,8 @@ services:
       DATABASE_URL: postgres://erp_user:${DB_TESTING_PASSWORD:-change_me_testing}@erp-db-testing:5432/erp_testing
       DJANGO_SETTINGS_MODULE: erp_system.settings
       ENVIRONMENT: testing
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
     volumes:
       - .:/app
       - erp_testing_static:/app/staticfiles

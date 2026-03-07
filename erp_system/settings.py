@@ -157,6 +157,7 @@ ACCOUNT_ADAPTER = 'apps.core.adapters.NoNewUsersAccountAdapter'
 SOCIALACCOUNT_ADAPTER = 'apps.core.adapters.GoogleOnlyLoginAdapter'
 SOCIALACCOUNT_LOGIN_ON_GET = True
 SOCIALACCOUNT_AUTO_SIGNUP = False
+ACCOUNT_DEFAULT_HTTP_PROTOCOL = os.environ.get('ACCOUNT_DEFAULT_HTTP_PROTOCOL', 'http')
 
 SOCIALACCOUNT_PROVIDERS = {
     'google': {

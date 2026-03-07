@@ -1,0 +1,53 @@
+{% extends "base/base.html" %}
+{% load humanize %}
+{% block title %}Inventario{% endblock %}
+{% block content %}
+<div class="page-header d-flex justify-content-between align-items-center">
+    <h4>Inventario</h4>
+    <a href="{% url 'logistics:movement_create' %}" class="btn btn-primary"><i class="bi bi-plus-lg"></i> Nuevo Movimiento</a>
+</div>
+
+{% if low_stock %}
+<div class="alert alert-warning d-flex align-items-center gap-2">
+    <i class="bi bi-exclamation-triangle"></i>
+    <strong>{{ low_stock.count }} producto(s) con stock bajo el mínimo</strong>
+</div>
+{% endif %}
+
+<div class="card stat-card mb-3">
+    <div class="card-body py-2">
+        <form method="get" class="d-flex gap-2">
+            <input type="text" name="q" value="{{ query }}" class="form-control form-control-sm" placeholder="Buscar producto...">
+            <select name="warehouse" class="form-select form-select-sm" style="max-width:200px;">
+                <option value="">Todos los almacenes</option>
+                {% for wh in warehouses %}<option value="{{ wh.pk }}">{{ wh.name }}</option>{% endfor %}
+            </select>
+            <button class="btn btn-sm btn-primary"><i class="bi bi-search"></i></button>
+        </form>
+    </div>
+</div>
+
+<div class="card stat-card">
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead><tr><th>SKU</th><th>Producto</th><th>Categoría</th><th>Almacén</th><th class="text-end">Cantidad</th><th class="text-end">Reservado</th><th class="text-end">Disponible</th><th>Estado</th></tr></thead>
+            <tbody>
+                {% for sl in stock_levels %}
+                <tr class="{% if sl.quantity <= sl.product.min_stock %}table-warning{% endif %}">
+                    <td><code>{{ sl.product.sku }}</code></td>
+                    <td class="fw-semibold">{{ sl.product.name }}</td>
+                    <td>{{ sl.product.category.name|default:"-" }}</td>
+                    <td>{{ sl.warehouse.name }}</td>
+                    <td class="text-end">{{ sl.quantity|floatformat:0 }}</td>
+                    <td class="text-end">{{ sl.reserved|floatformat:0 }}</td>
+                    <td class="text-end fw-bold">{{ sl.available|floatformat:0 }}</td>
+                    <td>{% if sl.quantity <= sl.product.min_stock %}<span class="badge bg-danger">Bajo</span>{% else %}<span class="badge bg-success">OK</span>{% endif %}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="8" class="text-center text-muted py-4">No hay datos de inventario</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

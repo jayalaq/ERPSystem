@@ -1,0 +1,153 @@
+import os
+from pathlib import Path
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-dev-key-change-in-production')
+DEBUG = os.environ.get('DEBUG', 'True').lower() in ('true', '1', 'yes')
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
+
+INSTALLED_APPS = [
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+    'django.contrib.humanize',
+    # Third party
+    'rest_framework',
+    'corsheaders',
+    'django_filters',
+    'crispy_forms',
+    'crispy_bootstrap5',
+    # Local apps
+    'apps.core',
+    'apps.crm',
+    'apps.pos',
+    'apps.logistics',
+    'apps.accounting',
+    'apps.sunat_integration',
+]
+
+MIDDLEWARE = [
+    'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django.middleware.locale.LocaleMiddleware',
+]
+
+ROOT_URLCONF = 'erp_system.urls'
+
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [BASE_DIR / 'templates'],
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'context_processors': [
+                'django.template.context_processors.debug',
+                'django.template.context_processors.request',
+                'django.contrib.auth.context_processors.auth',
+                'django.contrib.messages.context_processors.messages',
+                'apps.core.context_processors.company_info',
+            ],
+        },
+    },
+]
+
+WSGI_APPLICATION = 'erp_system.wsgi.application'
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
+}
+
+# Use PostgreSQL in production
+if os.environ.get('DATABASE_URL'):
+    import dj_database_url
+    DATABASES['default'] = dj_database_url.parse(os.environ['DATABASE_URL'])
+
+AUTH_PASSWORD_VALIDATORS = [
+    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
+]
+
+LANGUAGE_CODE = 'es-pe'
+TIME_ZONE = 'America/Lima'
+USE_I18N = True
+USE_TZ = True
+
+STATIC_URL = '/static/'
+STATICFILES_DIRS = [BASE_DIR / 'static']
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+AUTH_USER_MODEL = 'core.User'
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.SessionAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+    'DEFAULT_FILTER_BACKENDS': [
+        'django_filters.rest_framework.DjangoFilterBackend',
+        'rest_framework.filters.SearchFilter',
+        'rest_framework.filters.OrderingFilter',
+    ],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 25,
+}
+
+CRISPY_ALLOWED_TEMPLATE_PACKS = 'bootstrap5'
+CRISPY_TEMPLATE_PACK = 'bootstrap5'
+
+LOGIN_URL = '/login/'
+LOGIN_REDIRECT_URL = '/dashboard/'
+LOGOUT_REDIRECT_URL = '/login/'
+
+# SUNAT Configuration
+SUNAT_CONFIG = {
+    'RUC': os.environ.get('SUNAT_RUC', ''),
+    'USER': os.environ.get('SUNAT_USER', 'MODDATOS'),
+    'PASSWORD': os.environ.get('SUNAT_PASSWORD', 'moddatos'),
+    'CLIENT_ID': os.environ.get('SUNAT_CLIENT_ID', ''),
+    'CLIENT_SECRET': os.environ.get('SUNAT_CLIENT_SECRET', ''),
+    'PRODUCTION': os.environ.get('SUNAT_PRODUCTION', 'False').lower() == 'true',
+    'BETA_URL': 'https://e-beta.sunat.gob.pe/ol-ti-itcpfegem-beta/billService',
+    'PRODUCTION_URL': 'https://e-factura.sunat.gob.pe/ol-ti-itcpfegem/billService',
+    'CONSULT_RUC_URL': 'https://api.apis.net.pe/v2/sunat/ruc',
+    'TIPO_CAMBIO_URL': 'https://api.apis.net.pe/v2/sunat/tipo-cambio',
+}
+
+# Company Configuration
+COMPANY_CONFIG = {
+    'NAME': os.environ.get('COMPANY_NAME', 'Mi Empresa SAC'),
+    'RUC': os.environ.get('COMPANY_RUC', '20123456789'),
+    'ADDRESS': os.environ.get('COMPANY_ADDRESS', 'Lima, Peru'),
+    'PHONE': os.environ.get('COMPANY_PHONE', ''),
+    'EMAIL': os.environ.get('COMPANY_EMAIL', ''),
+    'WEBSITE': os.environ.get('COMPANY_WEBSITE', ''),
+    'LOGO': os.environ.get('COMPANY_LOGO', ''),
+    'IGV_RATE': 0.18,
+    'CURRENCY': 'PEN',
+}
+
+CORS_ALLOW_ALL_ORIGINS = DEBUG

@@ -1,0 +1,26 @@
+{% extends "base/base.html" %}
+{% block title %}Almacenes{% endblock %}
+{% block content %}
+<div class="page-header"><h4>Almacenes</h4></div>
+<div class="card stat-card">
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead><tr><th>Código</th><th>Nombre</th><th>Sucursal</th><th>Encargado</th><th>Principal</th><th>Estado</th></tr></thead>
+            <tbody>
+                {% for wh in warehouses %}
+                <tr>
+                    <td><code>{{ wh.code }}</code></td>
+                    <td class="fw-semibold">{{ wh.name }}</td>
+                    <td>{{ wh.branch.name }}</td>
+                    <td>{{ wh.manager|default:"-" }}</td>
+                    <td>{% if wh.is_default %}<i class="bi bi-check-circle text-success"></i>{% endif %}</td>
+                    <td>{% if wh.is_active %}<span class="badge bg-success">Activo</span>{% else %}<span class="badge bg-secondary">Inactivo</span>{% endif %}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="6" class="text-center text-muted py-4">No hay almacenes configurados</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

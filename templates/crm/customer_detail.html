@@ -1,0 +1,84 @@
+{% extends "base/base.html" %}
+{% load humanize %}
+{% block title %}{{ customer.name }}{% endblock %}
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'crm:customer_list' %}">Clientes</a></li>
+<li class="breadcrumb-item active">{{ customer.name }}</li>
+{% endblock %}
+
+{% block content %}
+<div class="page-header d-flex justify-content-between align-items-center">
+    <h4>{{ customer.name }}</h4>
+    <div class="d-flex gap-2">
+        <a href="{% url 'crm:interaction_create' %}?customer={{ customer.pk }}" class="btn btn-outline-primary btn-sm">
+            <i class="bi bi-chat-dots"></i> Nueva Interacción
+        </a>
+        <a href="{% url 'crm:customer_edit' customer.pk %}" class="btn btn-primary btn-sm">
+            <i class="bi bi-pencil"></i> Editar
+        </a>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-md-4">
+        <div class="card stat-card">
+            <div class="card-body">
+                <h6 class="fw-bold mb-3">Información General</h6>
+                <table class="table table-sm table-borderless">
+                    <tr><td class="text-muted">Tipo</td><td class="fw-semibold">{{ customer.get_customer_type_display }}</td></tr>
+                    <tr><td class="text-muted">{{ customer.doc_type }}</td><td class="fw-semibold">{{ customer.doc_number }}</td></tr>
+                    <tr><td class="text-muted">Email</td><td>{{ customer.email|default:"-" }}</td></tr>
+                    <tr><td class="text-muted">Teléfono</td><td>{{ customer.phone|default:"-" }}</td></tr>
+                    <tr><td class="text-muted">Celular</td><td>{{ customer.mobile|default:"-" }}</td></tr>
+                    <tr><td class="text-muted">Dirección</td><td>{{ customer.address|default:"-" }}</td></tr>
+                    <tr><td class="text-muted">Crédito</td><td>S/ {{ customer.credit_limit|floatformat:2 }} ({{ customer.credit_days }} días)</td></tr>
+                    <tr><td class="text-muted">Asignado</td><td>{{ customer.assigned_to|default:"-" }}</td></tr>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-8">
+        <div class="card stat-card mb-3">
+            <div class="card-body">
+                <h6 class="fw-bold mb-3">Oportunidades</h6>
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead><tr><th>Título</th><th>Etapa</th><th>Monto</th><th>Probabilidad</th></tr></thead>
+                        <tbody>
+                            {% for opp in opportunities %}
+                            <tr>
+                                <td>{{ opp.title }}</td>
+                                <td><span class="badge bg-info">{{ opp.get_stage_display }}</span></td>
+                                <td>S/ {{ opp.expected_amount|floatformat:2|intcomma }}</td>
+                                <td>{{ opp.probability }}%</td>
+                            </tr>
+                            {% empty %}
+                            <tr><td colspan="4" class="text-muted text-center">Sin oportunidades</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="card stat-card">
+            <div class="card-body">
+                <h6 class="fw-bold mb-3">Últimas Interacciones</h6>
+                {% for inter in interactions %}
+                <div class="d-flex gap-3 mb-3 pb-3 border-bottom">
+                    <div class="stat-icon bg-primary bg-opacity-10 text-primary" style="width:36px;height:36px;min-width:36px;">
+                        <i class="bi bi-{% if inter.interaction_type == 'call' %}telephone{% elif inter.interaction_type == 'email' %}envelope{% elif inter.interaction_type == 'meeting' %}calendar-event{% elif inter.interaction_type == 'whatsapp' %}whatsapp{% else %}chat{% endif %}" style="font-size:0.9rem;"></i>
+                    </div>
+                    <div>
+                        <div class="fw-semibold" style="font-size:0.875rem;">{{ inter.subject }}</div>
+                        <div class="text-muted" style="font-size:0.8rem;">{{ inter.description|truncatewords:20 }}</div>
+                        <div class="text-muted" style="font-size:0.75rem;">{{ inter.date|date:"d/m/Y H:i" }} - {{ inter.performed_by }}</div>
+                    </div>
+                </div>
+                {% empty %}
+                <p class="text-muted text-center">Sin interacciones registradas</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

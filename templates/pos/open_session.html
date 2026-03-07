@@ -1,0 +1,33 @@
+{% extends "base/base.html" %}
+{% block title %}Abrir Caja{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card stat-card">
+            <div class="card-body text-center py-5">
+                <i class="bi bi-cash-stack text-primary" style="font-size:3rem;"></i>
+                <h4 class="fw-bold mt-3">Abrir Sesión de Caja</h4>
+                <p class="text-muted">Seleccione la caja registradora e ingrese el monto inicial</p>
+                <form method="post" class="text-start mt-4">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Caja Registradora</label>
+                        <select name="register" class="form-select" required>
+                            {% for reg in registers %}
+                            <option value="{{ reg.pk }}">{{ reg.name }} ({{ reg.branch.name }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">Monto de Apertura (S/)</label>
+                        <input type="number" name="opening_amount" class="form-control" step="0.01" value="0" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-lg w-100">
+                        <i class="bi bi-unlock"></i> Abrir Caja
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

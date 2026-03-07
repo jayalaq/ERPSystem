@@ -1,0 +1,60 @@
+{% extends "base/base.html" %}
+{% load humanize %}
+{% block title %}Resumen de Sesión{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card stat-card">
+            <div class="card-body">
+                <h5 class="fw-bold mb-4 text-center">Resumen de Sesión de Caja #{{ session.id }}</h5>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <table class="table table-sm">
+                            <tr><td class="text-muted">Caja</td><td class="fw-semibold">{{ session.cash_register.name }}</td></tr>
+                            <tr><td class="text-muted">Cajero</td><td>{{ session.user.get_full_name }}</td></tr>
+                            <tr><td class="text-muted">Apertura</td><td>{{ session.opened_at|date:"d/m/Y H:i" }}</td></tr>
+                            <tr><td class="text-muted">Cierre</td><td>{{ session.closed_at|date:"d/m/Y H:i" }}</td></tr>
+                        </table>
+                    </div>
+                    <div class="col-md-6">
+                        <table class="table table-sm">
+                            <tr><td class="text-muted">Monto Apertura</td><td class="text-end">S/ {{ session.opening_amount|floatformat:2 }}</td></tr>
+                            <tr><td class="text-muted">Total Ventas</td><td class="text-end fw-semibold">S/ {{ session.total_sales|floatformat:2 }}</td></tr>
+                            <tr><td class="text-muted">Efectivo</td><td class="text-end">S/ {{ session.total_cash|floatformat:2 }}</td></tr>
+                            <tr><td class="text-muted">Tarjeta</td><td class="text-end">S/ {{ session.total_card|floatformat:2 }}</td></tr>
+                            <tr><td class="text-muted">Transferencia</td><td class="text-end">S/ {{ session.total_transfer|floatformat:2 }}</td></tr>
+                            <tr><td class="text-muted">Monto Esperado</td><td class="text-end">S/ {{ session.expected_amount|floatformat:2 }}</td></tr>
+                            <tr><td class="text-muted">Monto Cierre</td><td class="text-end">S/ {{ session.closing_amount|floatformat:2 }}</td></tr>
+                            <tr class="{% if session.difference < 0 %}text-danger{% elif session.difference > 0 %}text-warning{% else %}text-success{% endif %}">
+                                <td class="fw-bold">Diferencia</td><td class="text-end fw-bold">S/ {{ session.difference|floatformat:2 }}</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+
+                <h6 class="fw-bold mt-4 mb-3">Ventas de la Sesión</h6>
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead><tr><th>#</th><th>Comprobante</th><th>Cliente</th><th>Método</th><th class="text-end">Total</th><th>Hora</th></tr></thead>
+                        <tbody>
+                            {% for sale in sales %}
+                            <tr>
+                                <td>{{ forloop.counter }}</td>
+                                <td>{{ sale.series }}-{{ sale.correlative }}</td>
+                                <td>{{ sale.customer.name|default:"Varios" }}</td>
+                                <td>{{ sale.get_payment_method_display }}</td>
+                                <td class="text-end">S/ {{ sale.total|floatformat:2 }}</td>
+                                <td>{{ sale.created_at|date:"H:i" }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="text-center mt-3">
+                    <a href="{% url 'dashboard' %}" class="btn btn-primary">Ir al Dashboard</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

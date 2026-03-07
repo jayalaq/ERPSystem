@@ -1,0 +1,120 @@
+{% extends "base/base.html" %}
+{% block title %}{{ title }}{% endblock %}
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+<li class="breadcrumb-item"><a href="{% url 'crm:customer_list' %}">Clientes</a></li>
+<li class="breadcrumb-item active">{{ title }}</li>
+{% endblock %}
+
+{% block content %}
+<div class="page-header"><h4>{{ title }}</h4></div>
+<div class="card stat-card">
+    <div class="card-body">
+        <form method="post" id="customerForm">
+            {% csrf_token %}
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold">Tipo de Cliente</label>
+                    {{ form.customer_type }}
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold">Tipo Documento</label>
+                    {{ form.doc_type }}
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold">Nro. Documento</label>
+                    <div class="input-group">
+                        {{ form.doc_number }}
+                        <button type="button" class="btn btn-outline-primary" id="btnConsultRUC" title="Consultar SUNAT">
+                            <i class="bi bi-search"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold">Asignado a</label>
+                    {{ form.assigned_to }}
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">Nombre / Razón Social</label>
+                    {{ form.name }}
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">Nombre Comercial</label>
+                    {{ form.trade_name }}
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">Email</label>
+                    {{ form.email }}
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">Teléfono</label>
+                    {{ form.phone }}
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">Celular</label>
+                    {{ form.mobile }}
+                </div>
+                <div class="col-md-12">
+                    <label class="form-label fw-semibold">Dirección</label>
+                    {{ form.address }}
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">Departamento</label>
+                    {{ form.department }}
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">Provincia</label>
+                    {{ form.province }}
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">Distrito</label>
+                    {{ form.district }}
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold">Límite Crédito</label>
+                    {{ form.credit_limit }}
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold">Días Crédito</label>
+                    {{ form.credit_days }}
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">Etiquetas</label>
+                    {{ form.tags }}
+                </div>
+                <div class="col-12">
+                    <label class="form-label fw-semibold">Notas</label>
+                    {{ form.notes }}
+                </div>
+            </div>
+            <div class="mt-4 d-flex gap-2">
+                <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg"></i> Guardar</button>
+                <a href="{% url 'crm:customer_list' %}" class="btn btn-outline-secondary">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.getElementById('btnConsultRUC').addEventListener('click', function() {
+    const docNumber = document.querySelector('[name="doc_number"]').value;
+    if (docNumber.length === 11) {
+        fetch(`/sunat/consult-ruc/?ruc=${docNumber}`)
+        .then(r => r.json())
+        .then(data => {
+            if (data.success && data.data) {
+                document.querySelector('[name="name"]').value = data.data.razonSocial || data.data.nombre || '';
+                document.querySelector('[name="address"]').value = data.data.direccion || '';
+                document.querySelector('[name="department"]').value = data.data.departamento || '';
+                document.querySelector('[name="province"]').value = data.data.provincia || '';
+                document.querySelector('[name="district"]').value = data.data.distrito || '';
+            } else {
+                alert('No se encontró información para este RUC');
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

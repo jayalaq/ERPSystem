@@ -1,0 +1,98 @@
+from django.contrib.auth import login, logout
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, redirect
+from django.db.models import Sum, Count, Q, F
+from django.utils import timezone
+from datetime import timedelta
+from decimal import Decimal
+
+from .forms import LoginForm
+from apps.accounting.models import Invoice
+from apps.crm.models import Customer, Opportunity
+from apps.pos.models import POSSale
+from apps.logistics.models import Product, StockLevel
+
+
+def login_view(request):
+    if request.user.is_authenticated:
+        return redirect('dashboard')
+    if request.method == 'POST':
+        form = LoginForm(request, data=request.POST)
+        if form.is_valid():
+            login(request, form.get_user())
+            return redirect('dashboard')
+    else:
+        form = LoginForm()
+    return render(request, 'core/login.html', {'form': form})
+
+
+def logout_view(request):
+    logout(request)
+    return redirect('login')
+
+
+@login_required
+def dashboard(request):
+    today = timezone.now().date()
+    month_start = today.replace(day=1)
+    last_30_days = today - timedelta(days=30)
+
+    # Sales stats
+    monthly_sales = POSSale.objects.filter(
+        created_at__date__gte=month_start, status='completed'
+    ).aggregate(total=Sum('total'), count=Count('id'))
+
+    today_sales = POSSale.objects.filter(
+        created_at__date=today, status='completed'
+    ).aggregate(total=Sum('total'), count=Count('id'))
+
+    # Invoice stats
+    pending_invoices = Invoice.objects.filter(status='draft').count()
+    accepted_invoices = Invoice.objects.filter(
+        status='accepted', created_at__date__gte=month_start
+    ).count()
+
+    # CRM stats
+    total_customers = Customer.objects.filter(is_active=True).count()
+    active_opportunities = Opportunity.objects.exclude(
+        stage__in=['closed_won', 'closed_lost']
+    ).count()
+    pipeline_value = Opportunity.objects.exclude(
+        stage__in=['closed_won', 'closed_lost']
+    ).aggregate(total=Sum('expected_amount'))['total'] or Decimal('0')
+
+    # Low stock alerts
+    low_stock_products = Product.objects.filter(
+        track_inventory=True, is_active=True
+    ).annotate(
+        current_stock=Sum('stock_levels__quantity')
+    ).filter(current_stock__lte=F('min_stock')).count()
+
+    # Recent sales
+    recent_sales = POSSale.objects.filter(status='completed').select_related('customer', 'seller')[:10]
+
+    # Top products (last 30 days)
+    from apps.pos.models import POSSaleItem
+    top_products = POSSaleItem.objects.filter(
+        sale__created_at__date__gte=last_30_days,
+        sale__status='completed'
+    ).values('product__name').annotate(
+        total_qty=Sum('quantity'),
+        total_amount=Sum('total')
+    ).order_by('-total_amount')[:5]
+
+    context = {
+        'monthly_sales_total': monthly_sales['total'] or Decimal('0'),
+        'monthly_sales_count': monthly_sales['count'] or 0,
+        'today_sales_total': today_sales['total'] or Decimal('0'),
+        'today_sales_count': today_sales['count'] or 0,
+        'pending_invoices': pending_invoices,
+        'accepted_invoices': accepted_invoices,
+        'total_customers': total_customers,
+        'active_opportunities': active_opportunities,
+        'pipeline_value': pipeline_value,
+        'low_stock_products': low_stock_products,
+        'recent_sales': recent_sales,
+        'top_products': top_products,
+    }
+    return render(request, 'dashboard/dashboard.html', context)

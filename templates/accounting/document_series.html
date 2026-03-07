@@ -1,0 +1,28 @@
+{% extends "base/base.html" %}
+{% block title %}Series de Documentos{% endblock %}
+{% block content %}
+<div class="page-header d-flex justify-content-between align-items-center">
+    <h4>Series de Documentos</h4>
+    <a href="{% url 'accounting:document_series_create' %}" class="btn btn-primary"><i class="bi bi-plus-lg"></i> Nueva Serie</a>
+</div>
+<div class="card stat-card">
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead><tr><th>Tipo</th><th>Serie</th><th>Siguiente Correlativo</th><th>Sucursal</th><th>Estado</th></tr></thead>
+            <tbody>
+                {% for s in series %}
+                <tr>
+                    <td>{{ s.get_doc_type_display }}</td>
+                    <td class="fw-semibold">{{ s.series }}</td>
+                    <td>{{ s.next_correlative }}</td>
+                    <td>{{ s.branch.name }}</td>
+                    <td>{% if s.is_active %}<span class="badge bg-success">Activa</span>{% else %}<span class="badge bg-secondary">Inactiva</span>{% endif %}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="5" class="text-center text-muted py-4">No hay series configuradas</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

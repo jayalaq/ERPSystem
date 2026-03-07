@@ -1,0 +1,58 @@
+{% extends "base/base.html" %}
+{% block title %}Clientes{% endblock %}
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+<li class="breadcrumb-item active">Clientes</li>
+{% endblock %}
+
+{% block content %}
+<div class="page-header d-flex justify-content-between align-items-center">
+    <h4>Clientes</h4>
+    <a href="{% url 'crm:customer_create' %}" class="btn btn-primary"><i class="bi bi-plus-lg"></i> Nuevo Cliente</a>
+</div>
+
+<div class="card stat-card mb-3">
+    <div class="card-body py-2">
+        <form method="get" class="d-flex gap-2">
+            <input type="text" name="q" value="{{ query }}" class="form-control form-control-sm" placeholder="Buscar por nombre, documento o email...">
+            <button class="btn btn-sm btn-primary px-4"><i class="bi bi-search"></i></button>
+        </form>
+    </div>
+</div>
+
+<div class="card stat-card">
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead>
+                <tr>
+                    <th>Documento</th>
+                    <th>Nombre / Razón Social</th>
+                    <th>Tipo</th>
+                    <th>Teléfono</th>
+                    <th>Email</th>
+                    <th>Asignado a</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for customer in customers %}
+                <tr>
+                    <td><span class="badge bg-secondary">{{ customer.doc_type }}</span> {{ customer.doc_number }}</td>
+                    <td class="fw-semibold">{{ customer.name }}</td>
+                    <td>{{ customer.get_customer_type_display }}</td>
+                    <td>{{ customer.phone }}{% if customer.mobile %} / {{ customer.mobile }}{% endif %}</td>
+                    <td>{{ customer.email }}</td>
+                    <td>{{ customer.assigned_to|default:"-" }}</td>
+                    <td>
+                        <a href="{% url 'crm:customer_detail' customer.pk %}" class="btn btn-sm btn-outline-primary"><i class="bi bi-eye"></i></a>
+                        <a href="{% url 'crm:customer_edit' customer.pk %}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-pencil"></i></a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="7" class="text-center text-muted py-4">No se encontraron clientes</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

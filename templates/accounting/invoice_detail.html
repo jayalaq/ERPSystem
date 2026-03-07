@@ -1,0 +1,120 @@
+{% extends "base/base.html" %}
+{% load humanize %}
+{% block title %}{{ invoice }}{% endblock %}
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'accounting:invoice_list' %}">Comprobantes</a></li>
+<li class="breadcrumb-item active">{{ invoice.full_number }}</li>
+{% endblock %}
+
+{% block content %}
+<div class="page-header d-flex justify-content-between align-items-center">
+    <h4>{{ invoice.get_doc_type_display }} {{ invoice.full_number }}</h4>
+    <div class="d-flex gap-2">
+        {% if invoice.status == 'draft' or invoice.status == 'issued' %}
+        <a href="{% url 'accounting:invoice_send_sunat' invoice.pk %}" class="btn btn-success btn-sm">
+            <i class="bi bi-cloud-upload"></i> Enviar a SUNAT
+        </a>
+        {% endif %}
+        <a href="{% url 'accounting:payment_create' %}?invoice={{ invoice.pk }}" class="btn btn-primary btn-sm">
+            <i class="bi bi-cash"></i> Registrar Pago
+        </a>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-md-8">
+        <div class="card stat-card">
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <h6 class="fw-bold">Datos del Comprobante</h6>
+                        <table class="table table-sm table-borderless">
+                            <tr><td class="text-muted">Tipo</td><td>{{ invoice.get_doc_type_display }}</td></tr>
+                            <tr><td class="text-muted">Número</td><td class="fw-semibold">{{ invoice.full_number }}</td></tr>
+                            <tr><td class="text-muted">Emisión</td><td>{{ invoice.issue_date|date:"d/m/Y" }}</td></tr>
+                            <tr><td class="text-muted">Vencimiento</td><td>{{ invoice.due_date|date:"d/m/Y"|default:"-" }}</td></tr>
+                            <tr><td class="text-muted">Condición</td><td>{{ invoice.get_payment_condition_display }}</td></tr>
+                        </table>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="fw-bold">Cliente</h6>
+                        <table class="table table-sm table-borderless">
+                            <tr><td class="text-muted">{{ invoice.customer.doc_type }}</td><td>{{ invoice.customer.doc_number }}</td></tr>
+                            <tr><td class="text-muted">Nombre</td><td>{{ invoice.customer.name }}</td></tr>
+                            <tr><td class="text-muted">Dirección</td><td>{{ invoice.customer.address|default:"-" }}</td></tr>
+                        </table>
+                    </div>
+                </div>
+
+                <h6 class="fw-bold">Detalle</h6>
+                <table class="table table-sm">
+                    <thead><tr><th>Descripción</th><th>Unidad</th><th class="text-end">Cant.</th><th class="text-end">P.U.</th><th class="text-end">Desc.</th><th class="text-end">IGV</th><th class="text-end">Total</th></tr></thead>
+                    <tbody>
+                        {% for item in items %}
+                        <tr>
+                            <td>{{ item.description }}</td>
+                            <td>{{ item.unit.abbreviation }}</td>
+                            <td class="text-end">{{ item.quantity|floatformat:2 }}</td>
+                            <td class="text-end">{{ item.unit_price|floatformat:2 }}</td>
+                            <td class="text-end">{{ item.discount|floatformat:2 }}</td>
+                            <td class="text-end">{{ item.igv|floatformat:2 }}</td>
+                            <td class="text-end fw-semibold">{{ item.total|floatformat:2 }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="7" class="text-muted text-center">Sin ítems</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card stat-card mb-3">
+            <div class="card-body">
+                <h6 class="fw-bold">Totales</h6>
+                <table class="table table-sm table-borderless">
+                    <tr><td>Op. Gravada</td><td class="text-end">S/ {{ invoice.op_gravada|floatformat:2 }}</td></tr>
+                    <tr><td>Op. Exonerada</td><td class="text-end">S/ {{ invoice.op_exonerada|floatformat:2 }}</td></tr>
+                    <tr><td>Op. Inafecta</td><td class="text-end">S/ {{ invoice.op_inafecta|floatformat:2 }}</td></tr>
+                    <tr><td>IGV</td><td class="text-end">S/ {{ invoice.igv|floatformat:2 }}</td></tr>
+                    <tr class="fw-bold fs-5"><td>TOTAL</td><td class="text-end text-primary">S/ {{ invoice.total|floatformat:2 }}</td></tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="card stat-card mb-3">
+            <div class="card-body">
+                <h6 class="fw-bold">Estado</h6>
+                <span class="badge bg-{% if invoice.status == 'accepted' %}success{% elif invoice.status == 'draft' %}warning{% elif invoice.status == 'rejected' %}danger{% else %}secondary{% endif %} fs-6">
+                    {{ invoice.get_status_display }}
+                </span>
+                {% if invoice.sunat_response_description %}
+                <p class="mt-2 text-muted" style="font-size:0.8rem;">{{ invoice.sunat_response_description }}</p>
+                {% endif %}
+                {% if invoice.hash_code %}
+                <p class="mt-2" style="font-size:0.75rem;"><strong>Hash:</strong> {{ invoice.hash_code|truncatechars:30 }}</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="card stat-card">
+            <div class="card-body">
+                <h6 class="fw-bold">Pagos</h6>
+                {% for payment in payments %}
+                <div class="d-flex justify-content-between mb-1" style="font-size:0.85rem;">
+                    <span>{{ payment.payment_date|date:"d/m/Y" }} - {{ payment.get_payment_method_display }}</span>
+                    <span class="fw-semibold">S/ {{ payment.amount|floatformat:2 }}</span>
+                </div>
+                {% empty %}
+                <p class="text-muted" style="font-size:0.85rem;">Sin pagos registrados</p>
+                {% endfor %}
+                <div class="border-top mt-2 pt-2 d-flex justify-content-between fw-bold">
+                    <span>Saldo</span>
+                    <span class="{% if balance > 0 %}text-danger{% else %}text-success{% endif %}">S/ {{ balance|floatformat:2 }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

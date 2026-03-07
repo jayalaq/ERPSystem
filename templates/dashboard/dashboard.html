@@ -1,0 +1,174 @@
+{% extends "base/base.html" %}
+{% load humanize %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="page-header d-flex justify-content-between align-items-center">
+    <div>
+        <h4>Dashboard</h4>
+        <p class="text-muted mb-0" style="font-size: 0.85rem;">Resumen general del negocio</p>
+    </div>
+    <div>
+        <span class="text-muted" style="font-size: 0.85rem;">
+            <i class="bi bi-calendar3"></i> {% now "d M Y" %}
+        </span>
+    </div>
+</div>
+
+<!-- Stats Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card stat-card">
+            <div class="card-body d-flex align-items-center gap-3">
+                <div class="stat-icon bg-primary bg-opacity-10 text-primary">
+                    <i class="bi bi-cart-check"></i>
+                </div>
+                <div>
+                    <div class="text-muted" style="font-size: 0.75rem;">Ventas Hoy</div>
+                    <div class="fw-bold fs-5">S/ {{ today_sales_total|floatformat:2|intcomma }}</div>
+                    <div class="text-muted" style="font-size: 0.75rem;">{{ today_sales_count }} transacciones</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card">
+            <div class="card-body d-flex align-items-center gap-3">
+                <div class="stat-icon bg-success bg-opacity-10 text-success">
+                    <i class="bi bi-graph-up-arrow"></i>
+                </div>
+                <div>
+                    <div class="text-muted" style="font-size: 0.75rem;">Ventas del Mes</div>
+                    <div class="fw-bold fs-5">S/ {{ monthly_sales_total|floatformat:2|intcomma }}</div>
+                    <div class="text-muted" style="font-size: 0.75rem;">{{ monthly_sales_count }} ventas</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card">
+            <div class="card-body d-flex align-items-center gap-3">
+                <div class="stat-icon bg-warning bg-opacity-10 text-warning">
+                    <i class="bi bi-people"></i>
+                </div>
+                <div>
+                    <div class="text-muted" style="font-size: 0.75rem;">Clientes Activos</div>
+                    <div class="fw-bold fs-5">{{ total_customers|intcomma }}</div>
+                    <div class="text-muted" style="font-size: 0.75rem;">{{ active_opportunities }} oportunidades</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card">
+            <div class="card-body d-flex align-items-center gap-3">
+                <div class="stat-icon bg-danger bg-opacity-10 text-danger">
+                    <i class="bi bi-exclamation-triangle"></i>
+                </div>
+                <div>
+                    <div class="text-muted" style="font-size: 0.75rem;">Alertas Stock</div>
+                    <div class="fw-bold fs-5">{{ low_stock_products }}</div>
+                    <div class="text-muted" style="font-size: 0.75rem;">productos bajo mínimo</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Second Row -->
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="card stat-card">
+            <div class="card-body d-flex align-items-center gap-3">
+                <div class="stat-icon bg-info bg-opacity-10 text-info">
+                    <i class="bi bi-file-earmark-check"></i>
+                </div>
+                <div>
+                    <div class="text-muted" style="font-size: 0.75rem;">Comprobantes SUNAT</div>
+                    <div class="fw-bold fs-5">{{ accepted_invoices }}</div>
+                    <div class="text-muted" style="font-size: 0.75rem;">{{ pending_invoices }} pendientes</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card stat-card">
+            <div class="card-body d-flex align-items-center gap-3">
+                <div class="stat-icon bg-purple bg-opacity-10" style="color: #7c3aed; background: rgba(124,58,237,0.1);">
+                    <i class="bi bi-funnel"></i>
+                </div>
+                <div>
+                    <div class="text-muted" style="font-size: 0.75rem;">Pipeline CRM</div>
+                    <div class="fw-bold fs-5">S/ {{ pipeline_value|floatformat:2|intcomma }}</div>
+                    <div class="text-muted" style="font-size: 0.75rem;">valor potencial</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card stat-card">
+            <div class="card-body text-center py-3">
+                <a href="{% url 'pos:terminal' %}" class="btn btn-primary btn-lg px-5">
+                    <i class="bi bi-cart3"></i> Abrir POS
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tables -->
+<div class="row g-3">
+    <div class="col-md-8">
+        <div class="card stat-card">
+            <div class="card-body">
+                <h6 class="fw-bold mb-3">Ventas Recientes</h6>
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Comprobante</th>
+                                <th>Cliente</th>
+                                <th>Vendedor</th>
+                                <th class="text-end">Total</th>
+                                <th>Fecha</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for sale in recent_sales %}
+                            <tr>
+                                <td><span class="badge bg-primary">{{ sale.series }}-{{ sale.correlative }}</span></td>
+                                <td>{{ sale.customer.name|default:"Varios" }}</td>
+                                <td>{{ sale.seller.get_full_name|default:sale.seller.username }}</td>
+                                <td class="text-end fw-semibold">S/ {{ sale.total|floatformat:2 }}</td>
+                                <td>{{ sale.created_at|date:"d/m H:i" }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr><td colspan="5" class="text-center text-muted">No hay ventas registradas</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card stat-card">
+            <div class="card-body">
+                <h6 class="fw-bold mb-3">Productos Top del Mes</h6>
+                {% for product in top_products %}
+                <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom">
+                    <div>
+                        <div class="fw-semibold" style="font-size: 0.85rem;">{{ product.product__name }}</div>
+                        <div class="text-muted" style="font-size: 0.75rem;">{{ product.total_qty|floatformat:0 }} unidades</div>
+                    </div>
+                    <span class="fw-bold text-success">S/ {{ product.total_amount|floatformat:2 }}</span>
+                </div>
+                {% empty %}
+                <p class="text-muted text-center">Sin datos</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

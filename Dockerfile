@@ -18,11 +18,13 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 RUN python manage.py collectstatic --noinput 2>/dev/null || true
+RUN chmod +x scripts/docker-entrypoint.sh
 
 # --- Development ---
 FROM base AS development
 ENV DJANGO_SETTINGS_MODULE=erp_system.settings
 EXPOSE 8000
+ENTRYPOINT ["scripts/docker-entrypoint.sh"]
 CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
 
 # --- Production ---
@@ -33,6 +35,7 @@ RUN addgroup --system django && adduser --system --group django
 USER django
 
 EXPOSE 8000
+ENTRYPOINT ["scripts/docker-entrypoint.sh"]
 CMD ["gunicorn", "erp_system.wsgi:application", \
      "--bind", "0.0.0.0:8000", \
      "--workers", "4", \

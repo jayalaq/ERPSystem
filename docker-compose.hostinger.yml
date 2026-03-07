@@ -223,6 +223,7 @@ services:
       - "traefik.http.routers.erp-nginx.rule=Host(`${DOMAIN}`) || Host(`${TESTING_DOMAIN:-erp-testing.tailoringconsult.com}`)"
       - "traefik.http.routers.erp-nginx.tls=true"
       - "traefik.http.routers.erp-nginx.entrypoints=websecure"
+      - "traefik.http.routers.erp-nginx.tls.certresolver=mytlschallenge"
       - "traefik.http.services.erp-nginx.loadbalancer.server.port=80"
 
 volumes:

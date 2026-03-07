@@ -121,7 +121,8 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.erp-prod.rule=Host(`${DOMAIN}`)"
       - "traefik.http.routers.erp-prod.tls=true"
-      - "traefik.http.routers.erp-prod.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.erp-prod.entrypoints=websecure"
+      - "traefik.http.routers.erp-prod.tls.certresolver=mytlschallenge"
       - "traefik.http.services.erp-prod.loadbalancer.server.port=8000"
 
   # ============================================
@@ -155,7 +156,8 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.erp-test.rule=Host(`testing.${DOMAIN}`)"
       - "traefik.http.routers.erp-test.tls=true"
-      - "traefik.http.routers.erp-test.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.erp-test.entrypoints=websecure"
+      - "traefik.http.routers.erp-test.tls.certresolver=mytlschallenge"
       - "traefik.http.services.erp-test.loadbalancer.server.port=8000"
 
   # ============================================
@@ -227,7 +229,8 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.erp-nginx.rule=Host(`${DOMAIN}`) || Host(`testing.${DOMAIN}`)"
       - "traefik.http.routers.erp-nginx.tls=true"
-      - "traefik.http.routers.erp-nginx.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.erp-nginx.entrypoints=websecure"
+      - "traefik.http.routers.erp-nginx.tls.certresolver=mytlschallenge"
       - "traefik.http.services.erp-nginx.loadbalancer.server.port=80"
 
 volumes:
@@ -243,4 +246,4 @@ networks:
     driver: bridge
   hostinger-network:
     external: true
-    name: ${HOSTINGER_NETWORK:-hostinger_default}
+    name: ${HOSTINGER_NETWORK:-root_default}

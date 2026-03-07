@@ -12,7 +12,8 @@ class NoNewUsersAccountAdapter(DefaultAccountAdapter):
     """
 
     def is_open_for_signup(self, request):
-        return False
+        # Allow signup only when coming from social login (Google OAuth)
+        return 'socialaccount_sociallogin' in request.session
 
 
 class GoogleOnlyLoginAdapter(DefaultSocialAccountAdapter):

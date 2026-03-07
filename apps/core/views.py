@@ -96,3 +96,22 @@ def dashboard(request):
         'top_products': top_products,
     }
     return render(request, 'dashboard/dashboard.html', context)
+
+
+def health_check(request):
+    """Health check endpoint for load balancers and monitoring."""
+    import os
+    from django.http import JsonResponse
+    from django.db import connection
+
+    status = {'status': 'healthy', 'environment': os.environ.get('ENVIRONMENT', 'development')}
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute('SELECT 1')
+        status['database'] = 'connected'
+    except Exception as e:
+        status['database'] = f'error: {e}'
+        status['status'] = 'unhealthy'
+
+    code = 200 if status['status'] == 'healthy' else 503
+    return JsonResponse(status, status=code)

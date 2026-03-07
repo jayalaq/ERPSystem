@@ -1,0 +1,222 @@
+version: "3.9"
+
+x-common-env: &common-env
+  SECRET_KEY: ${SECRET_KEY:-django-insecure-change-me-in-production}
+  REDIS_URL: redis://redis:6379/0
+  COMPANY_NAME: ${COMPANY_NAME:-Mi Empresa SAC}
+  COMPANY_RUC: ${COMPANY_RUC:-20123456789}
+  SUNAT_RUC: ${SUNAT_RUC:-20123456789}
+  SUNAT_USER: ${SUNAT_USER:-MODDATOS}
+  SUNAT_PASSWORD: ${SUNAT_PASSWORD:-moddatos}
+  SUNAT_PRODUCTION: "False"
+  CLOUDFLARE_R2_BUCKET: ${CLOUDFLARE_R2_BUCKET:-erp-media}
+  CLOUDFLARE_R2_ACCESS_KEY: ${CLOUDFLARE_R2_ACCESS_KEY:-}
+  CLOUDFLARE_R2_SECRET_KEY: ${CLOUDFLARE_R2_SECRET_KEY:-}
+  CLOUDFLARE_R2_ENDPOINT: ${CLOUDFLARE_R2_ENDPOINT:-}
+  CLOUDFLARE_R2_PUBLIC_URL: ${CLOUDFLARE_R2_PUBLIC_URL:-}
+
+services:
+  # ============================================
+  # TESTING ENVIRONMENT
+  # ============================================
+  db-testing:
+    image: postgres:16-alpine
+    container_name: erp_db_testing
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: erp_testing
+      POSTGRES_USER: erp_user
+      POSTGRES_PASSWORD: ${DB_TESTING_PASSWORD:-testing_password_change_me}
+    volumes:
+      - pg_testing_data:/var/lib/postgresql/data
+      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U erp_user -d erp_testing"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  app-testing:
+    build:
+      context: .
+      target: development
+    container_name: erp_app_testing
+    restart: unless-stopped
+    environment:
+      <<: *common-env
+      DEBUG: "True"
+      ALLOWED_HOSTS: "localhost,127.0.0.1,testing.${DOMAIN:-erp.local}"
+      DATABASE_URL: postgres://erp_user:${DB_TESTING_PASSWORD:-testing_password_change_me}@db-testing:5432/erp_testing
+      ENVIRONMENT: testing
+    volumes:
+      - .:/app
+      - testing_static:/app/staticfiles
+      - testing_media:/app/media
+    ports:
+      - "8001:8000"
+    depends_on:
+      db-testing:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  # ============================================
+  # PRODUCTION ENVIRONMENT
+  # ============================================
+  db-production:
+    image: postgres:16-alpine
+    container_name: erp_db_production
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: erp_production
+      POSTGRES_USER: erp_user
+      POSTGRES_PASSWORD: ${DB_PRODUCTION_PASSWORD:-production_password_change_me}
+    volumes:
+      - pg_production_data:/var/lib/postgresql/data
+      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5434:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U erp_user -d erp_production"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  app-production:
+    build:
+      context: .
+      target: production
+    container_name: erp_app_production
+    restart: unless-stopped
+    environment:
+      <<: *common-env
+      DEBUG: "False"
+      ALLOWED_HOSTS: "${DOMAIN:-erp.local},www.${DOMAIN:-erp.local}"
+      DATABASE_URL: postgres://erp_user:${DB_PRODUCTION_PASSWORD:-production_password_change_me}@db-production:5432/erp_production
+      ENVIRONMENT: production
+      SUNAT_PRODUCTION: "True"
+      SECURE_SSL_REDIRECT: "True"
+    volumes:
+      - production_static:/app/staticfiles
+      - production_media:/app/media
+    ports:
+      - "8000:8000"
+    depends_on:
+      db-production:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  # ============================================
+  # SHARED SERVICES
+  # ============================================
+  redis:
+    image: redis:7-alpine
+    container_name: erp_redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Celery worker for background tasks (SUNAT, emails, reports)
+  celery-worker:
+    build:
+      context: .
+      target: production
+    container_name: erp_celery_worker
+    restart: unless-stopped
+    command: celery -A erp_system worker -l info --concurrency=2
+    environment:
+      <<: *common-env
+      DEBUG: "False"
+      DATABASE_URL: postgres://erp_user:${DB_PRODUCTION_PASSWORD:-production_password_change_me}@db-production:5432/erp_production
+      ENVIRONMENT: production
+    depends_on:
+      db-production:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  celery-beat:
+    build:
+      context: .
+      target: production
+    container_name: erp_celery_beat
+    restart: unless-stopped
+    command: celery -A erp_system beat -l info --schedule=/tmp/celerybeat-schedule
+    environment:
+      <<: *common-env
+      DEBUG: "False"
+      DATABASE_URL: postgres://erp_user:${DB_PRODUCTION_PASSWORD:-production_password_change_me}@db-production:5432/erp_production
+      ENVIRONMENT: production
+    depends_on:
+      redis:
+        condition: service_healthy
+
+  # Nginx reverse proxy
+  nginx:
+    image: nginx:alpine
+    container_name: erp_nginx
+    restart: unless-stopped
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/sites:/etc/nginx/conf.d:ro
+      - production_static:/static:ro
+      - production_media:/media:ro
+      - testing_static:/static-testing:ro
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - app-production
+      - app-testing
+
+  # Cloudflare Tunnel (secure tunnel to your domain)
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: erp_cloudflared
+    restart: unless-stopped
+    command: tunnel --no-autoupdate run
+    environment:
+      TUNNEL_TOKEN: ${CLOUDFLARE_TUNNEL_TOKEN:-}
+    depends_on:
+      - nginx
+
+  # Database backups
+  db-backup:
+    image: postgres:16-alpine
+    container_name: erp_db_backup
+    restart: "no"
+    environment:
+      PGPASSWORD: ${DB_PRODUCTION_PASSWORD:-production_password_change_me}
+    volumes:
+      - ./backups:/backups
+    entrypoint: >
+      /bin/sh -c "
+        pg_dump -h db-production -U erp_user erp_production | gzip > /backups/erp_production_$$(date +%Y%m%d_%H%M%S).sql.gz &&
+        echo 'Backup completed successfully' &&
+        find /backups -name '*.sql.gz' -mtime +30 -delete
+      "
+    depends_on:
+      db-production:
+        condition: service_healthy
+    profiles:
+      - backup
+
+volumes:
+  pg_testing_data:
+  pg_production_data:
+  redis_data:
+  testing_static:
+  testing_media:
+  production_static:
+  production_media:

@@ -150,13 +150,13 @@ AUTHENTICATION_BACKENDS = [
     'allauth.account.auth_backends.AuthenticationBackend',
 ]
 
-ACCOUNT_LOGIN_METHODS = {'username'}
+ACCOUNT_LOGIN_METHODS = {'username', 'email'}
 ACCOUNT_EMAIL_VERIFICATION = 'none'
 ACCOUNT_SIGNUP_ENABLED = False
 ACCOUNT_ADAPTER = 'apps.core.adapters.NoNewUsersAccountAdapter'
-SOCIALACCOUNT_ADAPTER = 'apps.core.adapters.GoogleOnlyLoginAdapter'
+SOCIALACCOUNT_ADAPTER = 'apps.core.adapters.GoogleLoginAdapter'
 SOCIALACCOUNT_LOGIN_ON_GET = True
-SOCIALACCOUNT_AUTO_SIGNUP = False
+SOCIALACCOUNT_AUTO_SIGNUP = True
 ACCOUNT_DEFAULT_HTTP_PROTOCOL = os.environ.get('ACCOUNT_DEFAULT_HTTP_PROTOCOL', 'http')
 
 SOCIALACCOUNT_PROVIDERS = {

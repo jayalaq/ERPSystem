@@ -107,6 +107,14 @@ CELERY_BEAT_SCHEDULE = {
         'task': 'apps.core.tasks.send_backup_reminder',
         'schedule': 604800.0,  # Weekly
     },
+    'n8n-daily-summary': {
+        'task': 'apps.n8n_integration.tasks.send_daily_summary',
+        'schedule': 86400.0,  # Daily
+    },
+    'n8n-retry-failed-webhooks': {
+        'task': 'apps.n8n_integration.tasks.retry_failed_webhooks',
+        'schedule': 3600.0,  # Every hour
+    },
 }
 
 # =============================================================================

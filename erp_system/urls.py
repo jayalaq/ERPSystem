@@ -12,6 +12,7 @@ urlpatterns = [
     path('accounting/', include('apps.accounting.urls')),
     path('sunat/', include('apps.sunat_integration.urls')),
     path('api/', include('apps.core.api_urls')),
+    path('api/n8n/', include('apps.n8n_integration.urls')),
 ]
 
 if settings.DEBUG:

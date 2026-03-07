@@ -1,0 +1,246 @@
+# ============================================
+# ERP System - Hostinger VPS + n8n Integration
+# ============================================
+# Este docker-compose se integra con tu n8n existente
+# en Hostinger. Comparten la misma red Docker.
+
+version: "3.9"
+
+x-common-env: &common-env
+  SECRET_KEY: ${SECRET_KEY:-change-me-in-production}
+  REDIS_URL: redis://erp-redis:6379/0
+  COMPANY_NAME: ${COMPANY_NAME:-Mi Empresa SAC}
+  COMPANY_RUC: ${COMPANY_RUC:-20123456789}
+  SUNAT_RUC: ${SUNAT_RUC:-20123456789}
+  SUNAT_USER: ${SUNAT_USER:-MODDATOS}
+  SUNAT_PASSWORD: ${SUNAT_PASSWORD:-moddatos}
+  SUNAT_PRODUCTION: ${SUNAT_PRODUCTION:-False}
+  N8N_WEBHOOK_URL: ${N8N_WEBHOOK_URL:-http://n8n:5678}
+  N8N_API_KEY: ${N8N_API_KEY:-}
+  CLOUDFLARE_R2_BUCKET: ${CLOUDFLARE_R2_BUCKET:-}
+  CLOUDFLARE_R2_ACCESS_KEY: ${CLOUDFLARE_R2_ACCESS_KEY:-}
+  CLOUDFLARE_R2_SECRET_KEY: ${CLOUDFLARE_R2_SECRET_KEY:-}
+  CLOUDFLARE_R2_ENDPOINT: ${CLOUDFLARE_R2_ENDPOINT:-}
+  CLOUDFLARE_R2_PUBLIC_URL: ${CLOUDFLARE_R2_PUBLIC_URL:-}
+
+services:
+  # ============================================
+  # BASE DE DATOS PRODUCCIÓN
+  # ============================================
+  erp-db-production:
+    image: postgres:16-alpine
+    container_name: erp_db_production
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: erp_production
+      POSTGRES_USER: erp_user
+      POSTGRES_PASSWORD: ${DB_PRODUCTION_PASSWORD:-change_me}
+    volumes:
+      - erp_pg_production:/var/lib/postgresql/data
+      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U erp_user -d erp_production"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - erp-internal
+    labels:
+      - "com.centurylinklabs.watchtower.enable=false"
+
+  # ============================================
+  # BASE DE DATOS TESTING
+  # ============================================
+  erp-db-testing:
+    image: postgres:16-alpine
+    container_name: erp_db_testing
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: erp_testing
+      POSTGRES_USER: erp_user
+      POSTGRES_PASSWORD: ${DB_TESTING_PASSWORD:-change_me_testing}
+    volumes:
+      - erp_pg_testing:/var/lib/postgresql/data
+      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U erp_user -d erp_testing"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - erp-internal
+    labels:
+      - "com.centurylinklabs.watchtower.enable=false"
+
+  # ============================================
+  # REDIS (compartido ERP + Celery)
+  # ============================================
+  erp-redis:
+    image: redis:7-alpine
+    container_name: erp_redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    volumes:
+      - erp_redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - erp-internal
+
+  # ============================================
+  # ERP APP - PRODUCCIÓN
+  # ============================================
+  erp-app-production:
+    build:
+      context: .
+      target: production
+    container_name: erp_app_production
+    restart: unless-stopped
+    environment:
+      <<: *common-env
+      DEBUG: "False"
+      ALLOWED_HOSTS: "${DOMAIN},www.${DOMAIN},localhost"
+      DATABASE_URL: postgres://erp_user:${DB_PRODUCTION_PASSWORD:-change_me}@erp-db-production:5432/erp_production
+      DJANGO_SETTINGS_MODULE: erp_system.settings_production
+      ENVIRONMENT: production
+    volumes:
+      - erp_production_static:/app/staticfiles
+      - erp_production_media:/app/media
+    depends_on:
+      erp-db-production:
+        condition: service_healthy
+      erp-redis:
+        condition: service_healthy
+    networks:
+      - erp-internal
+      - hostinger-network  # Shared with n8n
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.erp-prod.rule=Host(`${DOMAIN}`)"
+      - "traefik.http.routers.erp-prod.tls=true"
+      - "traefik.http.routers.erp-prod.tls.certresolver=letsencrypt"
+      - "traefik.http.services.erp-prod.loadbalancer.server.port=8000"
+
+  # ============================================
+  # ERP APP - TESTING
+  # ============================================
+  erp-app-testing:
+    build:
+      context: .
+      target: development
+    container_name: erp_app_testing
+    restart: unless-stopped
+    environment:
+      <<: *common-env
+      DEBUG: "True"
+      ALLOWED_HOSTS: "testing.${DOMAIN},localhost"
+      DATABASE_URL: postgres://erp_user:${DB_TESTING_PASSWORD:-change_me_testing}@erp-db-testing:5432/erp_testing
+      DJANGO_SETTINGS_MODULE: erp_system.settings
+      ENVIRONMENT: testing
+    volumes:
+      - .:/app
+      - erp_testing_static:/app/staticfiles
+    depends_on:
+      erp-db-testing:
+        condition: service_healthy
+      erp-redis:
+        condition: service_healthy
+    networks:
+      - erp-internal
+      - hostinger-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.erp-test.rule=Host(`testing.${DOMAIN}`)"
+      - "traefik.http.routers.erp-test.tls=true"
+      - "traefik.http.routers.erp-test.tls.certresolver=letsencrypt"
+      - "traefik.http.services.erp-test.loadbalancer.server.port=8000"
+
+  # ============================================
+  # CELERY WORKER (tareas SUNAT, n8n events)
+  # ============================================
+  erp-celery-worker:
+    build:
+      context: .
+      target: production
+    container_name: erp_celery_worker
+    restart: unless-stopped
+    command: celery -A erp_system worker -l info --concurrency=2 -Q default,n8n_events,sunat
+    environment:
+      <<: *common-env
+      DEBUG: "False"
+      DATABASE_URL: postgres://erp_user:${DB_PRODUCTION_PASSWORD:-change_me}@erp-db-production:5432/erp_production
+      DJANGO_SETTINGS_MODULE: erp_system.settings_production
+      ENVIRONMENT: production
+    depends_on:
+      erp-db-production:
+        condition: service_healthy
+      erp-redis:
+        condition: service_healthy
+    networks:
+      - erp-internal
+      - hostinger-network
+
+  # ============================================
+  # CELERY BEAT (tareas programadas)
+  # ============================================
+  erp-celery-beat:
+    build:
+      context: .
+      target: production
+    container_name: erp_celery_beat
+    restart: unless-stopped
+    command: celery -A erp_system beat -l info --schedule=/tmp/celerybeat-schedule
+    environment:
+      <<: *common-env
+      DEBUG: "False"
+      DATABASE_URL: postgres://erp_user:${DB_PRODUCTION_PASSWORD:-change_me}@erp-db-production:5432/erp_production
+      DJANGO_SETTINGS_MODULE: erp_system.settings_production
+      ENVIRONMENT: production
+    depends_on:
+      erp-redis:
+        condition: service_healthy
+    networks:
+      - erp-internal
+
+  # ============================================
+  # NGINX para ERP
+  # ============================================
+  erp-nginx:
+    image: nginx:alpine
+    container_name: erp_nginx
+    restart: unless-stopped
+    volumes:
+      - ./nginx/hostinger.conf:/etc/nginx/conf.d/default.conf:ro
+      - erp_production_static:/static:ro
+      - erp_production_media:/media:ro
+      - erp_testing_static:/static-testing:ro
+    depends_on:
+      - erp-app-production
+      - erp-app-testing
+    networks:
+      - erp-internal
+      - hostinger-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.erp-nginx.rule=Host(`${DOMAIN}`) || Host(`testing.${DOMAIN}`)"
+      - "traefik.http.routers.erp-nginx.tls=true"
+      - "traefik.http.routers.erp-nginx.tls.certresolver=letsencrypt"
+      - "traefik.http.services.erp-nginx.loadbalancer.server.port=80"
+
+volumes:
+  erp_pg_production:
+  erp_pg_testing:
+  erp_redis_data:
+  erp_production_static:
+  erp_production_media:
+  erp_testing_static:
+
+networks:
+  erp-internal:
+    driver: bridge
+  hostinger-network:
+    external: true
+    name: ${HOSTINGER_NETWORK:-hostinger_default}

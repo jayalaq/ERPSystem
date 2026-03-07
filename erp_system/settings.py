@@ -28,6 +28,7 @@ INSTALLED_APPS = [
     'apps.logistics',
     'apps.accounting',
     'apps.sunat_integration',
+    'apps.n8n_integration',
 ]
 
 MIDDLEWARE = [
@@ -151,3 +152,7 @@ COMPANY_CONFIG = {
 }
 
 CORS_ALLOW_ALL_ORIGINS = DEBUG
+
+# n8n Integration
+N8N_WEBHOOK_URL = os.environ.get('N8N_WEBHOOK_URL', 'http://n8n:5678')
+N8N_API_KEY = os.environ.get('N8N_API_KEY', '')

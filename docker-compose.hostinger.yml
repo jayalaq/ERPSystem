@@ -138,6 +138,7 @@ services:
       ENVIRONMENT: testing
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      ACCOUNT_DEFAULT_HTTP_PROTOCOL: ${ACCOUNT_DEFAULT_HTTP_PROTOCOL:-https}
     volumes:
       - .:/app
       - erp_testing_static:/app/staticfiles

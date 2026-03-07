@@ -118,11 +118,7 @@ services:
       - erp-internal
       - hostinger-network  # Shared with n8n
     labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.erp-prod.rule=Host(`${DOMAIN}`)"
-      - "traefik.http.routers.erp-prod.tls=true"
-      - "traefik.http.routers.erp-prod.entrypoints=websecure"
-      - "traefik.http.services.erp-prod.loadbalancer.server.port=8000"
+      - "traefik.enable=false"
 
   # ============================================
   # ERP APP - TESTING
@@ -152,11 +148,7 @@ services:
       - erp-internal
       - hostinger-network
     labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.erp-test.rule=Host(`${TESTING_DOMAIN:-erp-testing.tailoringconsult.com}`)"
-      - "traefik.http.routers.erp-test.tls=true"
-      - "traefik.http.routers.erp-test.entrypoints=websecure"
-      - "traefik.http.services.erp-test.loadbalancer.server.port=8000"
+      - "traefik.enable=false"
 
   # ============================================
   # CELERY WORKER (tareas SUNAT, n8n events)

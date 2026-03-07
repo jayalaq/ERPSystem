@@ -15,7 +15,7 @@ class NoNewUsersAccountAdapter(DefaultAccountAdapter):
         return False
 
 
-class GoogleLoginAdapter(DefaultSocialAccountAdapter):
+class GoogleOnlyLoginAdapter(DefaultSocialAccountAdapter):
     """Handle Google OAuth login: auto-create or link users by email."""
 
     def is_open_for_signup(self, request, sociallogin):

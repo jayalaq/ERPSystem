@@ -111,6 +111,12 @@ services:
     volumes:
       - erp_production_static:/app/staticfiles
       - erp_production_media:/app/media
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8000/app/health/ || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+      start_period: 60s
     depends_on:
       erp-db-production:
         condition: service_healthy
@@ -144,6 +150,12 @@ services:
     volumes:
       - .:/app
       - erp_testing_static:/app/staticfiles
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8000/app/health/ || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+      start_period: 60s
     depends_on:
       erp-db-testing:
         condition: service_healthy
@@ -220,8 +232,10 @@ services:
       - erp_production_media:/media:ro
       - erp_testing_static:/static-testing:ro
     depends_on:
-      - erp-app-production
-      - erp-app-testing
+      erp-app-production:
+        condition: service_healthy
+      erp-app-testing:
+        condition: service_healthy
     networks:
       - erp-internal
       - hostinger-network

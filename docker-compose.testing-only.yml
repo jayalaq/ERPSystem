@@ -78,6 +78,12 @@ services:
     volumes:
       - .:/app
       - erp_testing_static:/app/staticfiles
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8000/app/health/ || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+      start_period: 60s
     depends_on:
       erp-db-testing:
         condition: service_healthy
@@ -104,7 +110,8 @@ services:
       - ./nginx/testing-only.conf:/etc/nginx/templates/default.conf.template:ro
       - erp_testing_static:/static-testing:ro
     depends_on:
-      - erp-app-testing
+      erp-app-testing:
+        condition: service_healthy
     networks:
       - erp-internal
       - hostinger-network

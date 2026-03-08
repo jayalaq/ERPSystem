@@ -52,7 +52,7 @@ def dashboard(request):
     month_start = today.replace(day=1)
     last_30_days = today - timedelta(days=30)
 
-    # Sales stats
+    # Sales stats (POS)
     monthly_sales = POSSale.objects.filter(
         created_at__date__gte=month_start, status='completed'
     ).aggregate(total=Sum('total'), count=Count('id'))
@@ -96,6 +96,70 @@ def dashboard(request):
         total_amount=Sum('total')
     ).order_by('-total_amount')[:5]
 
+    # Sales module stats
+    from apps.sales.models import SalesQuotation, SalesOrder, PickingOrder
+    quotations_count = SalesQuotation.objects.filter(
+        status__in=['draft', 'sent']
+    ).count()
+    quotations_accepted = SalesQuotation.objects.filter(
+        status='accepted', created_at__date__gte=month_start
+    ).count()
+    orders_active = SalesOrder.objects.exclude(
+        status__in=['cancelled', 'invoiced']
+    ).count()
+    orders_pending = SalesOrder.objects.filter(
+        status__in=['confirmed', 'in_process']
+    ).count()
+    orders_total_value = SalesOrder.objects.exclude(
+        status__in=['cancelled', 'draft']
+    ).filter(
+        created_at__date__gte=month_start
+    ).aggregate(total=Sum('total'))['total'] or Decimal('0')
+    picking_pending = PickingOrder.objects.filter(
+        status__in=['pending', 'in_progress']
+    ).count()
+
+    # Manufacturing stats
+    from apps.manufacturing.models import BillOfMaterials, ProductionOrder
+    bom_count = BillOfMaterials.objects.filter(is_active=True).count()
+    production_active = ProductionOrder.objects.filter(
+        status__in=['confirmed', 'in_production', 'quality_check']
+    ).count()
+    production_completed_month = ProductionOrder.objects.filter(
+        status='completed', end_date__date__gte=month_start
+    ).count()
+
+    # Logistics stats
+    from apps.logistics.models import PurchaseOrder, Warehouse
+    from apps.accounting.models import AccountReceivable, AccountPayable
+    purchase_orders_pending = PurchaseOrder.objects.filter(
+        status__in=['draft', 'confirmed', 'partial']
+    ).count()
+    total_products = Product.objects.filter(is_active=True).count()
+    total_warehouses = Warehouse.objects.filter(is_active=True).count()
+
+    # Finance stats
+    receivable_total = AccountReceivable.objects.filter(
+        status__in=['pending', 'partial', 'overdue']
+    ).aggregate(total=Sum('total'), collected=Sum('collected_amount'))
+    receivable_balance = (receivable_total['total'] or Decimal('0')) - (receivable_total['collected'] or Decimal('0'))
+    payable_balance = AccountPayable.objects.filter(
+        status__in=['pending', 'partial', 'overdue']
+    ).aggregate(
+        bal=Sum('total') - Sum('paid_amount')
+    )['bal'] or Decimal('0')
+    overdue_receivables = AccountReceivable.objects.filter(
+        status='overdue'
+    ).count()
+
+    # Recent activity
+    recent_orders = SalesOrder.objects.select_related('customer').order_by('-created_at')[:5]
+    recent_quotations = SalesQuotation.objects.select_related('customer').order_by('-created_at')[:5]
+
+    # Suppliers
+    from apps.crm.models import Supplier
+    total_suppliers = Supplier.objects.filter(is_active=True).count()
+
     context = {
         'monthly_sales_total': monthly_sales['total'] or Decimal('0'),
         'monthly_sales_count': monthly_sales['count'] or 0,
@@ -109,6 +173,30 @@ def dashboard(request):
         'low_stock_products': low_stock_products,
         'recent_sales': recent_sales,
         'top_products': top_products,
+        # Sales module
+        'quotations_count': quotations_count,
+        'quotations_accepted': quotations_accepted,
+        'orders_active': orders_active,
+        'orders_pending': orders_pending,
+        'orders_total_value': orders_total_value,
+        'picking_pending': picking_pending,
+        # Manufacturing
+        'bom_count': bom_count,
+        'production_active': production_active,
+        'production_completed_month': production_completed_month,
+        # Logistics
+        'purchase_orders_pending': purchase_orders_pending,
+        'total_products': total_products,
+        'total_warehouses': total_warehouses,
+        # Finance
+        'receivable_balance': receivable_balance,
+        'payable_balance': payable_balance,
+        'overdue_receivables': overdue_receivables,
+        # Activity
+        'recent_orders': recent_orders,
+        'recent_quotations': recent_quotations,
+        # CRM
+        'total_suppliers': total_suppliers,
     }
     return render(request, 'dashboard/dashboard.html', context)
 

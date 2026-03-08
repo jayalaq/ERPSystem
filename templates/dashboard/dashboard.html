@@ -4,147 +4,413 @@
 {% block title %}Dashboard{% endblock %}
 
 {% block content %}
-<div class="page-header d-flex justify-content-between align-items-center">
+<!-- Welcome Header -->
+<div class="d-flex justify-content-between align-items-start mb-4">
     <div>
-        <h4>Dashboard</h4>
-        <p class="text-muted mb-0" style="font-size: 0.85rem;">Resumen general del negocio</p>
+        <h3 class="fw-bold mb-1" style="letter-spacing: -0.02em;">
+            Buen{% now "H" as hour %}{% if hour|add:"0" < 12 %}os dias{% elif hour|add:"0" < 19 %}as tardes{% else %}as noches{% endif %}, {{ request.user.first_name|default:request.user.username }}
+        </h3>
+        <p class="text-muted mb-0" style="font-size: 0.85rem;">
+            <i class="bi bi-calendar3 me-1"></i>{% now "l d \d\e F, Y" %} &middot;
+            <span style="color: var(--neon-green);"><i class="bi bi-circle-fill me-1" style="font-size: 0.4rem; vertical-align: middle;"></i>Sistema operativo</span>
+        </p>
     </div>
-    <div>
-        <span class="text-muted" style="font-size: 0.85rem;">
-            <i class="bi bi-calendar3"></i> {% now "d M Y" %}
-        </span>
+    <div class="d-flex gap-2">
+        <a href="{% url 'pos:terminal' %}" class="btn btn-primary">
+            <i class="bi bi-cart3 me-1"></i> Abrir POS
+        </a>
+        <a href="{% url 'sales:quotation_create' %}" class="btn btn-outline-primary">
+            <i class="bi bi-plus-lg me-1"></i> Cotizar
+        </a>
     </div>
 </div>
 
-<!-- Stats Cards -->
+<!-- ============================================ -->
+<!-- KPI CARDS - Financial Summary (Holded style) -->
+<!-- ============================================ -->
 <div class="row g-3 mb-4">
-    <div class="col-md-3">
-        <div class="card stat-card">
-            <div class="card-body d-flex align-items-center gap-3">
-                <div class="stat-icon bg-primary bg-opacity-10 text-primary">
-                    <i class="bi bi-cart-check"></i>
-                </div>
-                <div>
-                    <div class="text-muted" style="font-size: 0.75rem;">Ventas Hoy</div>
-                    <div class="fw-bold fs-5">S/ {{ today_sales_total|floatformat:2|intcomma }}</div>
-                    <div class="text-muted" style="font-size: 0.75rem;">{{ today_sales_count }} transacciones</div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="card stat-card">
-            <div class="card-body d-flex align-items-center gap-3">
-                <div class="stat-icon bg-success bg-opacity-10 text-success">
-                    <i class="bi bi-graph-up-arrow"></i>
-                </div>
-                <div>
-                    <div class="text-muted" style="font-size: 0.75rem;">Ventas del Mes</div>
-                    <div class="fw-bold fs-5">S/ {{ monthly_sales_total|floatformat:2|intcomma }}</div>
-                    <div class="text-muted" style="font-size: 0.75rem;">{{ monthly_sales_count }} ventas</div>
+    <div class="col-6 col-xl-3">
+        <div class="stat-card position-relative overflow-hidden">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <div class="text-muted" style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em;">Ventas Hoy</div>
+                        <div class="fw-bold mt-1" style="font-size: 1.5rem; line-height: 1.2;">S/ {{ today_sales_total|floatformat:2|intcomma }}</div>
+                        <div class="mt-1" style="font-size: 0.75rem; color: var(--accent);">{{ today_sales_count }} transacciones</div>
+                    </div>
+                    <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(99, 102, 241, 0.12); display: flex; align-items: center; justify-content: center;">
+                        <i class="bi bi-cash-stack" style="font-size: 1.2rem; color: var(--primary-light);"></i>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-    <div class="col-md-3">
-        <div class="card stat-card">
-            <div class="card-body d-flex align-items-center gap-3">
-                <div class="stat-icon bg-warning bg-opacity-10 text-warning">
-                    <i class="bi bi-people"></i>
-                </div>
-                <div>
-                    <div class="text-muted" style="font-size: 0.75rem;">Clientes Activos</div>
-                    <div class="fw-bold fs-5">{{ total_customers|intcomma }}</div>
-                    <div class="text-muted" style="font-size: 0.75rem;">{{ active_opportunities }} oportunidades</div>
+    <div class="col-6 col-xl-3">
+        <div class="stat-card position-relative overflow-hidden">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <div class="text-muted" style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em;">Ventas del Mes</div>
+                        <div class="fw-bold mt-1" style="font-size: 1.5rem; line-height: 1.2;">S/ {{ monthly_sales_total|floatformat:2|intcomma }}</div>
+                        <div class="mt-1" style="font-size: 0.75rem; color: var(--neon-green);">
+                            <i class="bi bi-graph-up-arrow me-1"></i>{{ monthly_sales_count }} ventas
+                        </div>
+                    </div>
+                    <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(16, 185, 129, 0.12); display: flex; align-items: center; justify-content: center;">
+                        <i class="bi bi-graph-up-arrow" style="font-size: 1.2rem; color: var(--neon-green);"></i>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-    <div class="col-md-3">
-        <div class="card stat-card">
-            <div class="card-body d-flex align-items-center gap-3">
-                <div class="stat-icon bg-danger bg-opacity-10 text-danger">
-                    <i class="bi bi-exclamation-triangle"></i>
+    <div class="col-6 col-xl-3">
+        <div class="stat-card position-relative overflow-hidden">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <div class="text-muted" style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em;">Por Cobrar</div>
+                        <div class="fw-bold mt-1" style="font-size: 1.5rem; line-height: 1.2;">S/ {{ receivable_balance|floatformat:2|intcomma }}</div>
+                        <div class="mt-1" style="font-size: 0.75rem; color: var(--neon-orange);">
+                            {% if overdue_receivables > 0 %}<i class="bi bi-exclamation-triangle me-1"></i>{{ overdue_receivables }} vencidos{% else %}<i class="bi bi-check-circle me-1"></i>Al dia{% endif %}
+                        </div>
+                    </div>
+                    <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(245, 158, 11, 0.12); display: flex; align-items: center; justify-content: center;">
+                        <i class="bi bi-wallet2" style="font-size: 1.2rem; color: var(--neon-orange);"></i>
+                    </div>
                 </div>
-                <div>
-                    <div class="text-muted" style="font-size: 0.75rem;">Alertas Stock</div>
-                    <div class="fw-bold fs-5">{{ low_stock_products }}</div>
-                    <div class="text-muted" style="font-size: 0.75rem;">productos bajo mínimo</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-xl-3">
+        <div class="stat-card position-relative overflow-hidden">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <div class="text-muted" style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em;">Por Pagar</div>
+                        <div class="fw-bold mt-1" style="font-size: 1.5rem; line-height: 1.2;">S/ {{ payable_balance|floatformat:2|intcomma }}</div>
+                        <div class="mt-1" style="font-size: 0.75rem; color: var(--neon-red);">
+                            <i class="bi bi-cash-coin me-1"></i>proveedores
+                        </div>
+                    </div>
+                    <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(239, 68, 68, 0.12); display: flex; align-items: center; justify-content: center;">
+                        <i class="bi bi-cash-coin" style="font-size: 1.2rem; color: var(--neon-red);"></i>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Second Row -->
-<div class="row g-3 mb-4">
-    <div class="col-md-4">
-        <div class="card stat-card">
-            <div class="card-body d-flex align-items-center gap-3">
-                <div class="stat-icon bg-info bg-opacity-10 text-info">
-                    <i class="bi bi-file-earmark-check"></i>
-                </div>
-                <div>
-                    <div class="text-muted" style="font-size: 0.75rem;">Comprobantes SUNAT</div>
-                    <div class="fw-bold fs-5">{{ accepted_invoices }}</div>
-                    <div class="text-muted" style="font-size: 0.75rem;">{{ pending_invoices }} pendientes</div>
-                </div>
-            </div>
+<!-- ============================================ -->
+<!-- APP LAUNCHER - Odoo style module grid        -->
+<!-- ============================================ -->
+<div class="card stat-card mb-4">
+    <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h6 class="fw-bold mb-0"><i class="bi bi-grid-3x3-gap me-2"></i>Modulos</h6>
+            <span class="text-muted" style="font-size: 0.75rem;">Acceso rapido a todos los modulos del sistema</span>
         </div>
-    </div>
-    <div class="col-md-4">
-        <div class="card stat-card">
-            <div class="card-body d-flex align-items-center gap-3">
-                <div class="stat-icon" style="color: #7B2FBE; background: rgba(123,47,190,0.1);">
-                    <i class="bi bi-funnel"></i>
-                </div>
-                <div>
-                    <div class="text-muted" style="font-size: 0.75rem;">Pipeline CRM</div>
-                    <div class="fw-bold fs-5">S/ {{ pipeline_value|floatformat:2|intcomma }}</div>
-                    <div class="text-muted" style="font-size: 0.75rem;">valor potencial</div>
-                </div>
+        <div class="row g-3">
+            <!-- POS -->
+            <div class="col-6 col-md-4 col-lg-3 col-xl-2">
+                <a href="{% url 'pos:terminal' %}" class="text-decoration-none">
+                    <div class="text-center p-3 rounded-3 app-module-card">
+                        <div class="app-icon mx-auto mb-2" style="background: linear-gradient(135deg, #6366f1, #8b5cf6);">
+                            <i class="bi bi-display"></i>
+                        </div>
+                        <div class="fw-semibold" style="font-size: 0.8rem; color: var(--text-primary);">Punto de Venta</div>
+                        <div class="text-muted" style="font-size: 0.65rem;">{{ today_sales_count }} ventas hoy</div>
+                    </div>
+                </a>
             </div>
-        </div>
-    </div>
-    <div class="col-md-4">
-        <div class="card stat-card">
-            <div class="card-body text-center py-3">
-                <a href="{% url 'pos:terminal' %}" class="btn btn-primary btn-lg px-5">
-                    <i class="bi bi-cart3"></i> Abrir POS
+            <!-- Cotizaciones -->
+            <div class="col-6 col-md-4 col-lg-3 col-xl-2">
+                <a href="{% url 'sales:quotation_list' %}" class="text-decoration-none">
+                    <div class="text-center p-3 rounded-3 app-module-card">
+                        <div class="app-icon mx-auto mb-2" style="background: linear-gradient(135deg, #06b6d4, #22d3ee);">
+                            <i class="bi bi-file-earmark-richtext"></i>
+                        </div>
+                        <div class="fw-semibold" style="font-size: 0.8rem; color: var(--text-primary);">Cotizaciones</div>
+                        <div class="text-muted" style="font-size: 0.65rem;">{{ quotations_count }} pendientes</div>
+                    </div>
+                </a>
+            </div>
+            <!-- Pedidos -->
+            <div class="col-6 col-md-4 col-lg-3 col-xl-2">
+                <a href="{% url 'sales:order_list' %}" class="text-decoration-none">
+                    <div class="text-center p-3 rounded-3 app-module-card">
+                        <div class="app-icon mx-auto mb-2" style="background: linear-gradient(135deg, #10b981, #34d399);">
+                            <i class="bi bi-cart-check"></i>
+                        </div>
+                        <div class="fw-semibold" style="font-size: 0.8rem; color: var(--text-primary);">Pedidos Venta</div>
+                        <div class="text-muted" style="font-size: 0.65rem;">{{ orders_active }} activos</div>
+                    </div>
+                </a>
+            </div>
+            <!-- Picking -->
+            <div class="col-6 col-md-4 col-lg-3 col-xl-2">
+                <a href="{% url 'sales:picking_list' %}" class="text-decoration-none">
+                    <div class="text-center p-3 rounded-3 app-module-card">
+                        <div class="app-icon mx-auto mb-2" style="background: linear-gradient(135deg, #f59e0b, #fbbf24);">
+                            <i class="bi bi-box-seam"></i>
+                        </div>
+                        <div class="fw-semibold" style="font-size: 0.8rem; color: var(--text-primary);">Picking</div>
+                        <div class="text-muted" style="font-size: 0.65rem;">{% if picking_pending %}{{ picking_pending }} pendiente{{ picking_pending|pluralize:"s" }}{% else %}Todo listo{% endif %}</div>
+                    </div>
+                </a>
+            </div>
+            <!-- Comprobantes -->
+            <div class="col-6 col-md-4 col-lg-3 col-xl-2">
+                <a href="{% url 'accounting:invoice_list' %}" class="text-decoration-none">
+                    <div class="text-center p-3 rounded-3 app-module-card">
+                        <div class="app-icon mx-auto mb-2" style="background: linear-gradient(135deg, #8b5cf6, #a78bfa);">
+                            <i class="bi bi-file-earmark-text"></i>
+                        </div>
+                        <div class="fw-semibold" style="font-size: 0.8rem; color: var(--text-primary);">Comprobantes</div>
+                        <div class="text-muted" style="font-size: 0.65rem;">{{ accepted_invoices }} aceptados</div>
+                    </div>
+                </a>
+            </div>
+            <!-- CRM -->
+            <div class="col-6 col-md-4 col-lg-3 col-xl-2">
+                <a href="{% url 'crm:customer_list' %}" class="text-decoration-none">
+                    <div class="text-center p-3 rounded-3 app-module-card">
+                        <div class="app-icon mx-auto mb-2" style="background: linear-gradient(135deg, #ec4899, #f472b6);">
+                            <i class="bi bi-people"></i>
+                        </div>
+                        <div class="fw-semibold" style="font-size: 0.8rem; color: var(--text-primary);">CRM</div>
+                        <div class="text-muted" style="font-size: 0.65rem;">{{ total_customers }} clientes</div>
+                    </div>
+                </a>
+            </div>
+            <!-- Productos -->
+            <div class="col-6 col-md-4 col-lg-3 col-xl-2">
+                <a href="{% url 'logistics:product_list' %}" class="text-decoration-none">
+                    <div class="text-center p-3 rounded-3 app-module-card">
+                        <div class="app-icon mx-auto mb-2" style="background: linear-gradient(135deg, #14b8a6, #2dd4bf);">
+                            <i class="bi bi-tags"></i>
+                        </div>
+                        <div class="fw-semibold" style="font-size: 0.8rem; color: var(--text-primary);">Productos</div>
+                        <div class="text-muted" style="font-size: 0.65rem;">{{ total_products }} activos</div>
+                    </div>
+                </a>
+            </div>
+            <!-- Inventario -->
+            <div class="col-6 col-md-4 col-lg-3 col-xl-2">
+                <a href="{% url 'logistics:inventory' %}" class="text-decoration-none">
+                    <div class="text-center p-3 rounded-3 app-module-card">
+                        <div class="app-icon mx-auto mb-2" style="background: linear-gradient(135deg, #0ea5e9, #38bdf8);">
+                            <i class="bi bi-box2"></i>
+                        </div>
+                        <div class="fw-semibold" style="font-size: 0.8rem; color: var(--text-primary);">Inventario</div>
+                        <div class="text-muted" style="font-size: 0.65rem;">{% if low_stock_products %}<span style="color: var(--neon-red);">{{ low_stock_products }} alertas</span>{% else %}Stock OK{% endif %}</div>
+                    </div>
+                </a>
+            </div>
+            <!-- Compras -->
+            <div class="col-6 col-md-4 col-lg-3 col-xl-2">
+                <a href="{% url 'logistics:purchase_order_list' %}" class="text-decoration-none">
+                    <div class="text-center p-3 rounded-3 app-module-card">
+                        <div class="app-icon mx-auto mb-2" style="background: linear-gradient(135deg, #ef4444, #f87171);">
+                            <i class="bi bi-bag-check"></i>
+                        </div>
+                        <div class="fw-semibold" style="font-size: 0.8rem; color: var(--text-primary);">Compras</div>
+                        <div class="text-muted" style="font-size: 0.65rem;">{{ purchase_orders_pending }} pendientes</div>
+                    </div>
+                </a>
+            </div>
+            <!-- Fabricacion -->
+            <div class="col-6 col-md-4 col-lg-3 col-xl-2">
+                <a href="{% url 'manufacturing:production_order_list' %}" class="text-decoration-none">
+                    <div class="text-center p-3 rounded-3 app-module-card">
+                        <div class="app-icon mx-auto mb-2" style="background: linear-gradient(135deg, #f97316, #fb923c);">
+                            <i class="bi bi-gear-wide-connected"></i>
+                        </div>
+                        <div class="fw-semibold" style="font-size: 0.8rem; color: var(--text-primary);">Fabricacion</div>
+                        <div class="text-muted" style="font-size: 0.65rem;">{{ production_active }} en proceso</div>
+                    </div>
+                </a>
+            </div>
+            <!-- Finanzas -->
+            <div class="col-6 col-md-4 col-lg-3 col-xl-2">
+                <a href="{% url 'accounting:accounts_receivable' %}" class="text-decoration-none">
+                    <div class="text-center p-3 rounded-3 app-module-card">
+                        <div class="app-icon mx-auto mb-2" style="background: linear-gradient(135deg, #84cc16, #a3e635);">
+                            <i class="bi bi-bank"></i>
+                        </div>
+                        <div class="fw-semibold" style="font-size: 0.8rem; color: var(--text-primary);">Finanzas</div>
+                        <div class="text-muted" style="font-size: 0.65rem;">Cobros y pagos</div>
+                    </div>
+                </a>
+            </div>
+            <!-- SUNAT -->
+            <div class="col-6 col-md-4 col-lg-3 col-xl-2">
+                <a href="{% url 'sunat:logs' %}" class="text-decoration-none">
+                    <div class="text-center p-3 rounded-3 app-module-card">
+                        <div class="app-icon mx-auto mb-2" style="background: linear-gradient(135deg, #64748b, #94a3b8);">
+                            <i class="bi bi-cloud-upload"></i>
+                        </div>
+                        <div class="fw-semibold" style="font-size: 0.8rem; color: var(--text-primary);">SUNAT</div>
+                        <div class="text-muted" style="font-size: 0.65rem;">{{ pending_invoices }} por enviar</div>
+                    </div>
                 </a>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Tables -->
-<div class="row g-3">
-    <div class="col-md-8">
-        <div class="card stat-card">
+<!-- ============================================ -->
+<!-- PIPELINE & ACTIVITY                          -->
+<!-- ============================================ -->
+<div class="row g-3 mb-4">
+    <!-- Workflow Pipeline -->
+    <div class="col-lg-8">
+        <div class="card stat-card h-100">
             <div class="card-body">
-                <h6 class="fw-bold mb-3">Ventas Recientes</h6>
+                <h6 class="fw-bold mb-3"><i class="bi bi-diagram-3 me-2"></i>Flujo de Ventas</h6>
+                <div class="d-flex gap-2 flex-wrap">
+                    <a href="{% url 'sales:quotation_list' %}?status=draft" class="text-decoration-none flex-fill">
+                        <div class="pipeline-stage" style="border-left: 3px solid var(--accent);">
+                            <div class="fw-bold" style="font-size: 1.3rem;">{{ quotations_count }}</div>
+                            <div class="text-muted" style="font-size: 0.7rem;">Cotizaciones</div>
+                        </div>
+                    </a>
+                    <div class="d-flex align-items-center text-muted"><i class="bi bi-chevron-right"></i></div>
+                    <a href="{% url 'sales:order_list' %}?status=confirmed" class="text-decoration-none flex-fill">
+                        <div class="pipeline-stage" style="border-left: 3px solid var(--primary-light);">
+                            <div class="fw-bold" style="font-size: 1.3rem;">{{ orders_pending }}</div>
+                            <div class="text-muted" style="font-size: 0.7rem;">Pedidos Confirm.</div>
+                        </div>
+                    </a>
+                    <div class="d-flex align-items-center text-muted"><i class="bi bi-chevron-right"></i></div>
+                    <a href="{% url 'sales:picking_list' %}?status=pending" class="text-decoration-none flex-fill">
+                        <div class="pipeline-stage" style="border-left: 3px solid var(--neon-orange);">
+                            <div class="fw-bold" style="font-size: 1.3rem;">{{ picking_pending }}</div>
+                            <div class="text-muted" style="font-size: 0.7rem;">Picking Pend.</div>
+                        </div>
+                    </a>
+                    <div class="d-flex align-items-center text-muted"><i class="bi bi-chevron-right"></i></div>
+                    <a href="{% url 'logistics:dispatch_guide_list' %}" class="text-decoration-none flex-fill">
+                        <div class="pipeline-stage" style="border-left: 3px solid var(--neon-green);">
+                            <div class="fw-bold" style="font-size: 1.3rem;">{{ accepted_invoices }}</div>
+                            <div class="text-muted" style="font-size: 0.7rem;">Facturados</div>
+                        </div>
+                    </a>
+                </div>
+
+                {% if production_active > 0 or bom_count > 0 %}
+                <hr style="border-color: var(--border-color); margin: 1rem 0;">
+                <h6 class="fw-bold mb-3" style="font-size: 0.85rem;"><i class="bi bi-gear-wide-connected me-2"></i>Produccion</h6>
+                <div class="d-flex gap-2 flex-wrap">
+                    <div class="pipeline-stage flex-fill" style="border-left: 3px solid var(--neon-orange);">
+                        <div class="fw-bold" style="font-size: 1.3rem;">{{ production_active }}</div>
+                        <div class="text-muted" style="font-size: 0.7rem;">En proceso</div>
+                    </div>
+                    <div class="pipeline-stage flex-fill" style="border-left: 3px solid var(--neon-green);">
+                        <div class="fw-bold" style="font-size: 1.3rem;">{{ production_completed_month }}</div>
+                        <div class="text-muted" style="font-size: 0.7rem;">Completadas (mes)</div>
+                    </div>
+                    <div class="pipeline-stage flex-fill" style="border-left: 3px solid var(--primary-light);">
+                        <div class="fw-bold" style="font-size: 1.3rem;">{{ bom_count }}</div>
+                        <div class="text-muted" style="font-size: 0.7rem;">Recetas BOM</div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Stats Panel -->
+    <div class="col-lg-4">
+        <div class="card stat-card h-100">
+            <div class="card-body">
+                <h6 class="fw-bold mb-3"><i class="bi bi-speedometer2 me-2"></i>Indicadores Clave</h6>
+                <div class="d-flex flex-column gap-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center gap-2">
+                            <div style="width: 8px; height: 8px; border-radius: 50%; background: var(--neon-green);"></div>
+                            <span style="font-size: 0.85rem;">Pedidos del mes</span>
+                        </div>
+                        <span class="fw-bold" style="color: var(--neon-green);">S/ {{ orders_total_value|floatformat:2|intcomma }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center gap-2">
+                            <div style="width: 8px; height: 8px; border-radius: 50%; background: var(--primary-light);"></div>
+                            <span style="font-size: 0.85rem;">Pipeline CRM</span>
+                        </div>
+                        <span class="fw-bold" style="color: var(--primary-light);">S/ {{ pipeline_value|floatformat:2|intcomma }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center gap-2">
+                            <div style="width: 8px; height: 8px; border-radius: 50%; background: var(--accent);"></div>
+                            <span style="font-size: 0.85rem;">Oportunidades</span>
+                        </div>
+                        <span class="fw-bold">{{ active_opportunities }}</span>
+                    </div>
+                    <hr style="border-color: var(--border-color); margin: 0.25rem 0;">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="bi bi-people" style="color: var(--accent);"></i>
+                            <span style="font-size: 0.85rem;">Clientes</span>
+                        </div>
+                        <span class="fw-bold">{{ total_customers }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="bi bi-truck" style="color: var(--neon-orange);"></i>
+                            <span style="font-size: 0.85rem;">Proveedores</span>
+                        </div>
+                        <span class="fw-bold">{{ total_suppliers }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="bi bi-building" style="color: var(--primary-light);"></i>
+                            <span style="font-size: 0.85rem;">Almacenes</span>
+                        </div>
+                        <span class="fw-bold">{{ total_warehouses }}</span>
+                    </div>
+                    {% if low_stock_products > 0 %}
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="bi bi-exclamation-triangle" style="color: var(--neon-red);"></i>
+                            <span style="font-size: 0.85rem; color: var(--neon-red);">Stock bajo</span>
+                        </div>
+                        <span class="fw-bold" style="color: var(--neon-red);">{{ low_stock_products }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================ -->
+<!-- RECENT ACTIVITY                              -->
+<!-- ============================================ -->
+<div class="row g-3">
+    <!-- Recent POS Sales -->
+    <div class="col-lg-5">
+        <div class="card stat-card h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6 class="fw-bold mb-0"><i class="bi bi-receipt me-2"></i>Ventas Recientes POS</h6>
+                    <a href="{% url 'pos:sales_history' %}" class="btn btn-sm btn-outline-primary" style="font-size: 0.7rem;">Ver todo</a>
+                </div>
                 <div class="table-responsive">
-                    <table class="table table-sm">
+                    <table class="table table-sm table-hover mb-0">
                         <thead>
-                            <tr>
-                                <th>Comprobante</th>
-                                <th>Cliente</th>
-                                <th>Vendedor</th>
-                                <th class="text-end">Total</th>
-                                <th>Fecha</th>
-                            </tr>
+                            <tr><th>Comp.</th><th>Cliente</th><th class="text-end">Total</th><th>Hora</th></tr>
                         </thead>
                         <tbody>
                             {% for sale in recent_sales %}
                             <tr>
-                                <td><span class="badge bg-primary">{{ sale.series }}-{{ sale.correlative }}</span></td>
-                                <td>{{ sale.customer.name|default:"Varios" }}</td>
-                                <td>{{ sale.seller.get_full_name|default:sale.seller.username }}</td>
-                                <td class="text-end fw-semibold">S/ {{ sale.total|floatformat:2 }}</td>
-                                <td>{{ sale.created_at|date:"d/m H:i" }}</td>
+                                <td><span class="badge bg-primary" style="font-size: 0.65rem;">{{ sale.series }}-{{ sale.correlative }}</span></td>
+                                <td style="font-size: 0.8rem;">{{ sale.customer.name|default:"Varios"|truncatechars:20 }}</td>
+                                <td class="text-end fw-semibold" style="font-size: 0.8rem;">S/ {{ sale.total|floatformat:2 }}</td>
+                                <td style="font-size: 0.75rem;" class="text-muted">{{ sale.created_at|date:"d/m H:i" }}</td>
                             </tr>
                             {% empty %}
-                            <tr><td colspan="5" class="text-center text-muted">No hay ventas registradas</td></tr>
+                            <tr><td colspan="4" class="text-center text-muted py-3" style="font-size: 0.8rem;">Sin ventas registradas</td></tr>
                             {% endfor %}
                         </tbody>
                     </table>
@@ -152,23 +418,117 @@
             </div>
         </div>
     </div>
-    <div class="col-md-4">
-        <div class="card stat-card">
+
+    <!-- Recent Orders & Quotations -->
+    <div class="col-lg-4">
+        <div class="card stat-card h-100">
             <div class="card-body">
-                <h6 class="fw-bold mb-3">Productos Top del Mes</h6>
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6 class="fw-bold mb-0"><i class="bi bi-clock-history me-2"></i>Actividad Reciente</h6>
+                </div>
+                <div class="d-flex flex-column gap-2">
+                    {% for order in recent_orders %}
+                    <a href="{% url 'sales:order_detail' order.pk %}" class="d-flex align-items-center gap-2 p-2 rounded-2 text-decoration-none activity-item">
+                        <div style="width: 32px; height: 32px; border-radius: 8px; background: rgba(16, 185, 129, 0.12); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                            <i class="bi bi-cart-check" style="font-size: 0.8rem; color: var(--neon-green);"></i>
+                        </div>
+                        <div style="flex: 1; min-width: 0;">
+                            <div class="fw-semibold text-truncate" style="font-size: 0.8rem; color: var(--text-primary);">{{ order.number }}</div>
+                            <div class="text-muted text-truncate" style="font-size: 0.7rem;">{{ order.customer.name }} &middot; S/ {{ order.total|floatformat:2 }}</div>
+                        </div>
+                        <span class="badge bg-{% if order.status == 'confirmed' %}primary{% elif order.status == 'in_process' %}warning{% elif order.status == 'delivered' %}success{% else %}secondary{% endif %}" style="font-size: 0.6rem;">{{ order.get_status_display }}</span>
+                    </a>
+                    {% endfor %}
+                    {% for q in recent_quotations %}
+                    <a href="{% url 'sales:quotation_detail' q.pk %}" class="d-flex align-items-center gap-2 p-2 rounded-2 text-decoration-none activity-item">
+                        <div style="width: 32px; height: 32px; border-radius: 8px; background: rgba(6, 182, 212, 0.12); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                            <i class="bi bi-file-earmark-richtext" style="font-size: 0.8rem; color: var(--accent);"></i>
+                        </div>
+                        <div style="flex: 1; min-width: 0;">
+                            <div class="fw-semibold text-truncate" style="font-size: 0.8rem; color: var(--text-primary);">{{ q.number }}</div>
+                            <div class="text-muted text-truncate" style="font-size: 0.7rem;">{{ q.customer.name }} &middot; S/ {{ q.total|floatformat:2 }}</div>
+                        </div>
+                        <span class="badge bg-{% if q.status == 'accepted' %}success{% elif q.status == 'sent' %}info{% else %}secondary{% endif %}" style="font-size: 0.6rem;">{{ q.get_status_display }}</span>
+                    </a>
+                    {% endfor %}
+                    {% if not recent_orders and not recent_quotations %}
+                    <div class="text-center text-muted py-3" style="font-size: 0.8rem;">Sin actividad reciente</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Products -->
+    <div class="col-lg-3">
+        <div class="card stat-card h-100">
+            <div class="card-body">
+                <h6 class="fw-bold mb-3"><i class="bi bi-trophy me-2"></i>Top Productos</h6>
                 {% for product in top_products %}
-                <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom">
-                    <div>
-                        <div class="fw-semibold" style="font-size: 0.85rem;">{{ product.product__name }}</div>
-                        <div class="text-muted" style="font-size: 0.75rem;">{{ product.total_qty|floatformat:0 }} unidades</div>
+                <div class="d-flex justify-content-between align-items-center mb-2 pb-2" style="border-bottom: 1px solid var(--border-color);">
+                    <div style="min-width: 0;">
+                        <div class="fw-semibold text-truncate" style="font-size: 0.8rem;">{{ product.product__name }}</div>
+                        <div class="text-muted" style="font-size: 0.7rem;">{{ product.total_qty|floatformat:0 }} uds</div>
                     </div>
-                    <span class="fw-bold text-success">S/ {{ product.total_amount|floatformat:2 }}</span>
+                    <span class="fw-bold" style="font-size: 0.8rem; color: var(--neon-green); white-space: nowrap;">S/ {{ product.total_amount|floatformat:0 }}</span>
                 </div>
                 {% empty %}
-                <p class="text-muted text-center">Sin datos</p>
+                <p class="text-muted text-center" style="font-size: 0.8rem;">Sin datos este mes</p>
                 {% endfor %}
+
+                {% if top_products %}
+                <div class="text-center mt-2">
+                    <a href="{% url 'accounting:reports' %}" class="btn btn-sm btn-outline-secondary" style="font-size: 0.7rem;">
+                        <i class="bi bi-bar-chart me-1"></i>Ver reportes
+                    </a>
+                </div>
+                {% endif %}
             </div>
         </div>
     </div>
 </div>
+
+<style>
+    /* App Module Cards - Odoo style grid */
+    .app-module-card {
+        transition: all 0.2s ease;
+        cursor: pointer;
+        border: 1px solid transparent;
+    }
+    .app-module-card:hover {
+        background: var(--bg-surface) !important;
+        border-color: var(--border-color);
+        transform: translateY(-2px);
+    }
+    .app-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.3rem;
+        color: #fff;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    /* Pipeline stages */
+    .pipeline-stage {
+        padding: 0.75rem 1rem;
+        background: var(--bg-surface);
+        border-radius: 8px;
+        transition: all 0.2s;
+    }
+    .pipeline-stage:hover {
+        background: var(--bg-card);
+    }
+
+    /* Activity items */
+    .activity-item {
+        transition: background 0.15s;
+    }
+    .activity-item:hover {
+        background: var(--bg-surface) !important;
+    }
+</style>
 {% endblock %}

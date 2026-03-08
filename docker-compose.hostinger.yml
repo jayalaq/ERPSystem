@@ -102,7 +102,7 @@ services:
     environment:
       <<: *common-env
       DEBUG: "False"
-      ALLOWED_HOSTS: "${ERP_PRODUCTION_HOST:-erp.${DOMAIN}},${DOMAIN},www.${DOMAIN},localhost"
+      ALLOWED_HOSTS: "${ERP_PRODUCTION_HOST:-app.tailoringconsult.com},localhost"
       DATABASE_URL: postgres://erp_user:${DB_PRODUCTION_PASSWORD:-change_me}@erp-db-production:5432/erp_production
       DJANGO_SETTINGS_MODULE: erp_system.settings_production
       ENVIRONMENT: production
@@ -119,7 +119,7 @@ services:
       - hostinger-network  # Shared with n8n
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.erp-prod.rule=Host(`${ERP_PRODUCTION_HOST:-erp.${DOMAIN}}`) || Host(`${DOMAIN}`)"
+      - "traefik.http.routers.erp-prod.rule=Host(`${ERP_PRODUCTION_HOST:-app.tailoringconsult.com}`)"
       - "traefik.http.routers.erp-prod.tls=true"
       - "traefik.http.routers.erp-prod.tls.certresolver=letsencrypt"
       - "traefik.http.services.erp-prod.loadbalancer.server.port=8000"
@@ -216,7 +216,6 @@ services:
     environment:
       ERP_PRODUCTION_HOST: ${ERP_PRODUCTION_HOST:-app.tailoringconsult.com}
       ERP_TESTING_HOST: ${ERP_TESTING_HOST:-erp-testing.tailoringconsult.com}
-      DOMAIN: ${DOMAIN:-tailoringconsult.com}
     volumes:
       - ./nginx/docker-entrypoint.sh:/docker-entrypoint.sh:ro
       - ./nginx/hostinger.conf:/etc/nginx/templates/default.conf.template:ro
@@ -231,7 +230,7 @@ services:
       - hostinger-network
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.erp-nginx.rule=Host(`${ERP_PRODUCTION_HOST:-erp.${DOMAIN}}`) || Host(`${DOMAIN}`) || Host(`${ERP_TESTING_HOST:-erp-testing.${DOMAIN}}`)"
+      - "traefik.http.routers.erp-nginx.rule=Host(`${ERP_PRODUCTION_HOST:-app.tailoringconsult.com}`) || Host(`${ERP_TESTING_HOST:-erp-testing.tailoringconsult.com}`)"
       - "traefik.http.routers.erp-nginx.tls=true"
       - "traefik.http.routers.erp-nginx.tls.certresolver=letsencrypt"
       - "traefik.http.services.erp-nginx.loadbalancer.server.port=80"

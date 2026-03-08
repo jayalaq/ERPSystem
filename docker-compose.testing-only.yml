@@ -1,0 +1,130 @@
+# ============================================
+# ERP System - SOLO TESTING
+# ============================================
+# Levanta únicamente el entorno de testing.
+# Uso: docker compose -f docker-compose.testing-only.yml up -d --build
+
+version: "3.9"
+
+services:
+  # ============================================
+  # BASE DE DATOS TESTING
+  # ============================================
+  erp-db-testing:
+    image: postgres:16-alpine
+    container_name: erp_db_testing
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: erp_testing
+      POSTGRES_USER: erp_user
+      POSTGRES_PASSWORD: ${DB_TESTING_PASSWORD:-change_me_testing}
+    volumes:
+      - erp_pg_testing:/var/lib/postgresql/data
+      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U erp_user -d erp_testing"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - erp-internal
+
+  # ============================================
+  # REDIS
+  # ============================================
+  erp-redis:
+    image: redis:7-alpine
+    container_name: erp_redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    volumes:
+      - erp_redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - erp-internal
+
+  # ============================================
+  # ERP APP - TESTING
+  # ============================================
+  erp-app-testing:
+    build:
+      context: .
+      target: development
+    container_name: erp_app_testing
+    restart: unless-stopped
+    environment:
+      SECRET_KEY: ${SECRET_KEY:-change-me-in-production}
+      DEBUG: "True"
+      ALLOWED_HOSTS: "${ERP_TESTING_HOST:-erp-testing.tailoringconsult.com},localhost"
+      DATABASE_URL: postgres://erp_user:${DB_TESTING_PASSWORD:-change_me_testing}@erp-db-testing:5432/erp_testing
+      DJANGO_SETTINGS_MODULE: erp_system.settings
+      ENVIRONMENT: testing
+      REDIS_URL: redis://erp-redis:6379/0
+      COMPANY_NAME: ${COMPANY_NAME:-TAILORINGCONSULT S.A.C.S}
+      COMPANY_RUC: ${COMPANY_RUC:-20610248633}
+      SUNAT_RUC: ${SUNAT_RUC:-20610248633}
+      SUNAT_USER: ${SUNAT_USER:-MODDATOS}
+      SUNAT_PASSWORD: ${SUNAT_PASSWORD:-moddatos}
+      SUNAT_PRODUCTION: "False"
+      N8N_WEBHOOK_URL: ${N8N_WEBHOOK_URL:-http://n8n:5678}
+      N8N_API_KEY: ${N8N_API_KEY:-}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      ACCOUNT_DEFAULT_HTTP_PROTOCOL: ${ACCOUNT_DEFAULT_HTTP_PROTOCOL:-https}
+    volumes:
+      - .:/app
+      - erp_testing_static:/app/staticfiles
+    depends_on:
+      erp-db-testing:
+        condition: service_healthy
+      erp-redis:
+        condition: service_healthy
+    networks:
+      - erp-internal
+      - hostinger-network
+    labels:
+      - "traefik.enable=false"
+
+  # ============================================
+  # NGINX - SOLO TESTING
+  # ============================================
+  erp-nginx:
+    image: nginx:alpine
+    container_name: erp_nginx
+    restart: unless-stopped
+    entrypoint: ["/docker-entrypoint.sh"]
+    environment:
+      ERP_TESTING_HOST: ${ERP_TESTING_HOST:-erp-testing.tailoringconsult.com}
+    volumes:
+      - ./nginx/docker-entrypoint.sh:/docker-entrypoint.sh:ro
+      - ./nginx/testing-only.conf:/etc/nginx/templates/default.conf.template:ro
+      - erp_testing_static:/static-testing:ro
+    depends_on:
+      - erp-app-testing
+    networks:
+      - erp-internal
+      - hostinger-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.erp-nginx.rule=Host(`${ERP_TESTING_HOST:-erp-testing.tailoringconsult.com}`)"
+      - "traefik.http.routers.erp-nginx.tls=true"
+      - "traefik.http.routers.erp-nginx.entrypoints=websecure"
+      - "traefik.http.routers.erp-nginx.tls.certresolver=mytlschallenge"
+      - "traefik.http.services.erp-nginx.loadbalancer.server.port=80"
+      - "traefik.docker.network=${HOSTINGER_NETWORK:-root_default}"
+
+volumes:
+  erp_pg_testing:
+  erp_redis_data:
+  erp_testing_static:
+
+networks:
+  erp-internal:
+    driver: bridge
+  hostinger-network:
+    external: true
+    name: ${HOSTINGER_NETWORK:-root_default}

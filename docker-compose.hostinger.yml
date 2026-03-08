@@ -119,6 +119,8 @@ services:
     networks:
       - erp-internal
       - hostinger-network  # Shared with n8n
+    labels:
+      - "traefik.enable=false"
 
   # ============================================
   # ERP APP - TESTING
@@ -136,6 +138,9 @@ services:
       DATABASE_URL: postgres://erp_user:${DB_TESTING_PASSWORD:-change_me_testing}@erp-db-testing:5432/erp_testing
       DJANGO_SETTINGS_MODULE: erp_system.settings
       ENVIRONMENT: testing
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      ACCOUNT_DEFAULT_HTTP_PROTOCOL: ${ACCOUNT_DEFAULT_HTTP_PROTOCOL:-https}
     volumes:
       - .:/app
       - erp_testing_static:/app/staticfiles
@@ -147,6 +152,8 @@ services:
     networks:
       - erp-internal
       - hostinger-network
+    labels:
+      - "traefik.enable=false"
 
   # ============================================
   # CELERY WORKER (tareas SUNAT, n8n events)
@@ -222,8 +229,10 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.erp-nginx.rule=Host(`${ERP_PRODUCTION_HOST:-app.tailoringconsult.com}`) || Host(`${ERP_TESTING_HOST:-erp-testing.tailoringconsult.com}`)"
       - "traefik.http.routers.erp-nginx.tls=true"
+      - "traefik.http.routers.erp-nginx.entrypoints=websecure"
       - "traefik.http.routers.erp-nginx.tls.certresolver=mytlschallenge"
       - "traefik.http.services.erp-nginx.loadbalancer.server.port=80"
+      - "traefik.docker.network=${HOSTINGER_NETWORK:-root_default}"
 
 volumes:
   erp_pg_production:
@@ -238,4 +247,4 @@ networks:
     driver: bridge
   hostinger-network:
     external: true
-    name: ${HOSTINGER_NETWORK:-hostinger_default}
+    name: ${HOSTINGER_NETWORK:-root_default}

@@ -80,12 +80,11 @@
                 <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
                 Ingresar con Google
             </a>
-            <div class="text-center mt-3">
-                <a href="{% url 'landing' %}" class="btn-back"><i class="bi bi-arrow-left"></i> Volver al inicio</a>
-            </div>
             {% endif %}
             <p class="text-center text-muted mt-3" style="font-size: 0.8rem;">
-                Integrado con SUNAT - Facturación Electrónica
+                <a href="{% url 'website:landing' %}" style="color: #64748b; text-decoration: none;">
+                    <i class="bi bi-arrow-left"></i> Volver al sitio web
+                </a>
             </p>
         </div>
     </div>

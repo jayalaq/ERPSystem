@@ -14,7 +14,7 @@ ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '').split(',')
 
 # Cloudflare handles SSL termination, trust CF-Visitor header
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-# Cloudflare already redirects HTTP→HTTPS; Django must not redirect
+# Cloudflare already redirects HTTP->HTTPS; Django must not redirect
 # again or it creates an infinite loop (nginx $scheme is always 'http')
 SECURE_SSL_REDIRECT = False
 SECURE_HSTS_SECONDS = 31536000  # 1 year

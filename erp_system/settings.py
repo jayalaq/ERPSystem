@@ -6,6 +6,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-dev-key-change-in-production')
 DEBUG = os.environ.get('DEBUG', 'True').lower() in ('true', '1', 'yes')
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
+CSRF_TRUSTED_ORIGINS = [
+    f"https://{host.strip()}" for host in ALLOWED_HOSTS if host.strip()
+]
 
 ENVIRONMENT = os.environ.get('ENVIRONMENT', 'development')
 
@@ -31,6 +34,7 @@ INSTALLED_APPS = [
     'apps.accounting',
     'apps.sunat_integration',
     'apps.n8n_integration',
+    'apps.website',
 ]
 
 MIDDLEWARE = [
@@ -129,9 +133,9 @@ REST_FRAMEWORK = {
 CRISPY_ALLOWED_TEMPLATE_PACKS = 'bootstrap5'
 CRISPY_TEMPLATE_PACK = 'bootstrap5'
 
-LOGIN_URL = '/login/'
-LOGIN_REDIRECT_URL = '/dashboard/'
-LOGOUT_REDIRECT_URL = '/login/'
+LOGIN_URL = '/app/login/'
+LOGIN_REDIRECT_URL = '/app/dashboard/'
+LOGOUT_REDIRECT_URL = '/'
 
 # SUNAT Configuration
 SUNAT_CONFIG = {
@@ -179,10 +183,14 @@ if ENVIRONMENT == 'testing':
         'django.contrib.auth.backends.ModelBackend',
         'allauth.account.auth_backends.AuthenticationBackend',
     ]
-    ACCOUNT_LOGIN_METHODS = {'username'}
+    ACCOUNT_LOGIN_METHODS = {'username', 'email'}
     ACCOUNT_EMAIL_VERIFICATION = 'none'
-    ACCOUNT_SIGNUP_FIELDS = ['email*', 'username*', 'password1*', 'password2*']
-    ACCOUNT_LOGOUT_REDIRECT_URL = '/login/'
+    ACCOUNT_SIGNUP_ENABLED = False
+    ACCOUNT_ADAPTER = 'apps.core.adapters.NoNewUsersAccountAdapter'
+    SOCIALACCOUNT_ADAPTER = 'apps.core.adapters.GoogleOnlyLoginAdapter'
+    SOCIALACCOUNT_LOGIN_ON_GET = True
+    SOCIALACCOUNT_AUTO_SIGNUP = True
+    ACCOUNT_DEFAULT_HTTP_PROTOCOL = os.environ.get('ACCOUNT_DEFAULT_HTTP_PROTOCOL', 'http')
     SOCIALACCOUNT_PROVIDERS = {
         'google': {
             'SCOPE': ['profile', 'email'],
@@ -193,8 +201,6 @@ if ENVIRONMENT == 'testing':
             },
         },
     }
-    SOCIALACCOUNT_AUTO_SIGNUP = True
-    SOCIALACCOUNT_LOGIN_ON_GET = True
 
 # n8n Integration
 N8N_WEBHOOK_URL = os.environ.get('N8N_WEBHOOK_URL', 'http://n8n:5678')

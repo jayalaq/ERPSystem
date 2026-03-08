@@ -212,8 +212,14 @@ services:
     image: nginx:alpine
     container_name: erp_nginx
     restart: unless-stopped
+    entrypoint: ["/docker-entrypoint.sh"]
+    environment:
+      ERP_PRODUCTION_HOST: ${ERP_PRODUCTION_HOST:-app.tailoringconsult.com}
+      ERP_TESTING_HOST: ${ERP_TESTING_HOST:-erp-testing.tailoringconsult.com}
+      DOMAIN: ${DOMAIN:-tailoringconsult.com}
     volumes:
-      - ./nginx/hostinger.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./nginx/docker-entrypoint.sh:/docker-entrypoint.sh:ro
+      - ./nginx/hostinger.conf:/etc/nginx/templates/default.conf.template:ro
       - erp_production_static:/static:ro
       - erp_production_media:/media:ro
       - erp_testing_static:/static-testing:ro

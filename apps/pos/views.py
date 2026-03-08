@@ -13,7 +13,7 @@ from django.db.models import Sum, Q
 from .models import CashRegister, CashSession, POSSale, POSSaleItem, PaymentDetail
 from apps.crm.models import Customer
 from apps.logistics.models import Product, StockLevel, StockMovement
-from apps.accounting.models import DocumentSeries
+from apps.accounting.models import DocumentSeries, Invoice, InvoiceItem, AccountReceivable
 
 
 @login_required
@@ -50,7 +50,7 @@ def open_session(request):
             user=request.user,
             opening_amount=Decimal(opening_amount),
         )
-        messages.success(request, 'Sesión de caja abierta.')
+        messages.success(request, 'Sesion de caja abierta.')
         return redirect('pos:terminal')
     return render(request, 'pos/open_session.html', {'registers': registers})
 
@@ -81,7 +81,7 @@ def close_session(request):
     session.notes = request.POST.get('notes', '')
     session.save()
 
-    messages.success(request, f'Sesión cerrada. Diferencia: S/ {session.difference}')
+    messages.success(request, f'Sesion cerrada. Diferencia: S/ {session.difference}')
     return redirect('pos:session_summary', pk=session.pk)
 
 
@@ -95,13 +95,13 @@ def session_summary(request, pk):
 @login_required
 @require_POST
 def process_sale(request):
-    """Process a POS sale transaction."""
+    """Process a POS sale transaction with automatic invoice and accounting integration."""
     session = get_object_or_404(CashSession, user=request.user, status='open')
 
     try:
         data = json.loads(request.body)
     except json.JSONDecodeError:
-        return JsonResponse({'success': False, 'message': 'Datos inválidos'})
+        return JsonResponse({'success': False, 'message': 'Datos invalidos'})
 
     items_data = data.get('items', [])
     if not items_data:
@@ -112,6 +112,14 @@ def process_sale(request):
     customer_id = data.get('customer_id')
     amount_received = Decimal(str(data.get('amount_received', 0)))
 
+    # Validate factura requires customer with RUC
+    customer = None
+    if customer_id:
+        customer = Customer.objects.filter(pk=customer_id).first()
+
+    if doc_type == 'factura' and (not customer or customer.doc_type != 'RUC'):
+        return JsonResponse({'success': False, 'message': 'Para emitir Factura se requiere un cliente con RUC'})
+
     # Get document series
     series_map = {'boleta': '03', 'factura': '01', 'nota_venta': 'NV', 'ticket': 'TK'}
     sunat_doc_type = series_map.get(doc_type, '03')
@@ -120,11 +128,14 @@ def process_sale(request):
     ).first()
 
     if not doc_series and doc_type in ('boleta', 'factura'):
-        return JsonResponse({'success': False, 'message': 'No se encontró serie de documento configurada'})
+        return JsonResponse({'success': False, 'message': 'No se encontro serie de documento configurada'})
 
     with transaction.atomic():
         subtotal = Decimal('0')
         igv_total = Decimal('0')
+        op_gravada = Decimal('0')
+        op_exonerada = Decimal('0')
+        op_inafecta = Decimal('0')
         discount_total = Decimal(str(data.get('discount', 0)))
 
         # Calculate totals
@@ -138,10 +149,17 @@ def process_sale(request):
             item_subtotal = (price * qty) - item_discount
             if product.affectation_type == '10':
                 item_igv = item_subtotal * Decimal('0.18')
+                op_gravada += item_subtotal
+            elif product.affectation_type == '20':
+                item_igv = Decimal('0')
+                op_exonerada += item_subtotal
+            elif product.affectation_type == '30':
+                item_igv = Decimal('0')
+                op_inafecta += item_subtotal
             else:
                 item_igv = Decimal('0')
-            item_total = item_subtotal + item_igv
 
+            item_total = item_subtotal + item_igv
             subtotal += item_subtotal
             igv_total += item_igv
 
@@ -164,13 +182,8 @@ def process_sale(request):
             correlative = str(doc_series.get_next_number()).zfill(8)
         else:
             series_code = 'NV01'
-            from apps.pos.models import POSSale as PS
-            last = PS.objects.filter(series=series_code).order_by('-correlative').first()
+            last = POSSale.objects.filter(series=series_code).order_by('-correlative').first()
             correlative = str(int(last.correlative) + 1).zfill(8) if last else '00000001'
-
-        customer = None
-        if customer_id:
-            customer = Customer.objects.filter(pk=customer_id).first()
 
         sale = POSSale.objects.create(
             session=session,
@@ -207,6 +220,7 @@ def process_sale(request):
                         product=item['product'],
                         warehouse=warehouse,
                         quantity=item['quantity'],
+                        unit_cost=item['product'].purchase_price,
                         reference=f"POS-{sale.series}-{sale.correlative}",
                         reference_type='pos_sale',
                         reference_id=sale.pk,
@@ -222,6 +236,81 @@ def process_sale(request):
                 amount=Decimal(str(payment['amount'])),
                 reference=payment.get('reference', ''),
             )
+
+        # ===== AUTO-CREATE INVOICE (Comprobante Electronico) =====
+        if doc_type in ('boleta', 'factura'):
+            invoice_doc_type = '03' if doc_type == 'boleta' else '01'
+            payment_condition = 'credit' if payment_method == 'credit' else 'cash'
+
+            # For boletas without customer, use generic
+            invoice_customer = customer
+            if not invoice_customer and doc_type == 'boleta':
+                invoice_customer, _ = Customer.objects.get_or_create(
+                    doc_number='00000000',
+                    defaults={
+                        'name': 'CLIENTES VARIOS',
+                        'doc_type': 'DNI',
+                        'customer_type': 'individual',
+                    }
+                )
+
+            from apps.core.models import Currency
+            default_currency = Currency.objects.filter(is_default=True).first()
+
+            invoice = Invoice.objects.create(
+                doc_type=invoice_doc_type,
+                series=series_code,
+                correlative=int(correlative),
+                issue_date=timezone.now().date(),
+                due_date=timezone.now().date() if payment_condition == 'cash' else (timezone.now().date() + timezone.timedelta(days=30)),
+                customer=invoice_customer,
+                currency=default_currency,
+                payment_condition=payment_condition,
+                op_gravada=op_gravada,
+                op_exonerada=op_exonerada,
+                op_inafecta=op_inafecta,
+                igv=igv_total,
+                discount_total=discount_total,
+                total=total,
+                status='issued',
+                pos_sale=sale,
+                created_by=request.user,
+                notes=f'Generado automaticamente desde POS - Sesion #{session.id}',
+            )
+
+            # Create invoice items
+            for item in sale_items:
+                InvoiceItem.objects.create(
+                    invoice=invoice,
+                    product=item['product'],
+                    description=item['product'].name,
+                    unit=item['product'].unit,
+                    quantity=item['quantity'],
+                    unit_price=item['unit_price'],
+                    discount=item['discount'],
+                    affectation_type=item['product'].affectation_type,
+                    igv=item['igv'],
+                    subtotal=item['subtotal'],
+                    total=item['total'],
+                )
+
+            # ===== AUTO-CREATE ACCOUNT RECEIVABLE (for credit sales) =====
+            if payment_condition == 'credit' and invoice_customer:
+                AccountReceivable.objects.create(
+                    customer=invoice_customer,
+                    invoice=invoice,
+                    description=f'Comprobante {invoice.full_number}',
+                    total=total,
+                    issue_date=timezone.now().date(),
+                    due_date=timezone.now().date() + timezone.timedelta(
+                        days=invoice_customer.credit_days or 30
+                    ),
+                    status='pending',
+                    created_by=request.user,
+                )
+
+            sale.sunat_status = 'issued'
+            sale.save(update_fields=['sunat_status'])
 
     return JsonResponse({
         'success': True,
@@ -246,11 +335,22 @@ def sales_history(request):
     sales = POSSale.objects.select_related('customer', 'seller', 'session__cash_register').order_by('-created_at')
     date_from = request.GET.get('from')
     date_to = request.GET.get('to')
+    doc_type = request.GET.get('doc_type')
     if date_from:
         sales = sales.filter(created_at__date__gte=date_from)
     if date_to:
         sales = sales.filter(created_at__date__lte=date_to)
-    return render(request, 'pos/sales_history.html', {'sales': sales[:100]})
+    if doc_type:
+        sales = sales.filter(doc_type=doc_type)
+
+    total_ventas = sales.filter(status='completed').aggregate(t=Sum('total'))['t'] or Decimal('0')
+    total_count = sales.filter(status='completed').count()
+
+    return render(request, 'pos/sales_history.html', {
+        'sales': sales[:200],
+        'total_ventas': total_ventas,
+        'total_count': total_count,
+    })
 
 
 @login_required
@@ -277,6 +377,7 @@ def product_search(request):
             'stock': str(p.total_stock),
             'unit': p.unit.abbreviation if p.unit else 'UND',
             'image': image_url,
+            'affectation_type': p.affectation_type,
         })
 
     return JsonResponse({'products': results})

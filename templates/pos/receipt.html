@@ -5,41 +5,62 @@
     <meta charset="UTF-8">
     <title>{{ sale.series }}-{{ sale.correlative }}</title>
     <style>
-        * { font-family: 'Courier New', monospace; margin: 0; padding: 0; }
-        body { width: 300px; margin: 0 auto; padding: 10px; font-size: 12px; }
+        * { font-family: 'Courier New', monospace; margin: 0; padding: 0; box-sizing: border-box; }
+        body { width: 300px; margin: 0 auto; padding: 15px 10px; font-size: 12px; color: #000; }
         .center { text-align: center; }
         .bold { font-weight: bold; }
-        .divider { border-top: 1px dashed #000; margin: 5px 0; }
-        .row { display: flex; justify-content: space-between; }
-        .items th, .items td { padding: 2px 0; text-align: left; font-size: 11px; }
-        .items { width: 100%; border-collapse: collapse; }
+        .divider { border-top: 1px dashed #555; margin: 6px 0; }
+        .double-divider { border-top: 2px solid #000; margin: 6px 0; }
+        .row { display: flex; justify-content: space-between; padding: 1px 0; }
+        .items { width: 100%; border-collapse: collapse; margin: 4px 0; }
+        .items th { padding: 3px 0; text-align: left; font-size: 11px; border-bottom: 1px solid #ccc; }
+        .items td { padding: 3px 0; text-align: left; font-size: 11px; }
         .right { text-align: right; }
-        h3 { font-size: 14px; }
-        @media print { body { width: 80mm; } }
+        h3 { font-size: 15px; margin-bottom: 2px; }
+        .company-info { font-size: 10px; line-height: 1.4; }
+        .doc-type { font-size: 13px; margin: 4px 0; letter-spacing: 1px; }
+        .total-section .row { font-size: 12px; }
+        .grand-total { font-size: 16px; font-weight: bold; padding: 3px 0; }
+        .footer { font-size: 10px; line-height: 1.5; margin-top: 8px; }
+        .sunat-note { font-size: 9px; margin-top: 5px; padding: 4px; border: 1px solid #ccc; }
+        @media print {
+            body { width: 80mm; padding: 5px; }
+            @page { margin: 0; }
+        }
     </style>
 </head>
 <body>
     <div class="center">
-        <h3>{{ company_config.NAME }}</h3>
-        <p>RUC: {{ company_config.RUC }}</p>
-        <p>{{ company_config.ADDRESS }}</p>
+        <h3>{{ company_config.NAME|default:"EMPRESA S.A.C." }}</h3>
+        <div class="company-info">
+            <p>RUC: {{ company_config.RUC|default:"20000000001" }}</p>
+            <p>{{ company_config.ADDRESS|default:"Lima, Peru" }}</p>
+            {% if company_config.PHONE %}<p>Tel: {{ company_config.PHONE }}</p>{% endif %}
+        </div>
         <div class="divider"></div>
-        <p class="bold">{{ sale.get_doc_type_display|upper }}</p>
-        <p class="bold">{{ sale.series }}-{{ sale.correlative }}</p>
+        <p class="doc-type bold">{{ sale.get_doc_type_display|upper }}</p>
+        <p class="bold" style="font-size:14px;">{{ sale.series }}-{{ sale.correlative }}</p>
         <div class="divider"></div>
     </div>
 
-    <p>Fecha: {{ sale.created_at|date:"d/m/Y H:i" }}</p>
-    {% if sale.customer %}<p>Cliente: {{ sale.customer.name }}</p>
-    <p>{{ sale.customer.doc_type }}: {{ sale.customer.doc_number }}</p>{% endif %}
+    <div style="font-size:11px;margin:4px 0;">
+        <div class="row"><span>Fecha:</span><span>{{ sale.created_at|date:"d/m/Y H:i" }}</span></div>
+        {% if sale.customer %}
+        <div class="row"><span>Cliente:</span><span>{{ sale.customer.name|truncatechars:25 }}</span></div>
+        <div class="row"><span>{{ sale.customer.doc_type }}:</span><span>{{ sale.customer.doc_number }}</span></div>
+        {% if sale.customer.address %}<div class="row"><span>Dir:</span><span>{{ sale.customer.address|truncatechars:25 }}</span></div>{% endif %}
+        {% endif %}
+    </div>
     <div class="divider"></div>
 
     <table class="items">
-        <thead><tr><th>Producto</th><th class="right">Cant</th><th class="right">P.U.</th><th class="right">Total</th></tr></thead>
+        <thead>
+            <tr><th>Descripcion</th><th class="right">Cant</th><th class="right">P.U.</th><th class="right">Total</th></tr>
+        </thead>
         <tbody>
             {% for item in sale.items.all %}
             <tr>
-                <td>{{ item.product.name|truncatechars:20 }}</td>
+                <td>{{ item.product.name|truncatechars:18 }}</td>
                 <td class="right">{{ item.quantity|floatformat:0 }}</td>
                 <td class="right">{{ item.unit_price|floatformat:2 }}</td>
                 <td class="right">{{ item.total|floatformat:2 }}</td>
@@ -48,25 +69,33 @@
         </tbody>
     </table>
 
-    <div class="divider"></div>
-    <div class="row"><span>Subtotal:</span><span>S/ {{ sale.subtotal|floatformat:2 }}</span></div>
-    {% if sale.discount %}<div class="row"><span>Descuento:</span><span>S/ {{ sale.discount|floatformat:2 }}</span></div>{% endif %}
-    <div class="row"><span>IGV (18%):</span><span>S/ {{ sale.igv|floatformat:2 }}</span></div>
-    <div class="divider"></div>
-    <div class="row bold" style="font-size:14px;"><span>TOTAL:</span><span>S/ {{ sale.total|floatformat:2 }}</span></div>
+    <div class="double-divider"></div>
+    <div class="total-section">
+        <div class="row"><span>Op. Gravada:</span><span>S/ {{ sale.subtotal|floatformat:2 }}</span></div>
+        {% if sale.discount %}<div class="row"><span>Descuento:</span><span>S/ -{{ sale.discount|floatformat:2 }}</span></div>{% endif %}
+        <div class="row"><span>IGV (18%):</span><span>S/ {{ sale.igv|floatformat:2 }}</span></div>
+        <div class="divider"></div>
+        <div class="row grand-total"><span>TOTAL:</span><span>S/ {{ sale.total|floatformat:2 }}</span></div>
+    </div>
     <div class="divider"></div>
 
-    <div class="row"><span>Pago:</span><span>{{ sale.get_payment_method_display }}</span></div>
-    {% if sale.payment_method == 'cash' %}
-    <div class="row"><span>Recibido:</span><span>S/ {{ sale.amount_received|floatformat:2 }}</span></div>
-    <div class="row bold"><span>Vuelto:</span><span>S/ {{ sale.change_amount|floatformat:2 }}</span></div>
-    {% endif %}
+    <div style="font-size:11px;">
+        <div class="row"><span>Forma de Pago:</span><span>{{ sale.get_payment_method_display }}</span></div>
+        {% if sale.payment_method == 'cash' %}
+        <div class="row"><span>Recibido:</span><span>S/ {{ sale.amount_received|floatformat:2 }}</span></div>
+        <div class="row bold"><span>Vuelto:</span><span>S/ {{ sale.change_amount|floatformat:2 }}</span></div>
+        {% endif %}
+    </div>
 
     <div class="divider"></div>
-    <div class="center" style="margin-top:10px;">
-        <p>Vendedor: {{ sale.seller.get_full_name|default:sale.seller.username }}</p>
-        <p style="margin-top:10px;">Gracias por su compra!</p>
-        <p style="font-size:10px;">Representación impresa de comprobante electrónico</p>
+    <div class="center footer">
+        <p>Atendido por: {{ sale.seller.get_full_name|default:sale.seller.username }}</p>
+        <p>Caja: {{ sale.session.cash_register.name }}</p>
+        <p style="margin-top:6px;font-size:11px;">*** Gracias por su compra ***</p>
+        <div class="sunat-note">
+            Representacion impresa del comprobante electronico.<br>
+            Consulte en: https://www.sunat.gob.pe
+        </div>
     </div>
 
     <script>window.onload = function() { window.print(); }</script>

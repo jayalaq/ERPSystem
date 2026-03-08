@@ -31,4 +31,19 @@ python manage.py migrate --noinput
 echo "Collecting static files..."
 python manage.py collectstatic --noinput 2>/dev/null || true
 
+# Seed initial data (idempotent - safe to run multiple times)
+echo "Seeding initial data..."
+python manage.py seed_initial_data 2>/dev/null || true
+
+# In testing environment, seed test data
+if [ "${ENVIRONMENT}" = "testing" ]; then
+    echo "Seeding test data for testing environment..."
+    python manage.py seed_test_data 2>/dev/null || true
+fi
+
+# Create superuser if not exists
+if [ -n "${DJANGO_SUPERUSER_USERNAME}" ]; then
+    python manage.py createsuperuser --noinput 2>/dev/null || true
+fi
+
 exec "$@"

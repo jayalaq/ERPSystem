@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'apps.accounting',
     'apps.sunat_integration',
     'apps.n8n_integration',
+    'apps.website',
 ]
 
 MIDDLEWARE = [
@@ -137,9 +138,9 @@ REST_FRAMEWORK = {
 CRISPY_ALLOWED_TEMPLATE_PACKS = 'bootstrap5'
 CRISPY_TEMPLATE_PACK = 'bootstrap5'
 
-LOGIN_URL = '/login/'
-LOGIN_REDIRECT_URL = '/dashboard/'
-LOGOUT_REDIRECT_URL = '/login/'
+LOGIN_URL = '/app/login/'
+LOGIN_REDIRECT_URL = '/app/dashboard/'
+LOGOUT_REDIRECT_URL = '/'
 
 # Django Sites Framework (required by allauth)
 SITE_ID = 1

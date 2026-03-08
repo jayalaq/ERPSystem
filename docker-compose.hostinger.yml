@@ -102,7 +102,7 @@ services:
     environment:
       <<: *common-env
       DEBUG: "False"
-      ALLOWED_HOSTS: "${DOMAIN},www.${DOMAIN},localhost"
+      ALLOWED_HOSTS: "${DOMAIN},www.${DOMAIN},${LANDING_DOMAIN:-tailoringconsult.com},www.${LANDING_DOMAIN:-tailoringconsult.com},localhost"
       DATABASE_URL: postgres://erp_user:${DB_PRODUCTION_PASSWORD:-change_me}@erp-db-production:5432/erp_production
       DJANGO_SETTINGS_MODULE: erp_system.settings_production
       ENVIRONMENT: production
@@ -220,7 +220,7 @@ services:
       - hostinger-network
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.erp-nginx.rule=Host(`${DOMAIN}`) || Host(`${TESTING_DOMAIN:-erp-testing.tailoringconsult.com}`)"
+      - "traefik.http.routers.erp-nginx.rule=Host(`${DOMAIN}`) || Host(`${TESTING_DOMAIN:-erp-testing.tailoringconsult.com}`) || Host(`${LANDING_DOMAIN:-tailoringconsult.com}`) || Host(`www.${LANDING_DOMAIN:-tailoringconsult.com}`)"
       - "traefik.http.routers.erp-nginx.tls=true"
       - "traefik.http.routers.erp-nginx.entrypoints=websecure"
       - "traefik.http.routers.erp-nginx.tls.certresolver=mytlschallenge"

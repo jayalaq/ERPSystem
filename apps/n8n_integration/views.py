@@ -147,6 +147,10 @@ def n8n_products(request):
 
     data = []
     for p in products[:limit]:
+        try:
+            image_url = p.image.url if p.image else ''
+        except Exception:
+            image_url = ''
         data.append({
             'id': p.pk, 'sku': p.sku, 'name': p.name,
             'category': p.category.name if p.category else '',
@@ -156,6 +160,7 @@ def n8n_products(request):
             'total_stock': float(p.total_stock),
             'min_stock': float(p.min_stock),
             'product_type': p.product_type,
+            'image_url': image_url,
         })
     return n8n_response({'products': data, 'count': len(data)})
 

@@ -6,10 +6,22 @@ class ProductSerializer(serializers.ModelSerializer):
     total_stock = serializers.ReadOnlyField()
     category_name = serializers.CharField(source='category.name', read_only=True, default='')
     unit_name = serializers.CharField(source='unit.abbreviation', read_only=True, default='')
+    image_url = serializers.SerializerMethodField()
 
     class Meta:
         model = Product
         fields = '__all__'
+
+    def get_image_url(self, obj):
+        try:
+            if obj.image:
+                request = self.context.get('request')
+                if request:
+                    return request.build_absolute_uri(obj.image.url)
+                return obj.image.url
+        except Exception:
+            pass
+        return None
 
 
 class WarehouseSerializer(serializers.ModelSerializer):

@@ -263,14 +263,20 @@ def product_search(request):
         Q(name__icontains=q) | Q(sku__icontains=q) | Q(barcode__icontains=q)
     )[:20]
 
-    results = [{
-        'id': p.id,
-        'sku': p.sku,
-        'name': p.name,
-        'price': str(p.sale_price),
-        'stock': str(p.total_stock),
-        'unit': p.unit.abbreviation if p.unit else 'UND',
-        'image': p.image.url if p.image else '',
-    } for p in products]
+    results = []
+    for p in products:
+        try:
+            image_url = p.image.url if p.image else ''
+        except Exception:
+            image_url = ''
+        results.append({
+            'id': p.id,
+            'sku': p.sku,
+            'name': p.name,
+            'price': str(p.sale_price),
+            'stock': str(p.total_stock),
+            'unit': p.unit.abbreviation if p.unit else 'UND',
+            'image': image_url,
+        })
 
     return JsonResponse({'products': results})

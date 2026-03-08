@@ -1,6 +1,7 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.core.validators import RegexValidator
+from apps.core.validators import validate_image_file
 
 
 class User(AbstractUser):
@@ -20,7 +21,7 @@ class User(AbstractUser):
         max_length=8, blank=True,
         validators=[RegexValidator(r'^\d{8}$', 'DNI debe tener 8 dígitos')]
     )
-    avatar = models.ImageField(upload_to='avatars/', blank=True, null=True)
+    avatar = models.ImageField(upload_to='avatars/', blank=True, null=True, validators=[validate_image_file])
     is_active_employee = models.BooleanField(default=True)
     branch = models.ForeignKey(
         'Branch', on_delete=models.SET_NULL, null=True, blank=True, related_name='employees'
@@ -50,7 +51,7 @@ class Company(models.Model):
     phone = models.CharField(max_length=20, blank=True, verbose_name='Teléfono')
     email = models.EmailField(blank=True)
     website = models.URLField(blank=True)
-    logo = models.ImageField(upload_to='company/', blank=True, null=True)
+    logo = models.ImageField(upload_to='company/', blank=True, null=True, validators=[validate_image_file])
     certificate = models.FileField(upload_to='certificates/', blank=True, null=True, verbose_name='Certificado Digital')
     certificate_password = models.CharField(max_length=100, blank=True)
     sol_user = models.CharField(max_length=20, blank=True, verbose_name='Usuario SOL')

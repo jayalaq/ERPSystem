@@ -1,5 +1,6 @@
 from django.db import models
 from django.conf import settings
+from apps.core.validators import validate_image_file
 
 
 class Category(models.Model):
@@ -8,7 +9,7 @@ class Category(models.Model):
     slug = models.SlugField(unique=True)
     parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='children')
     description = models.TextField(blank=True)
-    image = models.ImageField(upload_to='categories/', blank=True, null=True)
+    image = models.ImageField(upload_to='categories/', blank=True, null=True, validators=[validate_image_file])
     is_active = models.BooleanField(default=True)
     order = models.PositiveIntegerField(default=0)
 
@@ -25,7 +26,7 @@ class Brand(models.Model):
     """Product brands."""
     name = models.CharField(max_length=200, verbose_name='Nombre')
     slug = models.SlugField(unique=True)
-    logo = models.ImageField(upload_to='brands/', blank=True, null=True)
+    logo = models.ImageField(upload_to='brands/', blank=True, null=True, validators=[validate_image_file])
     is_active = models.BooleanField(default=True)
 
     class Meta:
@@ -82,7 +83,7 @@ class Product(models.Model):
     minimum_price = models.DecimalField(max_digits=12, decimal_places=2, default=0, verbose_name='Precio Mínimo')
     min_stock = models.DecimalField(max_digits=12, decimal_places=3, default=0, verbose_name='Stock Mínimo')
     max_stock = models.DecimalField(max_digits=12, decimal_places=3, default=0, verbose_name='Stock Máximo')
-    image = models.ImageField(upload_to='products/', blank=True, null=True)
+    image = models.ImageField(upload_to='products/', blank=True, null=True, validators=[validate_image_file])
     is_active = models.BooleanField(default=True)
     track_inventory = models.BooleanField(default=True, verbose_name='Control de Inventario')
     allow_negative_stock = models.BooleanField(default=False, verbose_name='Permitir Stock Negativo')

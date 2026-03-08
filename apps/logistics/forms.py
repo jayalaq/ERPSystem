@@ -1,5 +1,9 @@
 from django import forms
+from django.core.exceptions import ValidationError
 from .models import Product, Warehouse, StockMovement, PurchaseOrder
+
+MAX_IMAGE_SIZE = 5 * 1024 * 1024  # 5 MB
+ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
 
 
 class ProductForm(forms.ModelForm):
@@ -23,6 +27,21 @@ class ProductForm(forms.ModelForm):
             'min_stock': forms.NumberInput(attrs={'class': 'form-control'}),
             'max_stock': forms.NumberInput(attrs={'class': 'form-control'}),
         }
+
+    def clean_image(self):
+        image = self.cleaned_data.get('image')
+        if image and hasattr(image, 'size'):
+            if image.size > MAX_IMAGE_SIZE:
+                raise ValidationError(
+                    f'La imagen no debe superar {MAX_IMAGE_SIZE // (1024 * 1024)} MB. '
+                    f'Tamaño actual: {image.size / (1024 * 1024):.1f} MB.'
+                )
+            if hasattr(image, 'content_type') and image.content_type not in ALLOWED_IMAGE_TYPES:
+                raise ValidationError(
+                    f'Formato de imagen no soportado: {image.content_type}. '
+                    f'Formatos permitidos: JPEG, PNG, WebP, GIF.'
+                )
+        return image
 
 
 class WarehouseForm(forms.ModelForm):

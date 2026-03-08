@@ -8,6 +8,7 @@ django-extensions>=3.2
 django-crispy-forms>=2.1
 crispy-bootstrap5>=2024.2
 django-allauth>=0.61
+PyJWT[crypto]>=2.8
 
 # Database
 psycopg2-binary>=2.9

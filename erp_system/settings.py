@@ -134,7 +134,7 @@ CRISPY_ALLOWED_TEMPLATE_PACKS = 'bootstrap5'
 CRISPY_TEMPLATE_PACK = 'bootstrap5'
 
 LOGIN_URL = '/app/login/'
-LOGIN_REDIRECT_URL = '/app/dashboard/'
+LOGIN_REDIRECT_URL = '/app/'
 LOGOUT_REDIRECT_URL = '/'
 
 # SUNAT Configuration

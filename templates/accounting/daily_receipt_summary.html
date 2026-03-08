@@ -1,0 +1,121 @@
+{% extends "base/base.html" %}
+{% load humanize %}
+
+{% block title %}Resumen Diario de Boletas{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Inicio</a></li>
+<li class="breadcrumb-item active">Resumen Diario de Boletas</li>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h4>Resumen Diario de Boletas</h4>
+    <form class="d-flex gap-2" method="get">
+        <input type="date" name="date" class="form-control form-control-sm" value="{{ filter_date|date:'Y-m-d' }}" style="width:160px;">
+        <button class="btn btn-sm btn-primary" type="submit"><i class="bi bi-search"></i></button>
+    </form>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="stat-card card">
+            <div class="card-body text-center">
+                <div class="text-muted" style="font-size:0.75rem;">Fecha</div>
+                <div class="fw-bold">{{ filter_date|date:"d/m/Y" }}</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card card">
+            <div class="card-body text-center">
+                <div class="text-muted" style="font-size:0.75rem;">Total Boletas</div>
+                <div class="fw-bold fs-5">{{ summary.count|default:0 }}</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card card">
+            <div class="card-body text-center">
+                <div class="text-muted" style="font-size:0.75rem;">Total IGV</div>
+                <div class="fw-bold fs-5">S/ {{ summary.total_igv|default:0|floatformat:2|intcomma }}</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card card">
+            <div class="card-body text-center">
+                <div class="text-muted" style="font-size:0.75rem;">Total General</div>
+                <div class="fw-bold fs-5 text-primary">S/ {{ summary.total_amount|default:0|floatformat:2|intcomma }}</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if by_series %}
+<div class="card mb-4">
+    <div class="card-header">Resumen por Serie</div>
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead>
+                <tr>
+                    <th>Serie</th>
+                    <th>Rango Correlativos</th>
+                    <th>Cantidad</th>
+                    <th class="text-end">Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for s in by_series %}
+                <tr>
+                    <td class="fw-bold">{{ s.series }}</td>
+                    <td>{{ s.first_correlative }} - {{ s.last_correlative }}</td>
+                    <td>{{ s.count }}</td>
+                    <td class="text-end fw-bold">S/ {{ s.total|floatformat:2|intcomma }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+
+<div class="card">
+    <div class="card-header">Detalle de Boletas</div>
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead>
+                <tr>
+                    <th>Comprobante</th>
+                    <th>Cliente</th>
+                    <th class="text-end">Op. Gravada</th>
+                    <th class="text-end">Op. Exonerada</th>
+                    <th class="text-end">IGV</th>
+                    <th class="text-end">Total</th>
+                    <th>Estado</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for b in boletas %}
+                <tr>
+                    <td><a href="{% url 'accounting:invoice_detail' b.pk %}">{{ b.series }}-{{ b.correlative|stringformat:"08d" }}</a></td>
+                    <td>{{ b.customer.name|truncatechars:30 }}</td>
+                    <td class="text-end">{{ b.op_gravada|floatformat:2|intcomma }}</td>
+                    <td class="text-end">{{ b.op_exonerada|floatformat:2|intcomma }}</td>
+                    <td class="text-end">{{ b.igv|floatformat:2|intcomma }}</td>
+                    <td class="text-end fw-bold">S/ {{ b.total|floatformat:2|intcomma }}</td>
+                    <td>
+                        {% if b.status == 'accepted' %}<span class="badge bg-success">Aceptada</span>
+                        {% elif b.status == 'sent' %}<span class="badge bg-info">Enviada</span>
+                        {% else %}<span class="badge bg-warning text-dark">{{ b.get_status_display }}</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="7" class="text-center text-muted py-4">No hay boletas para esta fecha</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

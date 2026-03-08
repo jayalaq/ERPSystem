@@ -47,3 +47,52 @@ def sunat_logs(request):
     """View SUNAT interaction logs."""
     logs = SunatLog.objects.all()[:100]
     return render(request, 'accounting/sunat_logs.html', {'logs': logs})
+
+
+@login_required
+def sire_dashboard(request):
+    """SIRE - Sistema Integrado de Registros Electronicos."""
+    from apps.accounting.models import Invoice
+    from django.db.models import Sum, Count
+    from django.utils import timezone
+
+    today = timezone.now().date()
+    month_start = today.replace(day=1)
+
+    # Monthly invoices summary for SIRE
+    monthly_invoices = Invoice.objects.filter(
+        issue_date__gte=month_start,
+        status__in=['issued', 'accepted', 'sent']
+    )
+
+    # Registro de Ventas
+    ventas = monthly_invoices.filter(doc_type__in=['01', '03']).aggregate(
+        count=Count('id'),
+        total_gravada=Sum('op_gravada'),
+        total_exonerada=Sum('op_exonerada'),
+        total_inafecta=Sum('op_inafecta'),
+        total_igv=Sum('igv'),
+        total=Sum('total'),
+    )
+
+    # Registro de Compras (from AccountPayable)
+    from apps.accounting.models import AccountPayable
+    compras = AccountPayable.objects.filter(
+        invoice_date__gte=month_start
+    ).aggregate(
+        count=Count('id'),
+        total=Sum('total'),
+    )
+
+    # Notas de credito/debito
+    notas = monthly_invoices.filter(doc_type__in=['07', '08']).aggregate(
+        count=Count('id'),
+        total=Sum('total'),
+    )
+
+    return render(request, 'sunat/sire_dashboard.html', {
+        'month_start': month_start,
+        'ventas': ventas,
+        'compras': compras,
+        'notas': notas,
+    })

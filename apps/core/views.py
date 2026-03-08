@@ -130,3 +130,61 @@ def health_check(request):
 
     code = 200 if status['status'] == 'healthy' else 503
     return JsonResponse(status, status=code)
+
+
+@login_required
+def video_tutorials(request):
+    """Video tutorials page."""
+    tutorials = [
+        {'title': 'Como usar el Punto de Venta', 'description': 'Aprende a usar el terminal POS, abrir/cerrar sesiones y procesar ventas.', 'category': 'POS', 'icon': 'bi-cart3'},
+        {'title': 'Gestion de Clientes', 'description': 'Crear, editar y gestionar clientes en el CRM.', 'category': 'CRM', 'icon': 'bi-people'},
+        {'title': 'Emision de Comprobantes', 'description': 'Como emitir facturas, boletas y notas de credito electronicas.', 'category': 'Facturacion', 'icon': 'bi-file-earmark-text'},
+        {'title': 'Control de Inventario', 'description': 'Gestionar productos, stock y movimientos de inventario.', 'category': 'Logistica', 'icon': 'bi-box-seam'},
+        {'title': 'Envio a SUNAT', 'description': 'Proceso de envio de comprobantes electronicos a SUNAT.', 'category': 'SUNAT', 'icon': 'bi-cloud-upload'},
+        {'title': 'Guias de Remision', 'description': 'Crear y gestionar guias de remision para traslado de mercaderia.', 'category': 'Logistica', 'icon': 'bi-send'},
+        {'title': 'Caja Chica', 'description': 'Administrar caja chica y registrar gastos menores.', 'category': 'Finanzas', 'icon': 'bi-cash-stack'},
+        {'title': 'Reportes Financieros', 'description': 'Generar reportes de ventas, compras y contabilidad.', 'category': 'Reportes', 'icon': 'bi-graph-up'},
+    ]
+    return render(request, 'core/video_tutorials.html', {'tutorials': tutorials})
+
+
+@login_required
+def system_customize(request):
+    """System customization - company branding and settings."""
+    from apps.core.models import Company, SystemConfig
+
+    company = Company.objects.first()
+
+    if request.method == 'POST':
+        if company is None:
+            company = Company()
+        company.name = request.POST.get('name', company.name if company else '')
+        company.trade_name = request.POST.get('trade_name', '')
+        company.ruc = request.POST.get('ruc', company.ruc if company else '')
+        company.address = request.POST.get('address', '')
+        company.phone = request.POST.get('phone', '')
+        company.email = request.POST.get('email', '')
+        company.website = request.POST.get('website', '')
+
+        if 'logo' in request.FILES:
+            company.logo = request.FILES['logo']
+
+        company.save()
+
+        # Save system configs
+        for key in ['primary_color', 'accent_color', 'sidebar_color']:
+            value = request.POST.get(key, '')
+            if value:
+                SystemConfig.objects.update_or_create(
+                    key=key, defaults={'value': value, 'description': f'Theme {key}'}
+                )
+
+        from django.contrib import messages as msg
+        msg.success(request, 'Sistema personalizado exitosamente.')
+        return redirect('system_customize')
+
+    configs = {c.key: c.value for c in SystemConfig.objects.filter(key__in=['primary_color', 'accent_color', 'sidebar_color'])}
+
+    return render(request, 'core/system_customize.html', {
+        'company': company, 'configs': configs,
+    })

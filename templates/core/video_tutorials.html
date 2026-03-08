@@ -1,0 +1,47 @@
+{% extends "base/base.html" %}
+
+{% block title %}Video Tutoriales{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Inicio</a></li>
+<li class="breadcrumb-item active">Video Tutoriales</li>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h4>Video Tutoriales</h4>
+</div>
+
+<div class="row g-3">
+    {% for tutorial in tutorials %}
+    <div class="col-md-6 col-lg-4">
+        <div class="card h-100" style="cursor: pointer; transition: transform 0.15s, box-shadow 0.15s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)'" onmouseout="this.style.transform='';this.style.boxShadow=''">
+            <div class="card-body">
+                <div class="d-flex align-items-start gap-3">
+                    <div class="stat-icon bg-primary bg-opacity-10 text-primary" style="min-width:44px;">
+                        <i class="bi {{ tutorial.icon }}"></i>
+                    </div>
+                    <div>
+                        <h6 class="mb-1" style="font-size: 0.9rem;">{{ tutorial.title }}</h6>
+                        <p class="text-muted mb-2" style="font-size: 0.8rem;">{{ tutorial.description }}</p>
+                        <span class="badge bg-light text-dark" style="font-size: 0.7rem;">{{ tutorial.category }}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer bg-transparent border-0 pt-0">
+                <button class="btn btn-sm btn-outline-primary w-100">
+                    <i class="bi bi-play-circle me-1"></i>Ver Tutorial
+                </button>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<div class="card mt-4">
+    <div class="card-body text-center py-4">
+        <i class="bi bi-camera-video text-muted" style="font-size: 2rem;"></i>
+        <p class="text-muted mt-2 mb-0">Los videos tutoriales estaran disponibles proximamente. Estamos preparando contenido de alta calidad para ayudarte a aprovechar al maximo el sistema ERP.</p>
+    </div>
+</div>
+{% endblock %}

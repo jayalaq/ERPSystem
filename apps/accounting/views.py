@@ -1,9 +1,10 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
-from django.db.models import Q, Sum
+from django.db.models import Q, Sum, Count, Min, Max
 from django.utils import timezone
 from decimal import Decimal
+from datetime import timedelta
 
 from .models import Invoice, InvoiceItem, PaymentRecord, AccountPayable, DocumentSeries
 from .forms import InvoiceForm, PaymentRecordForm, DocumentSeriesForm
@@ -167,4 +168,192 @@ def reports_dashboard(request):
         'monthly_total': monthly_total,
         'monthly_igv': monthly_igv,
         'monthly_pos_sales': monthly_pos_sales,
+    })
+
+
+@login_required
+def petty_cash(request):
+    """Caja Chica management."""
+    from .models import PettyCash, PettyCashTransaction
+    from .forms import PettyCashForm, PettyCashTransactionForm
+
+    cashes = PettyCash.objects.select_related('responsible').order_by('-opened_at')
+
+    # Handle new petty cash creation
+    if request.method == 'POST' and 'create_cash' in request.POST:
+        form = PettyCashForm(request.POST)
+        if form.is_valid():
+            cash = form.save(commit=False)
+            cash.current_balance = cash.initial_amount
+            cash.save()
+            messages.success(request, f'Caja Chica "{cash.name}" creada.')
+            return redirect('accounting:petty_cash')
+    else:
+        form = PettyCashForm()
+
+    total_open = cashes.filter(status='open').aggregate(t=Sum('current_balance'))['t'] or Decimal('0')
+    return render(request, 'accounting/petty_cash.html', {
+        'cashes': cashes, 'form': form, 'total_open': total_open,
+    })
+
+
+@login_required
+def petty_cash_detail(request, pk):
+    """View and add transactions to a petty cash."""
+    from .models import PettyCash, PettyCashTransaction
+    from .forms import PettyCashTransactionForm
+
+    cash = get_object_or_404(PettyCash, pk=pk)
+    transactions = cash.transactions.select_related('recorded_by').order_by('-date', '-created_at')
+
+    if request.method == 'POST':
+        if 'close_cash' in request.POST and cash.status == 'open':
+            cash.status = 'closed'
+            cash.closed_at = timezone.now()
+            cash.save()
+            messages.success(request, 'Caja Chica cerrada.')
+            return redirect('accounting:petty_cash')
+
+        form = PettyCashTransactionForm(request.POST, request.FILES)
+        if form.is_valid():
+            txn = form.save(commit=False)
+            txn.petty_cash = cash
+            txn.recorded_by = request.user
+            txn.save()
+            # Update balance
+            if txn.transaction_type == 'income':
+                cash.current_balance += txn.amount
+            else:
+                cash.current_balance -= txn.amount
+            cash.save(update_fields=['current_balance'])
+            messages.success(request, 'Movimiento registrado.')
+            return redirect('accounting:petty_cash_detail', pk=pk)
+    else:
+        form = PettyCashTransactionForm(initial={'date': timezone.now().date()})
+
+    total_income = transactions.filter(transaction_type='income').aggregate(t=Sum('amount'))['t'] or Decimal('0')
+    total_expense = transactions.filter(transaction_type='expense').aggregate(t=Sum('amount'))['t'] or Decimal('0')
+
+    return render(request, 'accounting/petty_cash_detail.html', {
+        'cash': cash, 'transactions': transactions, 'form': form,
+        'total_income': total_income, 'total_expense': total_expense,
+    })
+
+
+@login_required
+def accounts_receivable(request):
+    """Cuentas por Cobrar."""
+    from .models import AccountReceivable
+    from .forms import AccountReceivableForm
+
+    receivables = AccountReceivable.objects.select_related('customer', 'invoice').order_by('due_date')
+
+    status_filter = request.GET.get('status', '')
+    if status_filter:
+        receivables = receivables.filter(status=status_filter)
+
+    # Auto-update overdue
+    today = timezone.now().date()
+    AccountReceivable.objects.filter(
+        status='pending', due_date__lt=today
+    ).update(status='overdue')
+
+    if request.method == 'POST':
+        form = AccountReceivableForm(request.POST)
+        if form.is_valid():
+            ar = form.save(commit=False)
+            ar.created_by = request.user
+            ar.save()
+            messages.success(request, 'Cuenta por cobrar registrada.')
+            return redirect('accounting:accounts_receivable')
+    else:
+        form = AccountReceivableForm(initial={
+            'issue_date': timezone.now().date(),
+            'due_date': timezone.now().date() + timedelta(days=30),
+        })
+
+    total_pending = receivables.filter(status__in=['pending', 'partial', 'overdue']).aggregate(
+        t=Sum('total'))['t'] or Decimal('0')
+    total_collected = receivables.aggregate(t=Sum('collected_amount'))['t'] or Decimal('0')
+    total_overdue = receivables.filter(status='overdue').aggregate(t=Sum('total'))['t'] or Decimal('0')
+
+    return render(request, 'accounting/accounts_receivable.html', {
+        'receivables': receivables, 'form': form,
+        'total_pending': total_pending, 'total_collected': total_collected,
+        'total_overdue': total_overdue,
+    })
+
+
+@login_required
+def accounts_receivable_collect(request, pk):
+    """Register a collection for an account receivable."""
+    from .models import AccountReceivable
+
+    ar = get_object_or_404(AccountReceivable, pk=pk)
+    if request.method == 'POST':
+        amount = Decimal(request.POST.get('amount', '0'))
+        if amount > 0:
+            ar.collected_amount += amount
+            if ar.collected_amount >= ar.total:
+                ar.status = 'collected'
+            else:
+                ar.status = 'partial'
+            ar.save()
+            messages.success(request, f'Cobro de S/ {amount} registrado.')
+    return redirect('accounting:accounts_receivable')
+
+
+@login_required
+def daily_receipt_summary(request):
+    """Resumen Diario de Boletas for SUNAT."""
+    from .models import Invoice
+
+    date_filter = request.GET.get('date', '')
+    if date_filter:
+        from datetime import datetime
+        try:
+            filter_date = datetime.strptime(date_filter, '%Y-%m-%d').date()
+        except ValueError:
+            filter_date = timezone.now().date()
+    else:
+        filter_date = timezone.now().date()
+
+    # Get all boletas for the date
+    boletas = Invoice.objects.filter(
+        doc_type='03',  # Boleta
+        issue_date=filter_date,
+        status__in=['issued', 'accepted', 'sent']
+    ).select_related('customer').order_by('series', 'correlative')
+
+    total = boletas.aggregate(
+        total_gravada=Sum('op_gravada'),
+        total_exonerada=Sum('op_exonerada'),
+        total_inafecta=Sum('op_inafecta'),
+        total_igv=Sum('igv'),
+        total_amount=Sum('total'),
+        count=Count('id'),
+    )
+
+    # Group by series
+    by_series = boletas.values('series').annotate(
+        count=Count('id'),
+        first_correlative=Min('correlative'),
+        last_correlative=Max('correlative'),
+        total=Sum('total'),
+    ).order_by('series')
+
+    return render(request, 'accounting/daily_receipt_summary.html', {
+        'boletas': boletas, 'filter_date': filter_date,
+        'summary': total, 'by_series': by_series,
+    })
+
+
+@login_required
+def taxpayer_list(request):
+    """Contribuyentes - List of companies/taxpayers configured."""
+    from apps.core.models import Company
+
+    companies = Company.objects.all()
+    return render(request, 'accounting/taxpayer_list.html', {
+        'companies': companies,
     })

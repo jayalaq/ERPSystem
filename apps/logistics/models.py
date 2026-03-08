@@ -231,3 +231,89 @@ class PurchaseOrderItem(models.Model):
 
     def __str__(self):
         return f"{self.product.name} x {self.quantity}"
+
+
+class DispatchGuide(models.Model):
+    """Guia de Remision - Dispatch/Shipping guide for SUNAT."""
+
+    class GuideType(models.TextChoices):
+        REMITENTE = 'remitente', 'Remitente'
+        TRANSPORTISTA = 'transportista', 'Transportista'
+
+    class TransferReason(models.TextChoices):
+        SALE = 'sale', 'Venta'
+        PURCHASE = 'purchase', 'Compra'
+        TRANSFER = 'transfer', 'Traslado entre establecimientos'
+        CONSIGNMENT = 'consignment', 'Consignacion'
+        RETURN = 'return', 'Devolucion'
+        OTHER = 'other', 'Otros'
+
+    class Status(models.TextChoices):
+        DRAFT = 'draft', 'Borrador'
+        ISSUED = 'issued', 'Emitida'
+        IN_TRANSIT = 'in_transit', 'En Transito'
+        DELIVERED = 'delivered', 'Entregada'
+        CANCELLED = 'cancelled', 'Anulada'
+
+    guide_type = models.CharField(max_length=20, choices=GuideType.choices, default=GuideType.REMITENTE, verbose_name='Tipo')
+    series = models.CharField(max_length=4, verbose_name='Serie')
+    correlative = models.PositiveIntegerField(verbose_name='Correlativo')
+    issue_date = models.DateField(verbose_name='Fecha de Emision')
+    transfer_start_date = models.DateField(verbose_name='Fecha Inicio Traslado')
+
+    transfer_reason = models.CharField(max_length=20, choices=TransferReason.choices, verbose_name='Motivo de Traslado')
+    description = models.CharField(max_length=500, blank=True, verbose_name='Descripcion')
+
+    origin_address = models.TextField(verbose_name='Direccion de Origen')
+    origin_ubigeo = models.CharField(max_length=6, blank=True, verbose_name='Ubigeo Origen')
+    destination_address = models.TextField(verbose_name='Direccion de Destino')
+    destination_ubigeo = models.CharField(max_length=6, blank=True, verbose_name='Ubigeo Destino')
+
+    recipient = models.ForeignKey('crm.Customer', on_delete=models.PROTECT, null=True, blank=True, related_name='dispatch_guides', verbose_name='Destinatario')
+
+    carrier_name = models.CharField(max_length=300, blank=True, verbose_name='Transportista')
+    carrier_ruc = models.CharField(max_length=11, blank=True, verbose_name='RUC Transportista')
+    driver_name = models.CharField(max_length=200, blank=True, verbose_name='Conductor')
+    driver_license = models.CharField(max_length=20, blank=True, verbose_name='Licencia')
+    vehicle_plate = models.CharField(max_length=10, blank=True, verbose_name='Placa')
+
+    gross_weight = models.DecimalField(max_digits=12, decimal_places=3, default=0, verbose_name='Peso Bruto (kg)')
+    packages = models.PositiveIntegerField(default=1, verbose_name='Bultos')
+
+    related_invoice = models.ForeignKey('accounting.Invoice', on_delete=models.SET_NULL, null=True, blank=True, related_name='dispatch_guides', verbose_name='Comprobante Relacionado')
+
+    status = models.CharField(max_length=20, choices=Status.choices, default=Status.DRAFT)
+    notes = models.TextField(blank=True, verbose_name='Observaciones')
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='dispatch_guides')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = 'Guia de Remision'
+        verbose_name_plural = 'Guias de Remision'
+        ordering = ['-created_at']
+        unique_together = ['series', 'correlative']
+
+    def __str__(self):
+        return f"T{self.series}-{self.correlative:08d}"
+
+    @property
+    def full_number(self):
+        return f"T{self.series}-{self.correlative:08d}"
+
+
+class DispatchGuideItem(models.Model):
+    """Items in a dispatch guide."""
+    guide = models.ForeignKey(DispatchGuide, on_delete=models.CASCADE, related_name='items')
+    product = models.ForeignKey(Product, on_delete=models.PROTECT, related_name='dispatch_items')
+    description = models.CharField(max_length=500, verbose_name='Descripcion')
+    quantity = models.DecimalField(max_digits=12, decimal_places=3, verbose_name='Cantidad')
+    unit = models.ForeignKey(UnitOfMeasure, on_delete=models.PROTECT)
+    weight = models.DecimalField(max_digits=12, decimal_places=3, default=0, verbose_name='Peso (kg)')
+
+    class Meta:
+        verbose_name = 'Item Guia de Remision'
+        verbose_name_plural = 'Items Guia de Remision'
+
+    def __str__(self):
+        return f"{self.description} x {self.quantity}"

@@ -1,0 +1,121 @@
+{% extends "base/base.html" %}
+
+{% block title %}Personalizar Sistema{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Inicio</a></li>
+<li class="breadcrumb-item active">Personalizar Sistema</li>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h4>Personalizar Sistema</h4>
+</div>
+
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+
+    <div class="row g-3">
+        <div class="col-md-8">
+            <div class="card mb-3">
+                <div class="card-header"><i class="bi bi-building me-1"></i>Datos de la Empresa</div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-8">
+                            <label class="form-label">Razon Social</label>
+                            <input type="text" name="name" class="form-control" value="{{ company.name|default:'' }}" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">RUC</label>
+                            <input type="text" name="ruc" class="form-control" value="{{ company.ruc|default:'' }}" maxlength="11" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Nombre Comercial</label>
+                            <input type="text" name="trade_name" class="form-control" value="{{ company.trade_name|default:'' }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Telefono</label>
+                            <input type="text" name="phone" class="form-control" value="{{ company.phone|default:'' }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Email</label>
+                            <input type="email" name="email" class="form-control" value="{{ company.email|default:'' }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Sitio Web</label>
+                            <input type="url" name="website" class="form-control" value="{{ company.website|default:'' }}">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Direccion Fiscal</label>
+                            <textarea name="address" class="form-control" rows="2">{{ company.address|default:'' }}</textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-3">
+                <div class="card-header"><i class="bi bi-palette me-1"></i>Tema y Colores</div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label">Color Principal</label>
+                            <div class="d-flex gap-2 align-items-center">
+                                <input type="color" name="primary_color" class="form-control form-control-color" value="{{ configs.primary_color|default:'#714B67' }}">
+                                <input type="text" class="form-control form-control-sm" value="{{ configs.primary_color|default:'#714B67' }}" readonly style="width:100px;">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Color Acento</label>
+                            <div class="d-flex gap-2 align-items-center">
+                                <input type="color" name="accent_color" class="form-control form-control-color" value="{{ configs.accent_color|default:'#00A09D' }}">
+                                <input type="text" class="form-control form-control-sm" value="{{ configs.accent_color|default:'#00A09D' }}" readonly style="width:100px;">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Color Sidebar</label>
+                            <div class="d-flex gap-2 align-items-center">
+                                <input type="color" name="sidebar_color" class="form-control form-control-color" value="{{ configs.sidebar_color|default:'#212529' }}">
+                                <input type="text" class="form-control form-control-sm" value="{{ configs.sidebar_color|default:'#212529' }}" readonly style="width:100px;">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card mb-3">
+                <div class="card-header">Logo de la Empresa</div>
+                <div class="card-body text-center">
+                    {% if company and company.logo %}
+                    <img src="{{ company.logo.url }}" alt="Logo" class="img-fluid mb-3" style="max-height: 120px; border-radius: 8px;">
+                    {% else %}
+                    <div class="py-4 mb-3 bg-light rounded d-flex align-items-center justify-content-center" style="min-height: 120px;">
+                        <i class="bi bi-image text-muted" style="font-size: 3rem;"></i>
+                    </div>
+                    {% endif %}
+                    <input type="file" name="logo" class="form-control form-control-sm" accept="image/*">
+                    <small class="text-muted d-block mt-1">Formatos: JPG, PNG, WebP. Max 5MB</small>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">Vista Previa</div>
+                <div class="card-body">
+                    <div class="p-3 rounded" style="background: {{ configs.sidebar_color|default:'#212529' }}; color: white;">
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <div style="width:24px; height:24px; background: {{ configs.primary_color|default:'#714B67' }}; border-radius: 4px;"></div>
+                            <span style="font-size: 0.8rem; font-weight: 600;">{{ company.trade_name|default:company.name|default:'Mi Empresa' }}</span>
+                        </div>
+                        <div style="border-left: 3px solid {{ configs.accent_color|default:'#00A09D' }}; padding-left: 8px; font-size: 0.75rem; opacity: 0.8;">Menu activo</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-3">
+        <button type="submit" class="btn btn-primary"><i class="bi bi-save me-1"></i>Guardar Cambios</button>
+    </div>
+</form>
+{% endblock %}

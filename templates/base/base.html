@@ -12,165 +12,388 @@
     <style>
         :root {
             --sidebar-width: 260px;
-            --primary-color: #7B2FBE;
-            --primary-dark: #6A22A8;
-            --primary-light: #9B4FDE;
-            --accent-color: #2E9BF5;
-            --sidebar-bg: #1a0a2e;
-            --sidebar-hover: #2d1550;
-            --sidebar-text: #b8a5d0;
-            --sidebar-active: #9B4FDE;
+            --sidebar-collapsed: 60px;
+            --topbar-height: 46px;
+            --primary-color: #714B67;
+            --primary-dark: #5B3A52;
+            --primary-light: #8B6B7F;
+            --accent-color: #00A09D;
+            --accent-light: #E8F8F5;
+            --sidebar-bg: #212529;
+            --sidebar-hover: #2c3136;
+            --sidebar-text: #9aa0a6;
+            --sidebar-active-bg: #343a40;
+            --sidebar-active-text: #ffffff;
+            --topbar-bg: #ffffff;
+            --content-bg: #f8f9fa;
+            --card-shadow: 0 1px 2px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.1);
+            --border-color: #dee2e6;
         }
-        * { font-family: 'Inter', sans-serif; }
-        body { background-color: #f1f5f9; min-height: 100vh; }
+        * { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }
+        body { background-color: var(--content-bg); min-height: 100vh; margin: 0; font-size: 0.875rem; }
 
-        /* Sidebar */
+        /* ========== SIDEBAR ========== */
         .sidebar {
             position: fixed; top: 0; left: 0; bottom: 0;
             width: var(--sidebar-width); background: var(--sidebar-bg);
-            z-index: 1000; overflow-y: auto; transition: transform 0.3s;
+            z-index: 1040; overflow-y: auto; overflow-x: hidden;
+            transition: all 0.2s ease; border-right: 1px solid #1a1d21;
+            scrollbar-width: thin; scrollbar-color: #495057 transparent;
         }
-        .sidebar-brand {
-            padding: 1.25rem 1.5rem; border-bottom: 1px solid #2d1550;
-            display: flex; align-items: center; gap: 0.75rem;
-        }
-        .sidebar-brand h5 { color: #fff; margin: 0; font-weight: 700; font-size: 1.1rem; }
-        .sidebar-brand .brand-sub { color: #9E9E9E; font-size: 0.65rem; font-weight: 600; letter-spacing: 0.15em; text-transform: uppercase; margin: 0; }
-        .sidebar-brand .brand-icon {
-            width: 36px; height: 36px; background: linear-gradient(135deg, var(--accent-color), var(--primary-color));
-            border-radius: 8px; display: flex; align-items: center; justify-content: center;
-            color: white; font-size: 1.1rem;
-        }
-        .sidebar-nav { padding: 0.75rem 0; }
-        .nav-section { padding: 0.75rem 1.5rem 0.25rem; color: #6b5b7b; font-size: 0.7rem;
-            text-transform: uppercase; letter-spacing: 0.1em; font-weight: 600; }
-        .sidebar-nav .nav-link {
-            display: flex; align-items: center; gap: 0.75rem;
-            padding: 0.6rem 1.5rem; color: var(--sidebar-text);
-            font-size: 0.875rem; transition: all 0.15s; text-decoration: none;
-        }
-        .sidebar-nav .nav-link:hover { background: var(--sidebar-hover); color: #e2e8f0; }
-        .sidebar-nav .nav-link.active { background: var(--sidebar-hover); color: var(--sidebar-active); border-right: 3px solid var(--sidebar-active); }
-        .sidebar-nav .nav-link i { font-size: 1.1rem; width: 1.5rem; text-align: center; }
+        .sidebar::-webkit-scrollbar { width: 4px; }
+        .sidebar::-webkit-scrollbar-thumb { background: #495057; border-radius: 2px; }
 
-        /* Main Content */
-        .main-content { margin-left: var(--sidebar-width); min-height: 100vh; }
-        .topbar {
-            background: #fff; border-bottom: 1px solid #e2e8f0;
-            padding: 0.75rem 1.5rem; display: flex; align-items: center; justify-content: space-between;
-            position: sticky; top: 0; z-index: 100;
+        .sidebar-brand {
+            padding: 0.65rem 1rem; border-bottom: 1px solid #343a40;
+            display: flex; align-items: center; gap: 0.6rem;
+            background: #1a1d21; position: sticky; top: 0; z-index: 10;
         }
-        .content-area { padding: 1.5rem; }
+        .sidebar-brand .brand-icon {
+            width: 32px; height: 32px; min-width: 32px;
+            background: linear-gradient(135deg, var(--accent-color), var(--primary-color));
+            border-radius: 8px; display: flex; align-items: center; justify-content: center;
+            color: white; font-size: 0.95rem; font-weight: 700;
+        }
+        .sidebar-brand .brand-text h6 { color: #fff; margin: 0; font-weight: 600; font-size: 0.85rem; line-height: 1.2; }
+        .sidebar-brand .brand-text small { color: #6c757d; font-size: 0.6rem; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; }
+
+        .sidebar-nav { padding: 0.5rem 0; }
+
+        .nav-section {
+            padding: 1rem 1rem 0.35rem; color: #6c757d; font-size: 0.65rem;
+            text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600;
+        }
+        .nav-section:first-child { padding-top: 0.5rem; }
+
+        .sidebar-nav .nav-link {
+            display: flex; align-items: center; gap: 0.65rem;
+            padding: 0.45rem 1rem; color: var(--sidebar-text);
+            font-size: 0.8rem; transition: all 0.15s; text-decoration: none;
+            border-radius: 0; margin: 0; position: relative;
+        }
+        .sidebar-nav .nav-link:hover {
+            background: var(--sidebar-hover); color: #e9ecef;
+        }
+        .sidebar-nav .nav-link.active {
+            background: var(--sidebar-active-bg); color: var(--sidebar-active-text);
+            font-weight: 500;
+        }
+        .sidebar-nav .nav-link.active::before {
+            content: ''; position: absolute; left: 0; top: 4px; bottom: 4px;
+            width: 3px; background: var(--accent-color); border-radius: 0 2px 2px 0;
+        }
+        .sidebar-nav .nav-link i { font-size: 1rem; width: 1.25rem; text-align: center; opacity: 0.8; }
+        .sidebar-nav .nav-link.active i { opacity: 1; }
+        .sidebar-nav .nav-link .badge {
+            margin-left: auto; font-size: 0.6rem; padding: 0.2em 0.5em;
+            background: var(--accent-color); border-radius: 10px;
+        }
+
+        /* Submenu / Collapsible */
+        .nav-group-toggle { cursor: pointer; }
+        .nav-group-toggle::after {
+            content: '\F282'; font-family: 'bootstrap-icons';
+            margin-left: auto; font-size: 0.7rem; transition: transform 0.2s; opacity: 0.5;
+        }
+        .nav-group-toggle[aria-expanded="true"]::after { transform: rotate(90deg); }
+        .nav-submenu .nav-link { padding-left: 2.5rem; font-size: 0.78rem; }
+
+        /* ========== TOPBAR ========== */
+        .main-content { margin-left: var(--sidebar-width); min-height: 100vh; transition: margin 0.2s; }
+        .topbar {
+            background: var(--topbar-bg); border-bottom: 1px solid var(--border-color);
+            padding: 0 1rem; display: flex; align-items: center; justify-content: space-between;
+            position: sticky; top: 0; z-index: 1030; height: var(--topbar-height);
+        }
+        .topbar-left { display: flex; align-items: center; gap: 0.75rem; }
+        .topbar-right { display: flex; align-items: center; gap: 0.5rem; }
+
+        .breadcrumb { margin: 0; font-size: 0.8rem; }
+        .breadcrumb-item a { color: var(--primary-color); text-decoration: none; }
+        .breadcrumb-item.active { color: #495057; }
+
+        .topbar .btn-icon {
+            width: 32px; height: 32px; border-radius: 6px; border: none;
+            background: transparent; color: #6c757d; display: flex;
+            align-items: center; justify-content: center; cursor: pointer;
+            transition: all 0.15s;
+        }
+        .topbar .btn-icon:hover { background: #f0f0f0; color: #212529; }
+
+        .user-menu {
+            display: flex; align-items: center; gap: 0.5rem; cursor: pointer;
+            padding: 0.3rem 0.6rem; border-radius: 6px; transition: background 0.15s;
+        }
+        .user-menu:hover { background: #f0f0f0; }
+        .user-avatar {
+            width: 28px; height: 28px; border-radius: 50%;
+            background: var(--primary-color); color: white;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.7rem; font-weight: 600;
+        }
+        .user-name { font-size: 0.8rem; color: #495057; font-weight: 500; }
+
+        /* ========== CONTENT ========== */
+        .content-area { padding: 1.25rem; }
 
         /* Cards */
-        .stat-card { border: none; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
-        .stat-card .card-body { padding: 1.25rem; }
-        .stat-icon { width: 48px; height: 48px; border-radius: 10px; display: flex;
-            align-items: center; justify-content: center; font-size: 1.3rem; }
+        .stat-card {
+            border: none; border-radius: 8px; box-shadow: var(--card-shadow);
+            background: #fff; transition: box-shadow 0.2s;
+        }
+        .stat-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.12); }
+        .stat-card .card-body { padding: 1.15rem; }
+        .stat-icon {
+            width: 44px; height: 44px; border-radius: 8px; display: flex;
+            align-items: center; justify-content: center; font-size: 1.2rem;
+        }
 
-        .table th { font-weight: 600; font-size: 0.8rem; text-transform: uppercase;
-            letter-spacing: 0.05em; color: #64748b; border-bottom: 2px solid #e2e8f0; }
-        .table td { vertical-align: middle; font-size: 0.875rem; }
+        .card { border: 1px solid var(--border-color); border-radius: 8px; box-shadow: none; }
+        .card-header {
+            background: #fff; border-bottom: 1px solid var(--border-color);
+            padding: 0.75rem 1rem; font-weight: 600; font-size: 0.85rem;
+        }
 
-        /* Bootstrap primary override */
+        /* Tables */
+        .table { font-size: 0.825rem; }
+        .table th {
+            font-weight: 600; font-size: 0.75rem; text-transform: uppercase;
+            letter-spacing: 0.04em; color: #6c757d; border-bottom: 2px solid var(--border-color);
+            padding: 0.6rem 0.75rem; white-space: nowrap;
+        }
+        .table td { vertical-align: middle; padding: 0.55rem 0.75rem; color: #495057; }
+        .table-hover tbody tr:hover { background-color: #f8f9fa; }
+
+        /* Buttons */
+        .btn { font-size: 0.8rem; border-radius: 6px; font-weight: 500; }
+        .btn-sm { font-size: 0.75rem; padding: 0.3rem 0.6rem; }
         .btn-primary { background-color: var(--primary-color); border-color: var(--primary-color); }
-        .btn-primary:hover, .btn-primary:active, .btn-primary:focus { background-color: var(--primary-dark); border-color: var(--primary-dark); }
+        .btn-primary:hover, .btn-primary:active, .btn-primary:focus {
+            background-color: var(--primary-dark); border-color: var(--primary-dark);
+        }
         .btn-outline-primary { color: var(--primary-color); border-color: var(--primary-color); }
         .btn-outline-primary:hover { background-color: var(--primary-color); border-color: var(--primary-color); color: white; }
+        .btn-success { background-color: var(--accent-color); border-color: var(--accent-color); }
+        .btn-success:hover { background-color: #008C89; border-color: #008C89; }
+
         .text-primary { color: var(--primary-color) !important; }
         .bg-primary { background-color: var(--primary-color) !important; }
         .badge.bg-primary { background-color: var(--primary-color) !important; }
         a { color: var(--primary-color); }
         a:hover { color: var(--primary-dark); }
 
-        .badge-stage { font-size: 0.75rem; padding: 0.35em 0.75em; border-radius: 6px; }
-        .page-header { margin-bottom: 1.5rem; }
-        .page-header h4 { font-weight: 700; color: #0f172a; margin: 0; }
+        .badge { font-weight: 500; font-size: 0.7rem; padding: 0.3em 0.6em; border-radius: 4px; }
+        .badge-stage { font-size: 0.7rem; padding: 0.3em 0.65em; border-radius: 4px; }
 
-        @media (max-width: 768px) {
+        .page-header { margin-bottom: 1.25rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.75rem; }
+        .page-header h4 { font-weight: 700; color: #212529; margin: 0; font-size: 1.15rem; }
+
+        /* Form styling */
+        .form-control, .form-select { font-size: 0.825rem; border-radius: 6px; border-color: #ced4da; }
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary-light); box-shadow: 0 0 0 0.2rem rgba(113, 75, 103, 0.15);
+        }
+        .form-label { font-weight: 500; font-size: 0.8rem; color: #495057; margin-bottom: 0.3rem; }
+
+        /* Alert */
+        .alert { font-size: 0.825rem; border-radius: 6px; }
+
+        /* Search bar */
+        .search-box { position: relative; }
+        .search-box input {
+            padding-left: 2rem; background: #f1f3f5; border: 1px solid transparent;
+            border-radius: 6px; font-size: 0.8rem; height: 32px;
+        }
+        .search-box input:focus { background: #fff; border-color: var(--primary-light); }
+        .search-box .search-icon {
+            position: absolute; left: 0.6rem; top: 50%; transform: translateY(-50%);
+            color: #adb5bd; font-size: 0.8rem;
+        }
+
+        /* ========== RESPONSIVE ========== */
+        @media (max-width: 991px) {
             .sidebar { transform: translateX(-100%); }
-            .sidebar.show { transform: translateX(0); }
+            .sidebar.show { transform: translateX(0); box-shadow: 4px 0 15px rgba(0,0,0,0.3); }
             .main-content { margin-left: 0; }
+            .sidebar-overlay {
+                display: none; position: fixed; inset: 0;
+                background: rgba(0,0,0,0.4); z-index: 1035;
+            }
+            .sidebar-overlay.show { display: block; }
         }
     </style>
     {% block extra_css %}{% endblock %}
 </head>
 <body>
+    <!-- Sidebar Overlay (mobile) -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
     <!-- Sidebar -->
     <nav class="sidebar" id="sidebar">
         <div class="sidebar-brand">
-            <div class="brand-icon"><i class="bi bi-layers"></i></div>
-            <div>
-                <h5>Tailoring</h5>
-                <p class="brand-sub">Consult</p>
+            <div class="brand-icon">TC</div>
+            <div class="brand-text">
+                <h6>Tailoring Consult</h6>
+                <small>ERP System</small>
             </div>
         </div>
         <div class="sidebar-nav">
+            <!-- Inicio -->
             <div class="nav-section">Principal</div>
             <a href="{% url 'dashboard' %}" class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
-                <i class="bi bi-grid-1x2-fill"></i> Dashboard
+                <i class="bi bi-house-door"></i> Inicio
             </a>
 
-            <div class="nav-section">Punto de Venta</div>
-            <a href="{% url 'pos:terminal' %}" class="nav-link"><i class="bi bi-cart3"></i> Terminal POS</a>
-            <a href="{% url 'pos:sales_history' %}" class="nav-link"><i class="bi bi-receipt"></i> Historial Ventas</a>
+            <!-- Contribuyentes -->
+            <div class="nav-section">Empresa</div>
+            <a href="#contribuyentesMenu" class="nav-link nav-group-toggle" data-bs-toggle="collapse" aria-expanded="false">
+                <i class="bi bi-building-gear"></i> Contribuyentes
+            </a>
+            <div class="collapse nav-submenu" id="contribuyentesMenu">
+                <a href="{% url 'accounting:taxpayer_list' %}" class="nav-link"><i class="bi bi-list-ul"></i> Listar Contribuyentes</a>
+                <a href="{% url 'system_customize' %}" class="nav-link"><i class="bi bi-palette"></i> Personalizar Sistema</a>
+            </div>
 
+            <a href="{% url 'video_tutorials' %}" class="nav-link {% if request.resolver_match.url_name == 'video_tutorials' %}active{% endif %}">
+                <i class="bi bi-play-circle"></i> Video Tutoriales
+            </a>
+
+            <a href="{% url 'admin:index' %}" class="nav-link">
+                <i class="bi bi-shield-lock"></i> Administraci&oacute;n
+            </a>
+
+            <!-- Ventas & Facturaci&oacute;n -->
+            <div class="nav-section">Ventas &amp; Facturaci&oacute;n</div>
+            <a href="{% url 'accounting:invoice_list' %}" class="nav-link {% if request.resolver_match.url_name == 'invoice_list' %}active{% endif %}">
+                <i class="bi bi-file-earmark-text"></i> Comprobantes de Pago
+            </a>
+            <a href="{% url 'pos:terminal' %}" class="nav-link {% if request.resolver_match.url_name == 'pos_terminal' %}active{% endif %}">
+                <i class="bi bi-cart3"></i> Punto de Venta
+            </a>
+            <a href="{% url 'pos:sales_history' %}" class="nav-link {% if request.resolver_match.url_name == 'sales_history' %}active{% endif %}">
+                <i class="bi bi-clock-history"></i> Historial Ventas
+            </a>
+
+            <!-- Finanzas -->
+            <div class="nav-section">Finanzas</div>
+            <a href="{% url 'accounting:petty_cash' %}" class="nav-link {% if request.resolver_match.url_name == 'petty_cash' %}active{% endif %}">
+                <i class="bi bi-cash-stack"></i> Caja Chica
+            </a>
+            <a href="{% url 'accounting:accounts_receivable' %}" class="nav-link {% if request.resolver_match.url_name == 'accounts_receivable' %}active{% endif %}">
+                <i class="bi bi-wallet2"></i> Cuentas por Cobrar
+            </a>
+            <a href="{% url 'accounting:accounts_payable' %}" class="nav-link {% if request.resolver_match.url_name == 'accounts_payable' %}active{% endif %}">
+                <i class="bi bi-cash-coin"></i> Cuentas por Pagar
+            </a>
+            <a href="{% url 'accounting:reports' %}" class="nav-link {% if request.resolver_match.url_name == 'reports_dashboard' %}active{% endif %}">
+                <i class="bi bi-bar-chart-line"></i> Contabilidad
+            </a>
+
+            <!-- Compras & Proveedores -->
+            <div class="nav-section">Compras</div>
+            <a href="{% url 'logistics:purchase_order_list' %}" class="nav-link {% if request.resolver_match.url_name == 'purchase_order_list' %}active{% endif %}">
+                <i class="bi bi-bag-check"></i> Gesti&oacute;n de Compras
+            </a>
+            <a href="{% url 'crm:supplier_list' %}" class="nav-link {% if request.resolver_match.url_name == 'supplier_list' %}active{% endif %}">
+                <i class="bi bi-truck"></i> Gesti&oacute;n de Proveedores
+            </a>
+
+            <!-- Log&iacute;stica -->
+            <div class="nav-section">Log&iacute;stica</div>
+            <a href="{% url 'logistics:dispatch_guide_list' %}" class="nav-link {% if request.resolver_match.url_name == 'dispatch_guide_list' %}active{% endif %}">
+                <i class="bi bi-send"></i> Gu&iacute;as de Remisi&oacute;n
+            </a>
+            <a href="{% url 'logistics:product_list' %}" class="nav-link {% if request.resolver_match.url_name == 'product_list' %}active{% endif %}">
+                <i class="bi bi-box-seam"></i> Inventario
+            </a>
+            <a href="{% url 'logistics:warehouse_list' %}" class="nav-link {% if request.resolver_match.url_name == 'warehouse_list' %}active{% endif %}">
+                <i class="bi bi-building"></i> Almacenes
+            </a>
+
+            <!-- CRM -->
             <div class="nav-section">CRM</div>
-            <a href="{% url 'crm:customer_list' %}" class="nav-link"><i class="bi bi-people"></i> Clientes</a>
-            <a href="{% url 'crm:supplier_list' %}" class="nav-link"><i class="bi bi-truck"></i> Proveedores</a>
-            <a href="{% url 'crm:opportunity_list' %}" class="nav-link"><i class="bi bi-funnel"></i> Oportunidades</a>
+            <a href="{% url 'crm:customer_list' %}" class="nav-link {% if request.resolver_match.url_name == 'customer_list' %}active{% endif %}">
+                <i class="bi bi-people"></i> Clientes
+            </a>
+            <a href="{% url 'crm:opportunity_list' %}" class="nav-link {% if request.resolver_match.url_name == 'opportunity_list' %}active{% endif %}">
+                <i class="bi bi-funnel"></i> Oportunidades
+            </a>
 
-            <div class="nav-section">Logística</div>
-            <a href="{% url 'logistics:product_list' %}" class="nav-link"><i class="bi bi-box"></i> Productos</a>
-            <a href="{% url 'logistics:inventory' %}" class="nav-link"><i class="bi bi-clipboard-data"></i> Inventario</a>
-            <a href="{% url 'logistics:warehouse_list' %}" class="nav-link"><i class="bi bi-building"></i> Almacenes</a>
-            <a href="{% url 'logistics:movement_list' %}" class="nav-link"><i class="bi bi-arrow-left-right"></i> Movimientos</a>
-            <a href="{% url 'logistics:purchase_order_list' %}" class="nav-link"><i class="bi bi-bag"></i> Órdenes de Compra</a>
+            <!-- Reportes -->
+            <div class="nav-section">Reportes &amp; SUNAT</div>
+            <a href="{% url 'accounting:reports' %}" class="nav-link">
+                <i class="bi bi-graph-up"></i> Reportes
+            </a>
+            <a href="{% url 'accounting:daily_receipt_summary' %}" class="nav-link {% if request.resolver_match.url_name == 'daily_receipt_summary' %}active{% endif %}">
+                <i class="bi bi-journal-text"></i> Resumen Diario Boletas
+            </a>
+            <a href="{% url 'sunat:sire_dashboard' %}" class="nav-link {% if request.resolver_match.url_name == 'sire_dashboard' %}active{% endif %}">
+                <i class="bi bi-bank"></i> SIRE
+            </a>
+            <a href="{% url 'sunat:logs' %}" class="nav-link {% if request.resolver_match.url_name == 'sunat_logs' %}active{% endif %}">
+                <i class="bi bi-cloud-upload"></i> Logs SUNAT
+            </a>
 
-            <div class="nav-section">Facturación</div>
-            <a href="{% url 'accounting:invoice_list' %}" class="nav-link"><i class="bi bi-file-earmark-text"></i> Comprobantes</a>
-            <a href="{% url 'accounting:invoice_create' %}" class="nav-link"><i class="bi bi-plus-circle"></i> Nuevo Comprobante</a>
-            <a href="{% url 'accounting:accounts_payable' %}" class="nav-link"><i class="bi bi-cash-coin"></i> Cuentas por Pagar</a>
-            <a href="{% url 'accounting:document_series' %}" class="nav-link"><i class="bi bi-hash"></i> Series</a>
-            <a href="{% url 'accounting:reports' %}" class="nav-link"><i class="bi bi-graph-up"></i> Reportes</a>
-
-            <div class="nav-section">SUNAT</div>
-            <a href="{% url 'sunat:logs' %}" class="nav-link"><i class="bi bi-cloud-upload"></i> Logs SUNAT</a>
-
+            <!-- Sistema -->
             <div class="nav-section">Sistema</div>
-            <a href="{% url 'admin:index' %}" class="nav-link"><i class="bi bi-gear"></i> Administración</a>
-            <a href="{% url 'logout' %}" class="nav-link"><i class="bi bi-box-arrow-left"></i> Cerrar Sesión</a>
+            <a href="{% url 'accounting:document_series' %}" class="nav-link">
+                <i class="bi bi-hash"></i> Series de Documentos
+            </a>
+            <a href="{% url 'logout' %}" class="nav-link">
+                <i class="bi bi-box-arrow-left"></i> Cerrar Sesi&oacute;n
+            </a>
         </div>
     </nav>
 
     <!-- Main Content -->
     <div class="main-content">
         <div class="topbar">
-            <div class="d-flex align-items-center gap-3">
-                <button class="btn btn-sm btn-outline-secondary d-md-none" onclick="document.getElementById('sidebar').classList.toggle('show')">
-                    <i class="bi bi-list"></i>
+            <div class="topbar-left">
+                <button class="btn-icon d-lg-none" onclick="toggleSidebar()" aria-label="Menu">
+                    <i class="bi bi-list" style="font-size: 1.2rem;"></i>
                 </button>
                 <nav aria-label="breadcrumb">
-                    <ol class="breadcrumb mb-0" style="font-size: 0.875rem;">
+                    <ol class="breadcrumb">
                         {% block breadcrumb %}
-                        <li class="breadcrumb-item active">Dashboard</li>
+                        <li class="breadcrumb-item active">Inicio</li>
                         {% endblock %}
                     </ol>
                 </nav>
             </div>
-            <div class="d-flex align-items-center gap-3">
-                <span class="text-muted" style="font-size: 0.85rem;">
-                    <i class="bi bi-person-circle"></i> {{ request.user.get_full_name|default:request.user.username }}
-                </span>
+            <div class="topbar-right">
+                <div class="search-box d-none d-md-block">
+                    <i class="bi bi-search search-icon"></i>
+                    <input type="text" class="form-control" placeholder="Buscar..." style="width: 200px;">
+                </div>
+                <button class="btn-icon" title="Notificaciones">
+                    <i class="bi bi-bell"></i>
+                </button>
+                <div class="user-menu dropdown">
+                    <div data-bs-toggle="dropdown" aria-expanded="false">
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="user-avatar">
+                                {{ request.user.first_name|default:request.user.username|make_list|first|upper }}
+                            </div>
+                            <span class="user-name d-none d-md-inline">{{ request.user.get_full_name|default:request.user.username }}</span>
+                            <i class="bi bi-chevron-down" style="font-size: 0.6rem; color: #adb5bd;"></i>
+                        </div>
+                    </div>
+                    <ul class="dropdown-menu dropdown-menu-end" style="font-size: 0.825rem;">
+                        <li><a class="dropdown-item" href="{% url 'admin:index' %}"><i class="bi bi-gear me-2"></i>Administraci&oacute;n</a></li>
+                        <li><a class="dropdown-item" href="{% url 'system_customize' %}"><i class="bi bi-palette me-2"></i>Personalizar</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="{% url 'logout' %}"><i class="bi bi-box-arrow-left me-2"></i>Cerrar Sesi&oacute;n</a></li>
+                    </ul>
+                </div>
             </div>
         </div>
 
         <div class="content-area">
             {% if messages %}
             {% for message in messages %}
-            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert" style="margin-bottom: 1rem;">
                 {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" style="font-size: 0.7rem;"></button>
             </div>
             {% endfor %}
             {% endif %}
@@ -181,6 +404,32 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script>
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('show');
+            document.getElementById('sidebarOverlay').classList.toggle('show');
+        }
+
+        // Auto-expand submenu if child is active
+        document.querySelectorAll('.nav-submenu .nav-link.active').forEach(function(el) {
+            var submenu = el.closest('.nav-submenu');
+            if (submenu) {
+                submenu.classList.add('show');
+                var toggle = submenu.previousElementSibling;
+                if (toggle) toggle.setAttribute('aria-expanded', 'true');
+            }
+        });
+
+        // Highlight current nav link based on URL
+        (function() {
+            var path = window.location.pathname;
+            document.querySelectorAll('.sidebar-nav .nav-link:not(.nav-group-toggle)').forEach(function(link) {
+                if (link.getAttribute('href') === path) {
+                    link.classList.add('active');
+                }
+            });
+        })();
+    </script>
     {% block extra_js %}{% endblock %}
 </body>
 </html>

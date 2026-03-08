@@ -1,0 +1,95 @@
+{% extends "base/base.html" %}
+{% load humanize %}
+
+{% block title %}SIRE - Registros Electronicos{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Inicio</a></li>
+<li class="breadcrumb-item active">SIRE</li>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h4>SIRE - Sistema Integrado de Registros Electronicos</h4>
+    <span class="badge bg-primary" style="font-size: 0.8rem;">Periodo: {{ month_start|date:"F Y" }}</span>
+</div>
+
+<div class="row g-3 mb-4">
+    <!-- Registro de Ventas -->
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-graph-up-arrow me-1"></i>Registro de Ventas</span>
+                <span class="badge bg-success">{{ ventas.count|default:0 }} docs</span>
+            </div>
+            <div class="card-body">
+                <table class="table table-sm mb-0">
+                    <tr><td class="text-muted">Op. Gravadas</td><td class="text-end fw-bold">S/ {{ ventas.total_gravada|default:0|floatformat:2|intcomma }}</td></tr>
+                    <tr><td class="text-muted">Op. Exoneradas</td><td class="text-end">S/ {{ ventas.total_exonerada|default:0|floatformat:2|intcomma }}</td></tr>
+                    <tr><td class="text-muted">Op. Inafectas</td><td class="text-end">S/ {{ ventas.total_inafecta|default:0|floatformat:2|intcomma }}</td></tr>
+                    <tr><td class="text-muted">IGV</td><td class="text-end fw-bold text-primary">S/ {{ ventas.total_igv|default:0|floatformat:2|intcomma }}</td></tr>
+                    <tr class="border-top"><td class="fw-bold">Total</td><td class="text-end fw-bold fs-5">S/ {{ ventas.total|default:0|floatformat:2|intcomma }}</td></tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Registro de Compras -->
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-graph-down-arrow me-1"></i>Registro de Compras</span>
+                <span class="badge bg-warning text-dark">{{ compras.count|default:0 }} docs</span>
+            </div>
+            <div class="card-body">
+                <table class="table table-sm mb-0">
+                    <tr><td class="text-muted">Total Compras</td><td class="text-end fw-bold fs-5">S/ {{ compras.total|default:0|floatformat:2|intcomma }}</td></tr>
+                    <tr><td class="text-muted">Documentos</td><td class="text-end">{{ compras.count|default:0 }}</td></tr>
+                </table>
+                <div class="mt-3 text-center">
+                    <a href="{% url 'accounting:accounts_payable' %}" class="btn btn-sm btn-outline-primary">Ver Cuentas por Pagar</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notas de Credito/Debito -->
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-file-earmark-minus me-1"></i>Notas de Credito/Debito</span>
+                <span class="badge bg-info">{{ notas.count|default:0 }} docs</span>
+            </div>
+            <div class="card-body">
+                <table class="table table-sm mb-0">
+                    <tr><td class="text-muted">Total Notas</td><td class="text-end fw-bold fs-5">S/ {{ notas.total|default:0|floatformat:2|intcomma }}</td></tr>
+                    <tr><td class="text-muted">Documentos</td><td class="text-end">{{ notas.count|default:0 }}</td></tr>
+                </table>
+                <div class="mt-3 text-center">
+                    <a href="{% url 'accounting:invoice_list' %}" class="btn btn-sm btn-outline-primary">Ver Comprobantes</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header"><i class="bi bi-info-circle me-1"></i>Informacion SIRE</div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <h6 style="font-size: 0.85rem;">Registro de Ventas e Ingresos (RVIE)</h6>
+                <p class="text-muted" style="font-size: 0.8rem;">El RVIE reemplaza al PLE de Ventas. Contiene todos los comprobantes de pago emitidos (facturas, boletas, notas de credito y debito) del periodo.</p>
+            </div>
+            <div class="col-md-6">
+                <h6 style="font-size: 0.85rem;">Registro de Compras (RC)</h6>
+                <p class="text-muted" style="font-size: 0.8rem;">El RC reemplaza al PLE de Compras. Contiene todos los comprobantes de pago recibidos de proveedores del periodo.</p>
+            </div>
+        </div>
+        <div class="alert alert-info mb-0 mt-2" style="font-size: 0.8rem;">
+            <i class="bi bi-lightbulb me-1"></i>
+            Los datos mostrados corresponden al periodo <strong>{{ month_start|date:"F Y" }}</strong>. Para generar archivos SIRE oficiales, utilice la plataforma de SUNAT.
+        </div>
+    </div>
+</div>
+{% endblock %}

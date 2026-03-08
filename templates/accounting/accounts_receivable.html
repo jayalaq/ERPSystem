@@ -1,0 +1,145 @@
+{% extends "base/base.html" %}
+{% load humanize %}
+
+{% block title %}Cuentas por Cobrar{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Inicio</a></li>
+<li class="breadcrumb-item active">Cuentas por Cobrar</li>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h4>Cuentas por Cobrar</h4>
+    <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#newReceivableModal">
+        <i class="bi bi-plus-lg me-1"></i>Nueva Cuenta por Cobrar
+    </button>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="stat-card card">
+            <div class="card-body d-flex align-items-center gap-3">
+                <div class="stat-icon bg-warning bg-opacity-10 text-warning"><i class="bi bi-hourglass-split"></i></div>
+                <div>
+                    <div class="text-muted" style="font-size:0.75rem;">Total Pendiente</div>
+                    <div class="fw-bold fs-5">S/ {{ total_pending|floatformat:2|intcomma }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-card card">
+            <div class="card-body d-flex align-items-center gap-3">
+                <div class="stat-icon bg-success bg-opacity-10 text-success"><i class="bi bi-check-circle"></i></div>
+                <div>
+                    <div class="text-muted" style="font-size:0.75rem;">Total Cobrado</div>
+                    <div class="fw-bold fs-5">S/ {{ total_collected|floatformat:2|intcomma }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-card card">
+            <div class="card-body d-flex align-items-center gap-3">
+                <div class="stat-icon bg-danger bg-opacity-10 text-danger"><i class="bi bi-exclamation-triangle"></i></div>
+                <div>
+                    <div class="text-muted" style="font-size:0.75rem;">Total Vencido</div>
+                    <div class="fw-bold fs-5">S/ {{ total_overdue|floatformat:2|intcomma }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span>Listado</span>
+        <div class="d-flex gap-2">
+            <a href="{% url 'accounting:accounts_receivable' %}" class="btn btn-sm {% if not request.GET.status %}btn-primary{% else %}btn-outline-secondary{% endif %}">Todas</a>
+            <a href="?status=pending" class="btn btn-sm {% if request.GET.status == 'pending' %}btn-primary{% else %}btn-outline-secondary{% endif %}">Pendientes</a>
+            <a href="?status=overdue" class="btn btn-sm {% if request.GET.status == 'overdue' %}btn-primary{% else %}btn-outline-secondary{% endif %}">Vencidas</a>
+            <a href="?status=collected" class="btn btn-sm {% if request.GET.status == 'collected' %}btn-primary{% else %}btn-outline-secondary{% endif %}">Cobradas</a>
+        </div>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead>
+                <tr>
+                    <th>Cliente</th>
+                    <th>Descripcion</th>
+                    <th>Emision</th>
+                    <th>Vencimiento</th>
+                    <th class="text-end">Total</th>
+                    <th class="text-end">Cobrado</th>
+                    <th class="text-end">Saldo</th>
+                    <th>Estado</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for ar in receivables %}
+                <tr>
+                    <td>{{ ar.customer.name|truncatechars:30 }}</td>
+                    <td>{{ ar.description|truncatechars:40 }}</td>
+                    <td>{{ ar.issue_date|date:"d/m/Y" }}</td>
+                    <td>{{ ar.due_date|date:"d/m/Y" }}</td>
+                    <td class="text-end">S/ {{ ar.total|floatformat:2|intcomma }}</td>
+                    <td class="text-end">S/ {{ ar.collected_amount|floatformat:2|intcomma }}</td>
+                    <td class="text-end fw-bold">S/ {{ ar.balance|floatformat:2|intcomma }}</td>
+                    <td>
+                        {% if ar.status == 'pending' %}<span class="badge bg-warning text-dark">Pendiente</span>
+                        {% elif ar.status == 'partial' %}<span class="badge bg-info">Parcial</span>
+                        {% elif ar.status == 'collected' %}<span class="badge bg-success">Cobrado</span>
+                        {% elif ar.status == 'overdue' %}<span class="badge bg-danger">Vencido</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if ar.status != 'collected' %}
+                        <form method="post" action="{% url 'accounting:accounts_receivable_collect' ar.pk %}" class="d-inline">
+                            {% csrf_token %}
+                            <div class="input-group input-group-sm" style="width:160px;">
+                                <input type="number" name="amount" step="0.01" min="0.01" max="{{ ar.balance }}" class="form-control" placeholder="Monto" required>
+                                <button class="btn btn-success" type="submit">Cobrar</button>
+                            </div>
+                        </form>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="9" class="text-center text-muted py-4">No hay cuentas por cobrar</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Modal Nueva Cuenta por Cobrar -->
+<div class="modal fade" id="newReceivableModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <form method="post">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title" style="font-size:0.95rem;">Nueva Cuenta por Cobrar</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        {% for field in form %}
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">{{ field.label }}</label>
+                            {{ field }}
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-sm btn-primary">Registrar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

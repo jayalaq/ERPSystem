@@ -1,0 +1,65 @@
+{% extends "base/base.html" %}
+
+{% block title %}Contribuyentes{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Inicio</a></li>
+<li class="breadcrumb-item active">Contribuyentes</li>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h4>Contribuyentes</h4>
+    <a href="{% url 'system_customize' %}" class="btn btn-primary btn-sm">
+        <i class="bi bi-plus-lg me-1"></i>Configurar Empresa
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-header">Empresas / Contribuyentes Registrados</div>
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead>
+                <tr>
+                    <th>RUC</th>
+                    <th>Razon Social</th>
+                    <th>Nombre Comercial</th>
+                    <th>Direccion</th>
+                    <th>Telefono</th>
+                    <th>Email</th>
+                    <th>SUNAT</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for company in companies %}
+                <tr>
+                    <td class="fw-bold">{{ company.ruc }}</td>
+                    <td>{{ company.name }}</td>
+                    <td>{{ company.trade_name|default:"-" }}</td>
+                    <td>{{ company.address|truncatechars:40 }}</td>
+                    <td>{{ company.phone|default:"-" }}</td>
+                    <td>{{ company.email|default:"-" }}</td>
+                    <td>
+                        {% if company.sunat_production %}
+                        <span class="badge bg-success">Produccion</span>
+                        {% else %}
+                        <span class="badge bg-warning text-dark">Beta</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="{% url 'system_customize' %}" class="btn btn-sm btn-outline-primary">Editar</a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="8" class="text-center text-muted py-4">
+                        No hay empresas configuradas. <a href="{% url 'system_customize' %}">Configurar ahora</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -1,5 +1,8 @@
 from django import forms
-from .models import Invoice, InvoiceItem, PaymentRecord, AccountPayable, DocumentSeries
+from .models import (
+    Invoice, InvoiceItem, PaymentRecord, AccountPayable, DocumentSeries,
+    PettyCash, PettyCashTransaction, AccountReceivable,
+)
 
 
 class InvoiceForm(forms.ModelForm):
@@ -55,4 +58,45 @@ class DocumentSeriesForm(forms.ModelForm):
             'series': forms.TextInput(attrs={'class': 'form-control'}),
             'next_correlative': forms.NumberInput(attrs={'class': 'form-control'}),
             'branch': forms.Select(attrs={'class': 'form-select'}),
+        }
+
+
+class PettyCashForm(forms.ModelForm):
+    class Meta:
+        model = PettyCash
+        fields = ['name', 'responsible', 'initial_amount', 'notes']
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'form-control'}),
+            'responsible': forms.Select(attrs={'class': 'form-select'}),
+            'initial_amount': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
+            'notes': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+        }
+
+
+class PettyCashTransactionForm(forms.ModelForm):
+    class Meta:
+        model = PettyCashTransaction
+        fields = ['transaction_type', 'category', 'description', 'amount', 'receipt_number', 'receipt_file', 'date']
+        widgets = {
+            'transaction_type': forms.Select(attrs={'class': 'form-select'}),
+            'category': forms.Select(attrs={'class': 'form-select'}),
+            'description': forms.TextInput(attrs={'class': 'form-control'}),
+            'amount': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
+            'receipt_number': forms.TextInput(attrs={'class': 'form-control'}),
+            'date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+        }
+
+
+class AccountReceivableForm(forms.ModelForm):
+    class Meta:
+        model = AccountReceivable
+        fields = ['customer', 'invoice', 'description', 'total', 'issue_date', 'due_date', 'notes']
+        widgets = {
+            'customer': forms.Select(attrs={'class': 'form-select'}),
+            'invoice': forms.Select(attrs={'class': 'form-select'}),
+            'description': forms.TextInput(attrs={'class': 'form-control'}),
+            'total': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
+            'issue_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'due_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'notes': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
         }

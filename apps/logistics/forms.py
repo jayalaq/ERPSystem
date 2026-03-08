@@ -1,6 +1,6 @@
 from django import forms
 from django.core.exceptions import ValidationError
-from .models import Product, Warehouse, StockMovement, PurchaseOrder
+from .models import Product, Warehouse, StockMovement, PurchaseOrder, DispatchGuide
 
 MAX_IMAGE_SIZE = 5 * 1024 * 1024  # 5 MB
 ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
@@ -87,5 +87,35 @@ class PurchaseOrderForm(forms.ModelForm):
             'subtotal': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
             'igv': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
             'total': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
+            'notes': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+        }
+
+
+class DispatchGuideForm(forms.ModelForm):
+    class Meta:
+        model = DispatchGuide
+        exclude = ['created_by', 'created_at', 'updated_at']
+        widgets = {
+            'guide_type': forms.Select(attrs={'class': 'form-select'}),
+            'series': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'T001'}),
+            'correlative': forms.NumberInput(attrs={'class': 'form-control'}),
+            'issue_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'transfer_start_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'transfer_reason': forms.Select(attrs={'class': 'form-select'}),
+            'description': forms.TextInput(attrs={'class': 'form-control'}),
+            'origin_address': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
+            'origin_ubigeo': forms.TextInput(attrs={'class': 'form-control'}),
+            'destination_address': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
+            'destination_ubigeo': forms.TextInput(attrs={'class': 'form-control'}),
+            'recipient': forms.Select(attrs={'class': 'form-select'}),
+            'carrier_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'carrier_ruc': forms.TextInput(attrs={'class': 'form-control'}),
+            'driver_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'driver_license': forms.TextInput(attrs={'class': 'form-control'}),
+            'vehicle_plate': forms.TextInput(attrs={'class': 'form-control'}),
+            'gross_weight': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.001'}),
+            'packages': forms.NumberInput(attrs={'class': 'form-control'}),
+            'related_invoice': forms.Select(attrs={'class': 'form-select'}),
+            'status': forms.Select(attrs={'class': 'form-select'}),
             'notes': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
         }

@@ -199,3 +199,108 @@ class DocumentSeries(models.Model):
         self.next_correlative += 1
         self.save(update_fields=['next_correlative'])
         return current
+
+
+class PettyCash(models.Model):
+    """Caja Chica - Petty cash management."""
+
+    class Status(models.TextChoices):
+        OPEN = 'open', 'Abierta'
+        CLOSED = 'closed', 'Cerrada'
+
+    name = models.CharField(max_length=100, verbose_name='Nombre')
+    responsible = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='petty_cashes',
+        verbose_name='Responsable'
+    )
+    initial_amount = models.DecimalField(max_digits=12, decimal_places=2, verbose_name='Monto Inicial')
+    current_balance = models.DecimalField(max_digits=12, decimal_places=2, verbose_name='Saldo Actual')
+    status = models.CharField(max_length=10, choices=Status.choices, default=Status.OPEN)
+    opened_at = models.DateTimeField(auto_now_add=True, verbose_name='Fecha Apertura')
+    closed_at = models.DateTimeField(null=True, blank=True, verbose_name='Fecha Cierre')
+    notes = models.TextField(blank=True, verbose_name='Observaciones')
+
+    class Meta:
+        verbose_name = 'Caja Chica'
+        verbose_name_plural = 'Cajas Chicas'
+        ordering = ['-opened_at']
+
+    def __str__(self):
+        return f"{self.name} - S/ {self.current_balance}"
+
+
+class PettyCashTransaction(models.Model):
+    """Transactions within petty cash."""
+
+    class TransactionType(models.TextChoices):
+        INCOME = 'income', 'Ingreso'
+        EXPENSE = 'expense', 'Gasto'
+
+    class ExpenseCategory(models.TextChoices):
+        OFFICE = 'office', 'Material de Oficina'
+        TRANSPORT = 'transport', 'Transporte'
+        FOOD = 'food', 'Alimentacion'
+        MAINTENANCE = 'maintenance', 'Mantenimiento'
+        SERVICES = 'services', 'Servicios'
+        OTHER = 'other', 'Otros'
+
+    petty_cash = models.ForeignKey(PettyCash, on_delete=models.CASCADE, related_name='transactions')
+    transaction_type = models.CharField(max_length=10, choices=TransactionType.choices, verbose_name='Tipo')
+    category = models.CharField(
+        max_length=20, choices=ExpenseCategory.choices, default=ExpenseCategory.OTHER,
+        verbose_name='Categoria'
+    )
+    description = models.CharField(max_length=500, verbose_name='Descripcion')
+    amount = models.DecimalField(max_digits=12, decimal_places=2, verbose_name='Monto')
+    receipt_number = models.CharField(max_length=50, blank=True, verbose_name='Nro. Comprobante')
+    receipt_file = models.FileField(upload_to='petty_cash/', blank=True, null=True, verbose_name='Archivo')
+    date = models.DateField(verbose_name='Fecha')
+    recorded_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='petty_cash_transactions'
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'Movimiento Caja Chica'
+        verbose_name_plural = 'Movimientos Caja Chica'
+        ordering = ['-date', '-created_at']
+
+    def __str__(self):
+        return f"{self.get_transaction_type_display()} - {self.description} - S/ {self.amount}"
+
+
+class AccountReceivable(models.Model):
+    """Cuentas por Cobrar - Accounts Receivable."""
+
+    class Status(models.TextChoices):
+        PENDING = 'pending', 'Pendiente'
+        PARTIAL = 'partial', 'Parcialmente Cobrado'
+        COLLECTED = 'collected', 'Cobrado'
+        OVERDUE = 'overdue', 'Vencido'
+
+    customer = models.ForeignKey('crm.Customer', on_delete=models.CASCADE, related_name='receivables')
+    invoice = models.ForeignKey(Invoice, on_delete=models.SET_NULL, null=True, blank=True, related_name='receivables')
+    description = models.CharField(max_length=500, verbose_name='Descripcion')
+    total = models.DecimalField(max_digits=12, decimal_places=2, verbose_name='Total')
+    collected_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0, verbose_name='Monto Cobrado')
+    issue_date = models.DateField(verbose_name='Fecha de Emision')
+    due_date = models.DateField(verbose_name='Fecha de Vencimiento')
+    status = models.CharField(max_length=20, choices=Status.choices, default=Status.PENDING)
+    notes = models.TextField(blank=True, verbose_name='Observaciones')
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='receivables_created'
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = 'Cuenta por Cobrar'
+        verbose_name_plural = 'Cuentas por Cobrar'
+        ordering = ['due_date']
+
+    def __str__(self):
+        return f"{self.customer.name} - {self.description} - S/ {self.total}"
+
+    @property
+    def balance(self):
+        return self.total - self.collected_amount

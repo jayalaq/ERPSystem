@@ -13,4 +13,7 @@ urlpatterns = [
     path('movements/new/', views.stock_movement_create, name='movement_create'),
     path('purchase-orders/', views.purchase_order_list, name='purchase_order_list'),
     path('purchase-orders/new/', views.purchase_order_create, name='purchase_order_create'),
+    path('dispatch-guides/', views.dispatch_guide_list, name='dispatch_guide_list'),
+    path('dispatch-guides/new/', views.dispatch_guide_create, name='dispatch_guide_create'),
+    path('dispatch-guides/<int:pk>/', views.dispatch_guide_detail, name='dispatch_guide_detail'),
 ]

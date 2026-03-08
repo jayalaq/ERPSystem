@@ -1,0 +1,116 @@
+{% extends "base/base.html" %}
+{% load humanize %}
+
+{% block title %}Guia {{ guide.full_number }}{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Inicio</a></li>
+<li class="breadcrumb-item"><a href="{% url 'logistics:dispatch_guide_list' %}">Guias de Remision</a></li>
+<li class="breadcrumb-item active">{{ guide.full_number }}</li>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h4>Guia de Remision {{ guide.full_number }}</h4>
+    <div>
+        {% if guide.status == 'draft' %}<span class="badge bg-secondary fs-6">Borrador</span>
+        {% elif guide.status == 'issued' %}<span class="badge bg-primary fs-6">Emitida</span>
+        {% elif guide.status == 'in_transit' %}<span class="badge bg-info fs-6">En Transito</span>
+        {% elif guide.status == 'delivered' %}<span class="badge bg-success fs-6">Entregada</span>
+        {% elif guide.status == 'cancelled' %}<span class="badge bg-danger fs-6">Anulada</span>
+        {% endif %}
+    </div>
+</div>
+
+<div class="row g-3 mb-3">
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header">Datos Generales</div>
+            <div class="card-body">
+                <table class="table table-sm mb-0">
+                    <tr><th style="width:40%;">Tipo</th><td>{{ guide.get_guide_type_display }}</td></tr>
+                    <tr><th>Fecha Emision</th><td>{{ guide.issue_date|date:"d/m/Y" }}</td></tr>
+                    <tr><th>Inicio Traslado</th><td>{{ guide.transfer_start_date|date:"d/m/Y" }}</td></tr>
+                    <tr><th>Motivo</th><td>{{ guide.get_transfer_reason_display }}</td></tr>
+                    <tr><th>Destinatario</th><td>{{ guide.recipient.name|default:"-" }}</td></tr>
+                    {% if guide.related_invoice %}<tr><th>Comprobante</th><td><a href="{% url 'accounting:invoice_detail' guide.related_invoice.pk %}">{{ guide.related_invoice.full_number }}</a></td></tr>{% endif %}
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header">Transporte</div>
+            <div class="card-body">
+                <table class="table table-sm mb-0">
+                    <tr><th style="width:40%;">Transportista</th><td>{{ guide.carrier_name|default:"-" }}</td></tr>
+                    <tr><th>RUC</th><td>{{ guide.carrier_ruc|default:"-" }}</td></tr>
+                    <tr><th>Conductor</th><td>{{ guide.driver_name|default:"-" }}</td></tr>
+                    <tr><th>Licencia</th><td>{{ guide.driver_license|default:"-" }}</td></tr>
+                    <tr><th>Placa</th><td>{{ guide.vehicle_plate|default:"-" }}</td></tr>
+                    <tr><th>Peso Bruto</th><td>{{ guide.gross_weight }} kg</td></tr>
+                    <tr><th>Bultos</th><td>{{ guide.packages }}</td></tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-3">
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header"><i class="bi bi-geo-alt me-1"></i>Punto de Partida</div>
+            <div class="card-body">
+                <p class="mb-1">{{ guide.origin_address }}</p>
+                {% if guide.origin_ubigeo %}<small class="text-muted">Ubigeo: {{ guide.origin_ubigeo }}</small>{% endif %}
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header"><i class="bi bi-geo-alt-fill me-1"></i>Punto de Llegada</div>
+            <div class="card-body">
+                <p class="mb-1">{{ guide.destination_address }}</p>
+                {% if guide.destination_ubigeo %}<small class="text-muted">Ubigeo: {{ guide.destination_ubigeo }}</small>{% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if items %}
+<div class="card mb-3">
+    <div class="card-header">Items</div>
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead>
+                <tr>
+                    <th>Producto</th>
+                    <th>Descripcion</th>
+                    <th>Unidad</th>
+                    <th class="text-end">Cantidad</th>
+                    <th class="text-end">Peso (kg)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                <tr>
+                    <td>{{ item.product.name }}</td>
+                    <td>{{ item.description }}</td>
+                    <td>{{ item.unit.abbreviation }}</td>
+                    <td class="text-end">{{ item.quantity|floatformat:3 }}</td>
+                    <td class="text-end">{{ item.weight|floatformat:3 }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+
+{% if guide.notes %}
+<div class="card">
+    <div class="card-header">Observaciones</div>
+    <div class="card-body">{{ guide.notes }}</div>
+</div>
+{% endif %}
+{% endblock %}

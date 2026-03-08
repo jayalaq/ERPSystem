@@ -160,3 +160,55 @@ def purchase_order_create(request):
     else:
         form = PurchaseOrderForm()
     return render(request, 'logistics/purchase_order_form.html', {'form': form, 'title': 'Nueva Orden de Compra'})
+
+
+@login_required
+def dispatch_guide_list(request):
+    """Guías de Remisión list."""
+    from .models import DispatchGuide
+
+    guides = DispatchGuide.objects.select_related('recipient', 'created_by').order_by('-created_at')
+
+    status_filter = request.GET.get('status', '')
+    if status_filter:
+        guides = guides.filter(status=status_filter)
+
+    query = request.GET.get('q', '')
+    if query:
+        guides = guides.filter(
+            Q(series__icontains=query) | Q(recipient__name__icontains=query) | Q(carrier_name__icontains=query)
+        )
+
+    return render(request, 'logistics/dispatch_guide_list.html', {'guides': guides[:100]})
+
+
+@login_required
+def dispatch_guide_create(request):
+    """Create a new dispatch guide."""
+    from .forms import DispatchGuideForm
+    from django.utils import timezone
+
+    if request.method == 'POST':
+        form = DispatchGuideForm(request.POST)
+        if form.is_valid():
+            guide = form.save(commit=False)
+            guide.created_by = request.user
+            guide.save()
+            messages.success(request, f'Guía de Remisión {guide.full_number} creada.')
+            return redirect('logistics:dispatch_guide_list')
+    else:
+        form = DispatchGuideForm(initial={
+            'issue_date': timezone.now().date(),
+            'transfer_start_date': timezone.now().date(),
+        })
+    return render(request, 'logistics/dispatch_guide_form.html', {'form': form, 'title': 'Nueva Guía de Remisión'})
+
+
+@login_required
+def dispatch_guide_detail(request, pk):
+    """View dispatch guide details."""
+    from .models import DispatchGuide
+
+    guide = get_object_or_404(DispatchGuide, pk=pk)
+    items = guide.items.select_related('product', 'unit')
+    return render(request, 'logistics/dispatch_guide_detail.html', {'guide': guide, 'items': items})

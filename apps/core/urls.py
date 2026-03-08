@@ -7,6 +7,8 @@ urlpatterns = [
     path('login/', views.login_view, name='login'),
     path('logout/', views.logout_view, name='logout'),
     path('health/', views.health_check, name='health_check'),
+    path('video-tutorials/', views.video_tutorials, name='video_tutorials'),
+    path('system-customize/', views.system_customize, name='system_customize'),
 ]
 
 if settings.ENVIRONMENT == 'testing':

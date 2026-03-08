@@ -13,6 +13,17 @@ from apps.pos.models import POSSale
 from apps.logistics.models import Product, StockLevel
 
 
+def landing_page(request):
+    if request.user.is_authenticated:
+        return redirect('dashboard')
+    return render(request, 'core/landing.html')
+
+
+def google_login_redirect(request):
+    """Redirect to allauth Google login flow."""
+    return redirect('/accounts/google/login/')
+
+
 def login_view(request):
     if request.user.is_authenticated:
         return redirect('dashboard')

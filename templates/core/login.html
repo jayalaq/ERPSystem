@@ -28,6 +28,16 @@
         .btn-login { width: 100%; padding: 0.7rem; border-radius: 8px; font-weight: 600;
             background: linear-gradient(135deg, #7B2FBE, #6A22A8); border: none; font-size: 1rem; color: white; }
         .btn-login:hover { background: linear-gradient(135deg, #6A22A8, #5A1B90); color: white; }
+        .divider { display: flex; align-items: center; margin: 1.2rem 0; color: #94a3b8; font-size: 0.8rem; }
+        .divider::before, .divider::after { content: ''; flex: 1; border-bottom: 1px solid #e2e8f0; }
+        .divider span { padding: 0 0.8rem; }
+        .btn-google { width: 100%; padding: 0.7rem; border-radius: 8px; font-weight: 600;
+            background: white; border: 1.5px solid #e2e8f0; font-size: 0.95rem; color: #333;
+            display: flex; align-items: center; justify-content: center; gap: 0.5rem; transition: all 0.3s; }
+        .btn-google:hover { border-color: #7B2FBE; background: #f8fafc; color: #333; }
+        .btn-google img { width: 18px; height: 18px; }
+        .btn-back { color: #7B2FBE; font-size: 0.85rem; text-decoration: none; font-weight: 500; }
+        .btn-back:hover { color: #5A1B90; }
     </style>
 </head>
 <body>
@@ -64,7 +74,15 @@
                     <i class="bi bi-box-arrow-in-right"></i> Ingresar
                 </button>
             </form>
-            <p class="text-center text-muted mt-3" style="font-size: 0.8rem;">
+            <div class="divider"><span>o continuar con</span></div>
+            <a href="{% url 'google_login' %}" class="btn btn-google">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
+                Ingresar con Google
+            </a>
+            <div class="text-center mt-3">
+                <a href="{% url 'landing' %}" class="btn-back"><i class="bi bi-arrow-left"></i> Volver al inicio</a>
+            </div>
+            <p class="text-center text-muted mt-2" style="font-size: 0.8rem;">
                 Integrado con SUNAT - Facturación Electrónica
             </p>
         </div>

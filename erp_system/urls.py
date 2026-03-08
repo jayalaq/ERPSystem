@@ -5,7 +5,6 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('accounts/', include('allauth.urls')),
     path('', include('apps.core.urls')),
     path('crm/', include('apps.crm.urls')),
     path('pos/', include('apps.pos.urls')),
@@ -15,6 +14,9 @@ urlpatterns = [
     path('api/', include('apps.core.api_urls')),
     path('api/n8n/', include('apps.n8n_integration.urls')),
 ]
+
+if settings.ENVIRONMENT == 'testing':
+    urlpatterns.insert(1, path('accounts/', include('allauth.urls')))
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

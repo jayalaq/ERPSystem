@@ -1,3 +1,5 @@
+import os
+
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
@@ -5,6 +7,8 @@ from django.db.models import Sum, Count, Q, F
 from django.utils import timezone
 from datetime import timedelta
 from decimal import Decimal
+
+IS_TESTING = os.environ.get('ENVIRONMENT') == 'testing'
 
 from .forms import LoginForm
 from apps.accounting.models import Invoice
@@ -34,7 +38,7 @@ def login_view(request):
             return redirect('dashboard')
     else:
         form = LoginForm()
-    return render(request, 'core/login.html', {'form': form})
+    return render(request, 'core/login.html', {'form': form, 'is_testing': IS_TESTING})
 
 
 def logout_view(request):

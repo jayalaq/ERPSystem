@@ -74,6 +74,7 @@
                     <i class="bi bi-box-arrow-in-right"></i> Ingresar
                 </button>
             </form>
+            {% if is_testing %}
             <div class="divider"><span>o continuar con</span></div>
             <a href="{% url 'google_login' %}" class="btn btn-google">
                 <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
@@ -82,7 +83,8 @@
             <div class="text-center mt-3">
                 <a href="{% url 'landing' %}" class="btn-back"><i class="bi bi-arrow-left"></i> Volver al inicio</a>
             </div>
-            <p class="text-center text-muted mt-2" style="font-size: 0.8rem;">
+            {% endif %}
+            <p class="text-center text-muted mt-3" style="font-size: 0.8rem;">
                 Integrado con SUNAT - Facturación Electrónica
             </p>
         </div>

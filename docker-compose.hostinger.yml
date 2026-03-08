@@ -117,12 +117,6 @@ services:
     networks:
       - erp-internal
       - hostinger-network  # Shared with n8n
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.erp-prod.rule=Host(`${ERP_PRODUCTION_HOST:-app.tailoringconsult.com}`)"
-      - "traefik.http.routers.erp-prod.tls=true"
-      - "traefik.http.routers.erp-prod.tls.certresolver=letsencrypt"
-      - "traefik.http.services.erp-prod.loadbalancer.server.port=8000"
 
   # ============================================
   # ERP APP - TESTING
@@ -151,12 +145,6 @@ services:
     networks:
       - erp-internal
       - hostinger-network
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.erp-test.rule=Host(`${ERP_TESTING_HOST:-erp-testing.tailoringconsult.com}`)"
-      - "traefik.http.routers.erp-test.tls=true"
-      - "traefik.http.routers.erp-test.tls.certresolver=letsencrypt"
-      - "traefik.http.services.erp-test.loadbalancer.server.port=8000"
 
   # ============================================
   # CELERY WORKER (tareas SUNAT, n8n events)
@@ -232,7 +220,7 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.erp-nginx.rule=Host(`${ERP_PRODUCTION_HOST:-app.tailoringconsult.com}`) || Host(`${ERP_TESTING_HOST:-erp-testing.tailoringconsult.com}`)"
       - "traefik.http.routers.erp-nginx.tls=true"
-      - "traefik.http.routers.erp-nginx.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.erp-nginx.tls.certresolver=mytlschallenge"
       - "traefik.http.services.erp-nginx.loadbalancer.server.port=80"
 
 volumes:

@@ -78,6 +78,7 @@ services:
     volumes:
       - .:/app
       - erp_testing_static:/app/staticfiles
+      - erp_testing_media:/app/media
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:8000/app/health/ || exit 1"]
       interval: 15s
@@ -109,6 +110,7 @@ services:
       - ./nginx/docker-entrypoint.sh:/docker-entrypoint.sh:ro
       - ./nginx/testing-only.conf:/etc/nginx/templates/default.conf.template:ro
       - erp_testing_static:/static-testing:ro
+      - erp_testing_media:/media-testing:ro
     depends_on:
       erp-app-testing:
         condition: service_healthy
@@ -128,6 +130,7 @@ volumes:
   erp_pg_testing:
   erp_redis_data:
   erp_testing_static:
+  erp_testing_media:
 
 networks:
   erp-internal:

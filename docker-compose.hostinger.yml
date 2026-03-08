@@ -150,6 +150,7 @@ services:
     volumes:
       - .:/app
       - erp_testing_static:/app/staticfiles
+      - erp_testing_media:/app/media
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:8000/app/health/ || exit 1"]
       interval: 15s
@@ -231,6 +232,7 @@ services:
       - erp_production_static:/static:ro
       - erp_production_media:/media:ro
       - erp_testing_static:/static-testing:ro
+      - erp_testing_media:/media-testing:ro
     depends_on:
       erp-app-production:
         condition: service_healthy
@@ -255,6 +257,7 @@ volumes:
   erp_production_static:
   erp_production_media:
   erp_testing_static:
+  erp_testing_media:
 
 networks:
   erp-internal:

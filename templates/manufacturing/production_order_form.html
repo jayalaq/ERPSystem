@@ -1,0 +1,78 @@
+{% extends "base/base.html" %}
+{% block title %}{{ title }}{% endblock %}
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+<li class="breadcrumb-item"><a href="{% url 'manufacturing:production_order_list' %}">Ordenes de Produccion</a></li>
+<li class="breadcrumb-item active">{{ title }}</li>
+{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h4><i class="bi bi-gear-wide-connected me-2"></i>{{ title }}</h4>
+</div>
+
+<form method="post">
+    {% csrf_token %}
+    {% if form.errors %}
+    <div class="alert alert-danger"><i class="bi bi-exclamation-triangle me-2"></i>{{ form.errors }}</div>
+    {% endif %}
+
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="card stat-card mb-3">
+                <div class="card-header"><i class="bi bi-info-circle me-2"></i>Informacion de Produccion</div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label">Numero</label>
+                            {{ form.number }}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Lista de Materiales (BOM)</label>
+                            {{ form.bom }}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Producto a Fabricar</label>
+                            {{ form.product }}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Cantidad a Producir</label>
+                            {{ form.quantity }}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Almacen</label>
+                            {{ form.warehouse }}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Pedido de Venta (opcional)</label>
+                            {{ form.sales_order }}
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Notas</label>
+                            {{ form.notes }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card stat-card mb-3">
+                <div class="card-header"><i class="bi bi-calendar me-2"></i>Planificacion</div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label">Prioridad</label>
+                        {{ form.priority }}
+                    </div>
+                    <div>
+                        <label class="form-label">Fecha Planificada</label>
+                        {{ form.planned_date }}
+                    </div>
+                </div>
+            </div>
+            <div class="d-grid gap-2">
+                <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg me-1"></i> Crear Orden</button>
+                <a href="{% url 'manufacturing:production_order_list' %}" class="btn btn-outline-secondary"><i class="bi bi-arrow-left me-1"></i> Cancelar</a>
+            </div>
+        </div>
+    </div>
+</form>
+{% endblock %}

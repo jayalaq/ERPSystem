@@ -11,6 +11,8 @@ urlpatterns = [
     path('pos/', include('apps.pos.urls')),
     path('logistics/', include('apps.logistics.urls')),
     path('accounting/', include('apps.accounting.urls')),
+    path('sales/', include('apps.sales.urls')),
+    path('manufacturing/', include('apps.manufacturing.urls')),
     path('sunat/', include('apps.sunat_integration.urls')),
     path('api/', include('apps.core.api_urls')),
     path('api/n8n/', include('apps.n8n_integration.urls')),

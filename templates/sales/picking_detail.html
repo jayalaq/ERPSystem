@@ -1,0 +1,158 @@
+{% extends "base/base.html" %}
+{% load humanize %}
+{% block title %}{{ picking.number }}{% endblock %}
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+<li class="breadcrumb-item"><a href="{% url 'sales:picking_list' %}">Picking</a></li>
+<li class="breadcrumb-item active">{{ picking.number }}</li>
+{% endblock %}
+{% block content %}
+<div class="page-header">
+    <div>
+        <h4><i class="bi bi-box-seam me-2"></i>{{ picking.number }}</h4>
+        <span class="badge bg-{% if picking.status == 'completed' %}success{% elif picking.status == 'in_progress' %}warning{% elif picking.status == 'pending' %}secondary{% else %}danger{% endif %}" style="font-size: 0.75rem;">
+            {{ picking.get_status_display }}
+        </span>
+    </div>
+    <div class="d-flex gap-2">
+        {% if picking.status == 'pending' %}
+        <a href="{% url 'sales:picking_start' picking.pk %}" class="btn btn-success btn-sm"><i class="bi bi-play-fill me-1"></i>Iniciar Picking</a>
+        {% endif %}
+        <a href="{% url 'sales:order_detail' picking.sales_order.pk %}" class="btn btn-outline-primary btn-sm">
+            <i class="bi bi-box-arrow-up-right me-1"></i>Ver Pedido {{ picking.sales_order.number }}
+        </a>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-8">
+        <!-- Progress -->
+        <div class="card stat-card mb-3">
+            <div class="card-body">
+                <div class="d-flex justify-content-between mb-2">
+                    <span class="fw-semibold">Progreso de Preparacion</span>
+                    <span class="fw-bold" style="color: var(--neon-green);">{{ picking.progress_percent }}%</span>
+                </div>
+                <div class="progress" style="height: 10px; background: var(--bg-surface); border-radius: 5px;">
+                    <div class="progress-bar bg-success" style="width: {{ picking.progress_percent }}%; border-radius: 5px; transition: width 0.5s;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Items to Pick -->
+        <div class="card stat-card">
+            <div class="card-header d-flex justify-content-between">
+                <span><i class="bi bi-list-check me-2"></i>Items a Preparar</span>
+                <span class="badge bg-primary">{{ items|length }} items</span>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th style="width: 40px;"></th>
+                            <th>Producto</th>
+                            <th>SKU</th>
+                            <th class="text-center">Solicitado</th>
+                            <th class="text-center">Preparado</th>
+                            <th>Ubicacion</th>
+                            <th>Observacion</th>
+                            {% if picking.status == 'in_progress' %}<th>Accion</th>{% endif %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in items %}
+                        <tr style="{% if item.picked %}opacity: 0.6;{% endif %}">
+                            <td class="text-center">
+                                {% if item.picked %}
+                                    <i class="bi bi-check-circle-fill text-success" style="font-size: 1.2rem;"></i>
+                                {% else %}
+                                    <i class="bi bi-circle text-muted" style="font-size: 1.2rem;"></i>
+                                {% endif %}
+                            </td>
+                            <td class="fw-semibold">{{ item.product.name }}</td>
+                            <td><span class="text-muted">{{ item.product.sku }}</span></td>
+                            <td class="text-center fw-bold">{{ item.quantity_requested|floatformat:0 }}</td>
+                            <td class="text-center">
+                                {% if item.picked %}
+                                    <span class="text-success fw-bold">{{ item.quantity_picked|floatformat:0 }}</span>
+                                {% else %}
+                                    <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ item.location|default:"-" }}</td>
+                            <td>{{ item.notes|default:"-" }}</td>
+                            {% if picking.status == 'in_progress' %}
+                            <td>
+                                {% if not item.picked %}
+                                <form method="post" action="{% url 'sales:picking_pick_item' picking.pk item.pk %}" class="d-inline">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="quantity_picked" value="{{ item.quantity_requested }}">
+                                    <button type="submit" class="btn btn-sm btn-success" title="Marcar como preparado">
+                                        <i class="bi bi-check-lg"></i> Preparado
+                                    </button>
+                                </form>
+                                {% else %}
+                                <span class="text-muted" style="font-size: 0.75rem;">
+                                    {% if item.picked_by %}{{ item.picked_by.get_full_name|default:item.picked_by.username }}{% endif %}
+                                    {% if item.picked_at %}<br>{{ item.picked_at|date:"H:i" }}{% endif %}
+                                </span>
+                                {% endif %}
+                            </td>
+                            {% endif %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Column -->
+    <div class="col-lg-4">
+        <div class="card stat-card mb-3">
+            <div class="card-header"><i class="bi bi-info-circle me-2"></i>Informacion</div>
+            <div class="card-body">
+                <div class="mb-2">
+                    <small class="text-muted">Pedido de Venta</small>
+                    <div><a href="{% url 'sales:order_detail' picking.sales_order.pk %}">{{ picking.sales_order.number }}</a></div>
+                </div>
+                <div class="mb-2">
+                    <small class="text-muted">Cliente</small>
+                    <div class="fw-semibold">{{ picking.sales_order.customer.name }}</div>
+                </div>
+                <div class="mb-2">
+                    <small class="text-muted">Almacen</small>
+                    <div>{{ picking.warehouse.name }}</div>
+                </div>
+                <div class="mb-2">
+                    <small class="text-muted">Asignado a</small>
+                    <div>{{ picking.assigned_to.get_full_name|default:"Sin asignar" }}</div>
+                </div>
+                <div class="mb-2">
+                    <small class="text-muted">Fecha Programada</small>
+                    <div>{{ picking.scheduled_date|date:"d/m/Y" }}</div>
+                </div>
+                {% if picking.started_at %}
+                <div class="mb-2">
+                    <small class="text-muted">Inicio</small>
+                    <div>{{ picking.started_at|date:"d/m/Y H:i" }}</div>
+                </div>
+                {% endif %}
+                {% if picking.completed_at %}
+                <div>
+                    <small class="text-muted">Completado</small>
+                    <div class="text-success">{{ picking.completed_at|date:"d/m/Y H:i" }}</div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        {% if picking.notes %}
+        <div class="card stat-card">
+            <div class="card-header"><i class="bi bi-chat-left-text me-2"></i>Notas</div>
+            <div class="card-body">{{ picking.notes }}</div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

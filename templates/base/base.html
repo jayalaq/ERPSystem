@@ -473,7 +473,16 @@
                 <i class="bi bi-display"></i> Punto de Venta
             </a>
             <a href="{% url 'pos:sales_history' %}" class="nav-link {% if request.resolver_match.url_name == 'sales_history' %}active{% endif %}">
-                <i class="bi bi-receipt"></i> Ventas
+                <i class="bi bi-receipt"></i> Ventas POS
+            </a>
+            <a href="{% url 'sales:quotation_list' %}" class="nav-link {% if request.resolver_match.url_name == 'quotation_list' %}active{% endif %}">
+                <i class="bi bi-file-earmark-richtext"></i> Cotizaciones
+            </a>
+            <a href="{% url 'sales:order_list' %}" class="nav-link {% if request.resolver_match.url_name == 'order_list' %}active{% endif %}">
+                <i class="bi bi-cart-check"></i> Pedidos de Venta
+            </a>
+            <a href="{% url 'sales:picking_list' %}" class="nav-link {% if request.resolver_match.url_name == 'picking_list' %}active{% endif %}">
+                <i class="bi bi-box-seam"></i> Picking
             </a>
             <a href="{% url 'accounting:invoice_list' %}" class="nav-link {% if request.resolver_match.url_name == 'invoice_list' %}active{% endif %}">
                 <i class="bi bi-file-earmark-text"></i> Comprobantes
@@ -507,6 +516,15 @@
             </a>
             <a href="{% url 'logistics:dispatch_guide_list' %}" class="nav-link {% if request.resolver_match.url_name == 'dispatch_guide_list' %}active{% endif %}">
                 <i class="bi bi-send"></i> Gu&iacute;as de Remisi&oacute;n
+            </a>
+
+            <!-- Fabricacion -->
+            <div class="nav-section">Fabricaci&oacute;n</div>
+            <a href="{% url 'manufacturing:bom_list' %}" class="nav-link {% if request.resolver_match.url_name == 'bom_list' %}active{% endif %}">
+                <i class="bi bi-diagram-3"></i> Lista de Materiales
+            </a>
+            <a href="{% url 'manufacturing:production_order_list' %}" class="nav-link {% if request.resolver_match.url_name == 'production_order_list' %}active{% endif %}">
+                <i class="bi bi-gear-wide-connected"></i> Producci&oacute;n
             </a>
 
             <!-- Finanzas -->

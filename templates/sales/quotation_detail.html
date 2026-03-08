@@ -1,0 +1,235 @@
+{% extends "base/base.html" %}
+{% load humanize %}
+{% block title %}{{ quotation.number }}{% endblock %}
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+<li class="breadcrumb-item"><a href="{% url 'sales:quotation_list' %}">Cotizaciones</a></li>
+<li class="breadcrumb-item active">{{ quotation.number }}</li>
+{% endblock %}
+{% block content %}
+<div class="page-header">
+    <div>
+        <h4><i class="bi bi-file-earmark-richtext me-2"></i>{{ quotation.number }}</h4>
+        <span class="badge bg-{% if quotation.status == 'accepted' %}success{% elif quotation.status == 'sent' %}info{% elif quotation.status == 'rejected' %}danger{% elif quotation.status == 'expired' %}warning{% else %}secondary{% endif %}" style="font-size: 0.75rem;">
+            {{ quotation.get_status_display }}
+        </span>
+    </div>
+    <div class="d-flex gap-2">
+        {% if quotation.status == 'draft' %}
+        <a href="{% url 'sales:quotation_edit' quotation.pk %}" class="btn btn-outline-primary btn-sm"><i class="bi bi-pencil me-1"></i>Editar</a>
+        {% endif %}
+        {% if quotation.status in 'draft,sent,accepted' and not quotation.sales_order %}
+        <a href="{% url 'sales:quotation_convert_to_order' quotation.pk %}" class="btn btn-success btn-sm" onclick="return confirm('Convertir en Pedido de Venta?')">
+            <i class="bi bi-arrow-right-circle me-1"></i>Convertir a Pedido
+        </a>
+        {% endif %}
+        {% if quotation.sales_order %}
+        <a href="{% url 'sales:order_detail' quotation.sales_order.pk %}" class="btn btn-info btn-sm">
+            <i class="bi bi-box-arrow-up-right me-1"></i>Ver Pedido {{ quotation.sales_order.number }}
+        </a>
+        {% endif %}
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Info -->
+    <div class="col-lg-8">
+        <div class="card stat-card mb-3">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-person me-2"></i>Datos del Cliente</span>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <small class="text-muted">Cliente</small>
+                        <div class="fw-semibold">{{ quotation.customer.name }}</div>
+                    </div>
+                    <div class="col-md-6">
+                        <small class="text-muted">RUC/DNI</small>
+                        <div>{{ quotation.customer.document_number|default:"-" }}</div>
+                    </div>
+                    {% if quotation.contact_name %}
+                    <div class="col-md-4 mt-2">
+                        <small class="text-muted">Contacto</small>
+                        <div>{{ quotation.contact_name }}</div>
+                    </div>
+                    {% endif %}
+                    {% if quotation.contact_email %}
+                    <div class="col-md-4 mt-2">
+                        <small class="text-muted">Email</small>
+                        <div>{{ quotation.contact_email }}</div>
+                    </div>
+                    {% endif %}
+                    {% if quotation.contact_phone %}
+                    <div class="col-md-4 mt-2">
+                        <small class="text-muted">Telefono</small>
+                        <div>{{ quotation.contact_phone }}</div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Items Table -->
+        <div class="card stat-card mb-3">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-list-ul me-2"></i>Items de la Cotizacion</span>
+                <span class="badge bg-primary">{{ items|length }} items</span>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>Producto</th>
+                            <th>Descripcion</th>
+                            <th class="text-center">Cant.</th>
+                            <th class="text-end">P. Unit.</th>
+                            <th class="text-end">Desc.</th>
+                            <th class="text-end">Subtotal</th>
+                            <th class="text-end">IGV</th>
+                            <th class="text-end">Total</th>
+                            {% if quotation.status == 'draft' %}<th></th>{% endif %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in items %}
+                        <tr>
+                            <td class="fw-semibold">{{ item.product.sku }}</td>
+                            <td>{{ item.description }}</td>
+                            <td class="text-center">{{ item.quantity|floatformat:0 }} {{ item.unit.abbreviation }}</td>
+                            <td class="text-end">S/ {{ item.unit_price|floatformat:2|intcomma }}</td>
+                            <td class="text-end">{% if item.discount %}S/ {{ item.discount|floatformat:2 }}{% else %}-{% endif %}</td>
+                            <td class="text-end">S/ {{ item.subtotal|floatformat:2|intcomma }}</td>
+                            <td class="text-end">S/ {{ item.igv|floatformat:2|intcomma }}</td>
+                            <td class="text-end fw-semibold">S/ {{ item.total|floatformat:2|intcomma }}</td>
+                            {% if quotation.status == 'draft' %}
+                            <td>
+                                <a href="{% url 'sales:quotation_remove_item' quotation.pk item.pk %}" class="btn btn-sm btn-outline-danger" onclick="return confirm('Eliminar item?')" title="Eliminar">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                            </td>
+                            {% endif %}
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="9" class="text-center text-muted py-4">No hay items. Agregue productos a la cotizacion.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Add Item Form -->
+        {% if quotation.status == 'draft' %}
+        <div class="card stat-card">
+            <div class="card-header"><i class="bi bi-plus-circle me-2"></i>Agregar Item</div>
+            <div class="card-body">
+                <form method="post" action="{% url 'sales:quotation_add_item' quotation.pk %}">
+                    {% csrf_token %}
+                    <div class="row g-2 align-items-end">
+                        <div class="col-md-3">
+                            <label class="form-label">Producto</label>
+                            {{ item_form.product }}
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Cantidad</label>
+                            {{ item_form.quantity }}
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Unidad</label>
+                            {{ item_form.unit }}
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Precio Unit.</label>
+                            {{ item_form.unit_price }}
+                        </div>
+                        <div class="col-md-1">
+                            <label class="form-label">Desc.</label>
+                            {{ item_form.discount }}
+                        </div>
+                        <div class="col-md-2">
+                            <button type="submit" class="btn btn-primary w-100"><i class="bi bi-plus-lg me-1"></i>Agregar</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Right Column - Summary -->
+    <div class="col-lg-4">
+        <div class="card stat-card mb-3">
+            <div class="card-header"><i class="bi bi-calculator me-2"></i>Resumen</div>
+            <div class="card-body">
+                <div class="d-flex justify-content-between mb-2">
+                    <span class="text-muted">Subtotal</span>
+                    <span>S/ {{ quotation.subtotal|floatformat:2|intcomma }}</span>
+                </div>
+                {% if quotation.discount_amount %}
+                <div class="d-flex justify-content-between mb-2">
+                    <span class="text-muted">Descuento{% if quotation.discount_percent %} ({{ quotation.discount_percent }}%){% endif %}</span>
+                    <span class="text-danger">- S/ {{ quotation.discount_amount|floatformat:2|intcomma }}</span>
+                </div>
+                {% endif %}
+                <div class="d-flex justify-content-between mb-2">
+                    <span class="text-muted">IGV (18%)</span>
+                    <span>S/ {{ quotation.igv|floatformat:2|intcomma }}</span>
+                </div>
+                <hr style="border-color: var(--border-color);">
+                <div class="d-flex justify-content-between">
+                    <span class="fw-bold" style="font-size: 1.1rem;">TOTAL</span>
+                    <span class="fw-bold" style="font-size: 1.2rem; color: var(--neon-green);">S/ {{ quotation.total|floatformat:2|intcomma }}</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="card stat-card mb-3">
+            <div class="card-header"><i class="bi bi-calendar me-2"></i>Fechas</div>
+            <div class="card-body">
+                <div class="mb-2">
+                    <small class="text-muted">Fecha de Emision</small>
+                    <div>{{ quotation.issue_date|date:"d/m/Y" }}</div>
+                </div>
+                <div class="mb-2">
+                    <small class="text-muted">Valida Hasta</small>
+                    <div>{{ quotation.valid_until|date:"d/m/Y" }}
+                        {% if quotation.is_expired %}<span class="badge bg-danger ms-1">Expirada</span>{% endif %}
+                    </div>
+                </div>
+                {% if quotation.payment_terms %}
+                <div class="mb-2">
+                    <small class="text-muted">Condiciones de Pago</small>
+                    <div>{{ quotation.payment_terms }}</div>
+                </div>
+                {% endif %}
+                {% if quotation.delivery_terms %}
+                <div class="mb-2">
+                    <small class="text-muted">Condiciones de Entrega</small>
+                    <div>{{ quotation.delivery_terms }}</div>
+                </div>
+                {% endif %}
+                {% if quotation.delivery_time %}
+                <div>
+                    <small class="text-muted">Tiempo de Entrega</small>
+                    <div>{{ quotation.delivery_time }}</div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="card stat-card">
+            <div class="card-header"><i class="bi bi-clock-history me-2"></i>Auditoria</div>
+            <div class="card-body">
+                <div class="mb-2">
+                    <small class="text-muted">Creado por</small>
+                    <div>{{ quotation.created_by.get_full_name|default:quotation.created_by.username }}</div>
+                </div>
+                <div>
+                    <small class="text-muted">Fecha de creacion</small>
+                    <div>{{ quotation.created_at|date:"d/m/Y H:i" }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

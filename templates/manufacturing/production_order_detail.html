@@ -1,0 +1,268 @@
+{% extends "base/base.html" %}
+{% load humanize %}
+{% block title %}{{ order.number }}{% endblock %}
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+<li class="breadcrumb-item"><a href="{% url 'manufacturing:production_order_list' %}">Ordenes de Produccion</a></li>
+<li class="breadcrumb-item active">{{ order.number }}</li>
+{% endblock %}
+{% block content %}
+<div class="page-header">
+    <div>
+        <h4><i class="bi bi-gear-wide-connected me-2"></i>{{ order.number }}</h4>
+        <span class="badge bg-{% if order.status == 'completed' %}success{% elif order.status == 'in_production' %}warning{% elif order.status == 'confirmed' %}primary{% elif order.status == 'quality_check' %}info{% elif order.status == 'cancelled' %}danger{% else %}secondary{% endif %}" style="font-size: 0.75rem;">
+            {{ order.get_status_display }}
+        </span>
+        {% if order.priority == 'urgent' %}
+        <span class="badge bg-danger ms-1" style="font-size: 0.75rem;"><i class="bi bi-exclamation-triangle-fill me-1"></i>Urgente</span>
+        {% endif %}
+    </div>
+    <div class="d-flex gap-2">
+        {% if order.status == 'draft' %}
+        <a href="{% url 'manufacturing:production_order_confirm' order.pk %}" class="btn btn-primary btn-sm" onclick="return confirm('Confirmar orden? Se verificara disponibilidad de componentes.')">
+            <i class="bi bi-check-circle me-1"></i>Confirmar
+        </a>
+        {% endif %}
+        {% if order.status == 'confirmed' %}
+        <a href="{% url 'manufacturing:production_order_start' order.pk %}" class="btn btn-warning btn-sm" onclick="return confirm('Iniciar produccion? Se descontaran los componentes del stock.')">
+            <i class="bi bi-play-fill me-1"></i>Iniciar Produccion
+        </a>
+        {% endif %}
+        {% if order.status == 'in_production' or order.status == 'quality_check' %}
+        <form method="post" action="{% url 'manufacturing:production_order_complete' order.pk %}" class="d-inline">
+            {% csrf_token %}
+            <input type="hidden" name="quantity_produced" value="{{ order.quantity }}">
+            <input type="hidden" name="quantity_rejected" value="0">
+            <button type="submit" class="btn btn-success btn-sm" onclick="return confirm('Completar produccion? Se ingresara el producto terminado al stock.')">
+                <i class="bi bi-check-all me-1"></i>Completar Produccion
+            </button>
+        </form>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Workflow Progress -->
+<div class="card stat-card mb-4">
+    <div class="card-body py-3">
+        <div class="d-flex justify-content-between align-items-center" style="position: relative;">
+            <div style="position: absolute; top: 50%; left: 8%; right: 8%; height: 2px; background: var(--border-color); z-index: 0;"></div>
+            {% with s=order.status %}
+            <div class="text-center" style="z-index: 1; flex: 1;">
+                <div class="mx-auto mb-1" style="width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+                    {% if s == 'draft' or s == 'confirmed' or s == 'in_production' or s == 'quality_check' or s == 'completed' %}
+                    background: var(--neon-green); color: #fff; box-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
+                    {% else %}background: var(--bg-card); border: 2px solid var(--border-color); color: var(--text-muted);{% endif %}">
+                    <i class="bi bi-pencil"></i>
+                </div>
+                <small style="font-size: 0.65rem;" class="{% if s == 'draft' %}fw-bold text-success{% else %}text-muted{% endif %}">Borrador</small>
+            </div>
+            <div class="text-center" style="z-index: 1; flex: 1;">
+                <div class="mx-auto mb-1" style="width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+                    {% if s == 'confirmed' or s == 'in_production' or s == 'quality_check' or s == 'completed' %}
+                    background: var(--neon-green); color: #fff; box-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
+                    {% else %}background: var(--bg-card); border: 2px solid var(--border-color); color: var(--text-muted);{% endif %}">
+                    <i class="bi bi-check-circle"></i>
+                </div>
+                <small style="font-size: 0.65rem;" class="{% if s == 'confirmed' %}fw-bold text-success{% else %}text-muted{% endif %}">Confirmada</small>
+            </div>
+            <div class="text-center" style="z-index: 1; flex: 1;">
+                <div class="mx-auto mb-1" style="width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+                    {% if s == 'in_production' or s == 'quality_check' or s == 'completed' %}
+                    background: var(--neon-orange); color: #fff; box-shadow: 0 0 10px rgba(245, 158, 11, 0.4);
+                    {% else %}background: var(--bg-card); border: 2px solid var(--border-color); color: var(--text-muted);{% endif %}">
+                    <i class="bi bi-gear"></i>
+                </div>
+                <small style="font-size: 0.65rem;" class="{% if s == 'in_production' %}fw-bold text-warning{% else %}text-muted{% endif %}">En Produccion</small>
+            </div>
+            <div class="text-center" style="z-index: 1; flex: 1;">
+                <div class="mx-auto mb-1" style="width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+                    {% if s == 'quality_check' or s == 'completed' %}
+                    background: var(--accent); color: #fff; box-shadow: 0 0 10px rgba(6, 182, 212, 0.4);
+                    {% else %}background: var(--bg-card); border: 2px solid var(--border-color); color: var(--text-muted);{% endif %}">
+                    <i class="bi bi-clipboard-check"></i>
+                </div>
+                <small style="font-size: 0.65rem;" class="{% if s == 'quality_check' %}fw-bold text-info{% else %}text-muted{% endif %}">Calidad</small>
+            </div>
+            <div class="text-center" style="z-index: 1; flex: 1;">
+                <div class="mx-auto mb-1" style="width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+                    {% if s == 'completed' %}
+                    background: var(--neon-green); color: #fff; box-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
+                    {% else %}background: var(--bg-card); border: 2px solid var(--border-color); color: var(--text-muted);{% endif %}">
+                    <i class="bi bi-trophy"></i>
+                </div>
+                <small style="font-size: 0.65rem;" class="{% if s == 'completed' %}fw-bold text-success{% else %}text-muted{% endif %}">Terminada</small>
+            </div>
+            {% endwith %}
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-8">
+        <!-- Product Info -->
+        <div class="card stat-card mb-3">
+            <div class="card-header"><i class="bi bi-box me-2"></i>Producto a Fabricar</div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <small class="text-muted">Producto</small>
+                        <div class="fw-semibold">{{ order.product.name }}</div>
+                    </div>
+                    <div class="col-md-2">
+                        <small class="text-muted">SKU</small>
+                        <div>{{ order.product.sku }}</div>
+                    </div>
+                    <div class="col-md-2">
+                        <small class="text-muted">Cantidad</small>
+                        <div class="fw-bold" style="font-size: 1.1rem;">{{ order.quantity|floatformat:0 }}</div>
+                    </div>
+                    <div class="col-md-2">
+                        <small class="text-muted">Producido</small>
+                        <div class="fw-bold text-success" style="font-size: 1.1rem;">{{ order.quantity_produced|floatformat:0 }}</div>
+                    </div>
+                    <div class="col-md-2">
+                        <small class="text-muted">Rechazado</small>
+                        <div class="{% if order.quantity_rejected > 0 %}text-danger fw-bold{% else %}text-muted{% endif %}">{{ order.quantity_rejected|floatformat:0 }}</div>
+                    </div>
+                </div>
+                {% if order.status == 'in_production' or order.status == 'completed' %}
+                <div class="mt-3">
+                    <div class="d-flex justify-content-between mb-1">
+                        <small class="text-muted">Progreso</small>
+                        <small class="fw-bold">{{ order.progress_percent }}%</small>
+                    </div>
+                    <div class="progress" style="height: 10px; background: var(--bg-surface); border-radius: 5px;">
+                        <div class="progress-bar bg-success" style="width: {{ order.progress_percent }}%; border-radius: 5px;"></div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Components -->
+        <div class="card stat-card">
+            <div class="card-header d-flex justify-content-between">
+                <span><i class="bi bi-puzzle me-2"></i>Componentes Requeridos</span>
+                <span class="badge bg-primary">{{ components|length }} componentes</span>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>Componente</th>
+                            <th>SKU</th>
+                            <th class="text-center">Requerido</th>
+                            <th class="text-center">Consumido</th>
+                            <th>Unidad</th>
+                            <th>Disponible</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for comp in components %}
+                        <tr>
+                            <td class="fw-semibold">{{ comp.component.name }}</td>
+                            <td><span class="text-muted">{{ comp.component.sku }}</span></td>
+                            <td class="text-center fw-bold">{{ comp.quantity_required|floatformat:2 }}</td>
+                            <td class="text-center">
+                                {% if comp.quantity_consumed > 0 %}
+                                    <span class="text-success">{{ comp.quantity_consumed|floatformat:2 }}</span>
+                                {% else %}
+                                    <span class="text-muted">0</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ comp.unit.abbreviation }}</td>
+                            <td>
+                                {% if comp.is_available %}
+                                    <span class="badge bg-success"><i class="bi bi-check"></i> Si</span>
+                                {% else %}
+                                    <span class="badge bg-danger"><i class="bi bi-x"></i> No</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Column -->
+    <div class="col-lg-4">
+        <div class="card stat-card mb-3">
+            <div class="card-header"><i class="bi bi-calculator me-2"></i>Costos</div>
+            <div class="card-body">
+                <div class="d-flex justify-content-between mb-2">
+                    <span class="text-muted">Costo Estimado</span>
+                    <span>S/ {{ order.estimated_cost|floatformat:2|intcomma }}</span>
+                </div>
+                {% if order.actual_cost %}
+                <div class="d-flex justify-content-between mb-2">
+                    <span class="text-muted">Costo Real</span>
+                    <span class="fw-bold">S/ {{ order.actual_cost|floatformat:2|intcomma }}</span>
+                </div>
+                {% endif %}
+                {% if order.quantity > 0 %}
+                <hr style="border-color: var(--border-color);">
+                <div class="d-flex justify-content-between">
+                    <span class="text-muted">Costo por Unidad</span>
+                    <span class="fw-bold" style="color: var(--neon-green);">S/ {{ order.estimated_cost|floatformat:2 }}</span>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="card stat-card mb-3">
+            <div class="card-header"><i class="bi bi-calendar me-2"></i>Fechas</div>
+            <div class="card-body">
+                <div class="mb-2">
+                    <small class="text-muted">Fecha Planificada</small>
+                    <div>{{ order.planned_date|date:"d/m/Y" }}</div>
+                </div>
+                {% if order.start_date %}
+                <div class="mb-2">
+                    <small class="text-muted">Inicio de Produccion</small>
+                    <div>{{ order.start_date|date:"d/m/Y H:i" }}</div>
+                </div>
+                {% endif %}
+                {% if order.end_date %}
+                <div>
+                    <small class="text-muted">Fin de Produccion</small>
+                    <div class="text-success">{{ order.end_date|date:"d/m/Y H:i" }}</div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="card stat-card mb-3">
+            <div class="card-header"><i class="bi bi-info-circle me-2"></i>Informacion</div>
+            <div class="card-body">
+                <div class="mb-2">
+                    <small class="text-muted">BOM</small>
+                    <div><a href="{% url 'manufacturing:bom_detail' order.bom.pk %}">{{ order.bom.name }}</a></div>
+                </div>
+                <div class="mb-2">
+                    <small class="text-muted">Almacen</small>
+                    <div>{{ order.warehouse.name }}</div>
+                </div>
+                {% if order.sales_order %}
+                <div class="mb-2">
+                    <small class="text-muted">Pedido de Venta</small>
+                    <div><a href="{% url 'sales:order_detail' order.sales_order.pk %}">{{ order.sales_order.number }}</a></div>
+                </div>
+                {% endif %}
+                <div>
+                    <small class="text-muted">Creado por</small>
+                    <div>{{ order.created_by.get_full_name|default:order.created_by.username }}</div>
+                </div>
+            </div>
+        </div>
+
+        {% if order.notes %}
+        <div class="card stat-card">
+            <div class="card-header"><i class="bi bi-chat-left-text me-2"></i>Notas</div>
+            <div class="card-body">{{ order.notes }}</div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

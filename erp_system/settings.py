@@ -35,6 +35,8 @@ INSTALLED_APPS = [
     'apps.sunat_integration',
     'apps.n8n_integration',
     'apps.website',
+    'apps.sales',
+    'apps.manufacturing',
 ]
 
 MIDDLEWARE = [

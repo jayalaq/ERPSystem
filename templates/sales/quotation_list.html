@@ -1,0 +1,139 @@
+{% extends "base/base.html" %}
+{% load humanize %}
+{% block title %}Cotizaciones{% endblock %}
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+<li class="breadcrumb-item active">Cotizaciones</li>
+{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h4><i class="bi bi-file-earmark-richtext me-2"></i>Cotizaciones</h4>
+    <a href="{% url 'sales:quotation_create' %}" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i> Nueva Cotizacion</a>
+</div>
+
+<!-- Stats -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+        <div class="stat-card position-relative">
+            <div class="card-body d-flex align-items-center gap-3">
+                <div class="stat-icon" style="background: rgba(99, 102, 241, 0.15); color: var(--primary-light);">
+                    <i class="bi bi-file-earmark-richtext"></i>
+                </div>
+                <div>
+                    <div class="text-muted" style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em;">Total</div>
+                    <div class="fw-bold" style="font-size: 1.3rem;">{{ stats.total }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat-card position-relative">
+            <div class="card-body d-flex align-items-center gap-3">
+                <div class="stat-icon" style="background: rgba(245, 158, 11, 0.15); color: var(--neon-orange);">
+                    <i class="bi bi-pencil-square"></i>
+                </div>
+                <div>
+                    <div class="text-muted" style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em;">Borradores</div>
+                    <div class="fw-bold" style="font-size: 1.3rem;">{{ stats.draft }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat-card position-relative">
+            <div class="card-body d-flex align-items-center gap-3">
+                <div class="stat-icon" style="background: rgba(6, 182, 212, 0.15); color: var(--accent);">
+                    <i class="bi bi-send-check"></i>
+                </div>
+                <div>
+                    <div class="text-muted" style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em;">Enviadas</div>
+                    <div class="fw-bold" style="font-size: 1.3rem;">{{ stats.sent }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat-card position-relative">
+            <div class="card-body d-flex align-items-center gap-3">
+                <div class="stat-icon" style="background: rgba(16, 185, 129, 0.15); color: var(--neon-green);">
+                    <i class="bi bi-check-circle"></i>
+                </div>
+                <div>
+                    <div class="text-muted" style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em;">Aceptadas</div>
+                    <div class="fw-bold" style="font-size: 1.3rem;">{{ stats.accepted }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Filters -->
+<div class="card stat-card mb-3">
+    <div class="card-body py-2">
+        <form method="get" class="d-flex align-items-center gap-2 flex-wrap">
+            <div class="search-box">
+                <i class="bi bi-search search-icon"></i>
+                <input type="text" name="q" class="form-control" placeholder="Buscar cotizacion..." value="{{ query }}" style="width: 240px;">
+            </div>
+            <select name="status" class="form-select" style="width: auto;" onchange="this.form.submit()">
+                <option value="">Todos los estados</option>
+                <option value="draft" {% if status_filter == 'draft' %}selected{% endif %}>Borrador</option>
+                <option value="sent" {% if status_filter == 'sent' %}selected{% endif %}>Enviada</option>
+                <option value="accepted" {% if status_filter == 'accepted' %}selected{% endif %}>Aceptada</option>
+                <option value="rejected" {% if status_filter == 'rejected' %}selected{% endif %}>Rechazada</option>
+                <option value="expired" {% if status_filter == 'expired' %}selected{% endif %}>Expirada</option>
+            </select>
+            <button type="submit" class="btn btn-sm btn-outline-primary"><i class="bi bi-search"></i></button>
+        </form>
+    </div>
+</div>
+
+<!-- Table -->
+<div class="card stat-card">
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead>
+                <tr>
+                    <th>Numero</th>
+                    <th>Cliente</th>
+                    <th>Estado</th>
+                    <th>Fecha</th>
+                    <th>Valida Hasta</th>
+                    <th class="text-end">Total</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for q in quotations %}
+                <tr>
+                    <td><a href="{% url 'sales:quotation_detail' q.pk %}" class="fw-semibold">{{ q.number }}</a></td>
+                    <td>{{ q.customer.name }}</td>
+                    <td>
+                        <span class="badge bg-{% if q.status == 'accepted' %}success{% elif q.status == 'sent' %}info{% elif q.status == 'rejected' %}danger{% elif q.status == 'expired' %}warning{% elif q.status == 'draft' %}secondary{% else %}secondary{% endif %}">
+                            {{ q.get_status_display }}
+                        </span>
+                    </td>
+                    <td>{{ q.issue_date|date:"d/m/Y" }}</td>
+                    <td>
+                        {% if q.is_expired and q.status == 'sent' %}
+                            <span class="text-danger">{{ q.valid_until|date:"d/m/Y" }} <i class="bi bi-exclamation-triangle-fill"></i></span>
+                        {% else %}
+                            {{ q.valid_until|date:"d/m/Y" }}
+                        {% endif %}
+                    </td>
+                    <td class="text-end fw-semibold">S/ {{ q.total|floatformat:2|intcomma }}</td>
+                    <td>
+                        <a href="{% url 'sales:quotation_detail' q.pk %}" class="btn btn-sm btn-outline-primary" title="Ver"><i class="bi bi-eye"></i></a>
+                        {% if q.status == 'draft' %}
+                        <a href="{% url 'sales:quotation_edit' q.pk %}" class="btn btn-sm btn-outline-secondary" title="Editar"><i class="bi bi-pencil"></i></a>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="7" class="text-center text-muted py-4"><i class="bi bi-inbox me-2"></i>No hay cotizaciones</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

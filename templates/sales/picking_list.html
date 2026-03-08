@@ -1,0 +1,124 @@
+{% extends "base/base.html" %}
+{% load humanize %}
+{% block title %}Ordenes de Picking{% endblock %}
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+<li class="breadcrumb-item active">Picking / Preparacion</li>
+{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h4><i class="bi bi-box-seam me-2"></i>Ordenes de Picking</h4>
+</div>
+
+<!-- Stats -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+        <div class="stat-card position-relative">
+            <div class="card-body d-flex align-items-center gap-3">
+                <div class="stat-icon" style="background: rgba(99, 102, 241, 0.15); color: var(--primary-light);"><i class="bi bi-box-seam"></i></div>
+                <div>
+                    <div class="text-muted" style="font-size: 0.7rem; text-transform: uppercase;">Total</div>
+                    <div class="fw-bold" style="font-size: 1.3rem;">{{ stats.total }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat-card position-relative">
+            <div class="card-body d-flex align-items-center gap-3">
+                <div class="stat-icon" style="background: rgba(239, 68, 68, 0.15); color: var(--neon-red);"><i class="bi bi-clock"></i></div>
+                <div>
+                    <div class="text-muted" style="font-size: 0.7rem; text-transform: uppercase;">Pendientes</div>
+                    <div class="fw-bold" style="font-size: 1.3rem;">{{ stats.pending }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat-card position-relative">
+            <div class="card-body d-flex align-items-center gap-3">
+                <div class="stat-icon" style="background: rgba(245, 158, 11, 0.15); color: var(--neon-orange);"><i class="bi bi-arrow-repeat"></i></div>
+                <div>
+                    <div class="text-muted" style="font-size: 0.7rem; text-transform: uppercase;">En Proceso</div>
+                    <div class="fw-bold" style="font-size: 1.3rem;">{{ stats.in_progress }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat-card position-relative">
+            <div class="card-body d-flex align-items-center gap-3">
+                <div class="stat-icon" style="background: rgba(16, 185, 129, 0.15); color: var(--neon-green);"><i class="bi bi-check-circle"></i></div>
+                <div>
+                    <div class="text-muted" style="font-size: 0.7rem; text-transform: uppercase;">Completados</div>
+                    <div class="fw-bold" style="font-size: 1.3rem;">{{ stats.completed }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Filter -->
+<div class="card stat-card mb-3">
+    <div class="card-body py-2">
+        <form method="get" class="d-flex align-items-center gap-2">
+            <select name="status" class="form-select" style="width: auto;" onchange="this.form.submit()">
+                <option value="">Todos</option>
+                <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>Pendientes</option>
+                <option value="in_progress" {% if status_filter == 'in_progress' %}selected{% endif %}>En Proceso</option>
+                <option value="completed" {% if status_filter == 'completed' %}selected{% endif %}>Completados</option>
+            </select>
+        </form>
+    </div>
+</div>
+
+<!-- Table -->
+<div class="card stat-card">
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead>
+                <tr>
+                    <th>Numero</th>
+                    <th>Pedido</th>
+                    <th>Almacen</th>
+                    <th>Asignado a</th>
+                    <th>Estado</th>
+                    <th>Progreso</th>
+                    <th>Fecha Prog.</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for pick in pickings %}
+                <tr>
+                    <td><a href="{% url 'sales:picking_detail' pick.pk %}" class="fw-semibold">{{ pick.number }}</a></td>
+                    <td><a href="{% url 'sales:order_detail' pick.sales_order.pk %}">{{ pick.sales_order.number }}</a></td>
+                    <td>{{ pick.warehouse.name }}</td>
+                    <td>{{ pick.assigned_to.get_full_name|default:"Sin asignar" }}</td>
+                    <td>
+                        <span class="badge bg-{% if pick.status == 'completed' %}success{% elif pick.status == 'in_progress' %}warning{% elif pick.status == 'pending' %}secondary{% else %}danger{% endif %}">
+                            {{ pick.get_status_display }}
+                        </span>
+                    </td>
+                    <td style="min-width: 120px;">
+                        <div class="progress" style="height: 6px; background: var(--bg-surface);">
+                            <div class="progress-bar bg-{% if pick.progress_percent == 100 %}success{% elif pick.progress_percent > 0 %}warning{% else %}secondary{% endif %}" style="width: {{ pick.progress_percent }}%"></div>
+                        </div>
+                        <small class="text-muted">{{ pick.progress_percent }}%</small>
+                    </td>
+                    <td>{{ pick.scheduled_date|date:"d/m/Y" }}</td>
+                    <td>
+                        <a href="{% url 'sales:picking_detail' pick.pk %}" class="btn btn-sm btn-outline-primary"><i class="bi bi-eye"></i></a>
+                        {% if pick.status == 'pending' %}
+                        <a href="{% url 'sales:picking_start' pick.pk %}" class="btn btn-sm btn-success" title="Iniciar"><i class="bi bi-play-fill"></i></a>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="8" class="text-center text-muted py-4"><i class="bi bi-inbox me-2"></i>No hay ordenes de picking</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

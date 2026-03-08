@@ -1,0 +1,120 @@
+{% extends "base/base.html" %}
+{% block title %}{{ title }}{% endblock %}
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+<li class="breadcrumb-item"><a href="{% url 'sales:quotation_list' %}">Cotizaciones</a></li>
+<li class="breadcrumb-item active">{{ title }}</li>
+{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h4><i class="bi bi-file-earmark-richtext me-2"></i>{{ title }}</h4>
+</div>
+
+<form method="post" class="needs-validation" novalidate>
+    {% csrf_token %}
+
+    {% if form.errors %}
+    <div class="alert alert-danger">
+        <i class="bi bi-exclamation-triangle me-2"></i>Por favor corrija los errores.
+        {{ form.errors }}
+    </div>
+    {% endif %}
+
+    <div class="row g-4">
+        <!-- Left Column -->
+        <div class="col-lg-8">
+            <div class="card stat-card mb-3">
+                <div class="card-header"><i class="bi bi-info-circle me-2"></i>Informacion General</div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label">Numero</label>
+                            {{ form.number }}
+                        </div>
+                        <div class="col-md-8">
+                            <label class="form-label">Cliente</label>
+                            {{ form.customer }}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Contacto</label>
+                            {{ form.contact_name }}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Email</label>
+                            {{ form.contact_email }}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Telefono</label>
+                            {{ form.contact_phone }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card stat-card mb-3">
+                <div class="card-header"><i class="bi bi-truck me-2"></i>Condiciones</div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label">Condiciones de Pago</label>
+                            {{ form.payment_terms }}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Condiciones de Entrega</label>
+                            {{ form.delivery_terms }}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Tiempo de Entrega</label>
+                            {{ form.delivery_time }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card stat-card">
+                <div class="card-header"><i class="bi bi-chat-left-text me-2"></i>Notas</div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label">Notas (visibles al cliente)</label>
+                        {{ form.notes }}
+                    </div>
+                    <div>
+                        <label class="form-label">Notas Internas</label>
+                        {{ form.internal_notes }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column -->
+        <div class="col-lg-4">
+            <div class="card stat-card mb-3">
+                <div class="card-header"><i class="bi bi-calendar me-2"></i>Fechas y Estado</div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label">Estado</label>
+                        {{ form.status }}
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Fecha de Emision</label>
+                        {{ form.issue_date }}
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Valida Hasta</label>
+                        {{ form.valid_until }}
+                    </div>
+                    <div>
+                        <label class="form-label">% Descuento Global</label>
+                        {{ form.discount_percent }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-grid gap-2">
+                <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg me-1"></i> Guardar Cotizacion</button>
+                <a href="{% url 'sales:quotation_list' %}" class="btn btn-outline-secondary"><i class="bi bi-arrow-left me-1"></i> Cancelar</a>
+            </div>
+        </div>
+    </div>
+</form>
+{% endblock %}

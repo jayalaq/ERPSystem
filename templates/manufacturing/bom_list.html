@@ -1,0 +1,63 @@
+{% extends "base/base.html" %}
+{% load humanize %}
+{% block title %}Listas de Materiales{% endblock %}
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+<li class="breadcrumb-item active">Listas de Materiales</li>
+{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h4><i class="bi bi-diagram-3 me-2"></i>Listas de Materiales (BOM)</h4>
+    <a href="{% url 'manufacturing:bom_create' %}" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i> Nueva BOM</a>
+</div>
+
+<div class="card stat-card mb-3">
+    <div class="card-body py-2">
+        <form method="get" class="d-flex align-items-center gap-2">
+            <div class="search-box">
+                <i class="bi bi-search search-icon"></i>
+                <input type="text" name="q" class="form-control" placeholder="Buscar producto..." value="{{ query }}" style="width: 280px;">
+            </div>
+            <button type="submit" class="btn btn-sm btn-outline-primary"><i class="bi bi-search"></i></button>
+        </form>
+    </div>
+</div>
+
+<div class="card stat-card">
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead>
+                <tr>
+                    <th>Producto Final</th>
+                    <th>Nombre BOM</th>
+                    <th>Tipo</th>
+                    <th class="text-center">Componentes</th>
+                    <th class="text-center">Cant. Producir</th>
+                    <th class="text-center">Tiempo (min)</th>
+                    <th class="text-end">Costo Estimado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for bom in boms %}
+                <tr>
+                    <td class="fw-semibold">{{ bom.product.name }}</td>
+                    <td>{{ bom.name }}</td>
+                    <td><span class="badge bg-{% if bom.bom_type == 'manufacturing' %}primary{% elif bom.bom_type == 'assembly' %}info{% else %}secondary{% endif %}">{{ bom.get_bom_type_display }}</span></td>
+                    <td class="text-center">{{ bom.component_count }}</td>
+                    <td class="text-center">{{ bom.quantity|floatformat:0 }}</td>
+                    <td class="text-center">{{ bom.estimated_time_minutes }} min</td>
+                    <td class="text-end fw-semibold">S/ {{ bom.estimated_cost|floatformat:2|intcomma }}</td>
+                    <td>
+                        <a href="{% url 'manufacturing:bom_detail' bom.pk %}" class="btn btn-sm btn-outline-primary" title="Ver"><i class="bi bi-eye"></i></a>
+                        <a href="{% url 'manufacturing:bom_edit' bom.pk %}" class="btn btn-sm btn-outline-secondary" title="Editar"><i class="bi bi-pencil"></i></a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="8" class="text-center text-muted py-4"><i class="bi bi-inbox me-2"></i>No hay listas de materiales</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,158 @@
+{% extends "base/base.html" %}
+{% load humanize %}
+{% block title %}BOM: {{ bom.product.name }}{% endblock %}
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+<li class="breadcrumb-item"><a href="{% url 'manufacturing:bom_list' %}">Listas de Materiales</a></li>
+<li class="breadcrumb-item active">{{ bom.product.name }}</li>
+{% endblock %}
+{% block content %}
+<div class="page-header">
+    <div>
+        <h4><i class="bi bi-diagram-3 me-2"></i>{{ bom.product.name }}</h4>
+        <span class="badge bg-{% if bom.bom_type == 'manufacturing' %}primary{% elif bom.bom_type == 'assembly' %}info{% else %}secondary{% endif %}" style="font-size: 0.75rem;">
+            {{ bom.get_bom_type_display }}
+        </span>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{% url 'manufacturing:bom_edit' bom.pk %}" class="btn btn-outline-primary btn-sm"><i class="bi bi-pencil me-1"></i>Editar</a>
+        <a href="{% url 'manufacturing:production_order_create' %}?bom={{ bom.pk }}" class="btn btn-success btn-sm">
+            <i class="bi bi-play-circle me-1"></i>Crear Orden de Produccion
+        </a>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-8">
+        <!-- Components -->
+        <div class="card stat-card mb-3">
+            <div class="card-header d-flex justify-content-between">
+                <span><i class="bi bi-puzzle me-2"></i>Componentes / Materiales</span>
+                <span class="badge bg-primary">{{ components|length }} componentes</span>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>Componente</th>
+                            <th>SKU</th>
+                            <th class="text-center">Cantidad</th>
+                            <th>Unidad</th>
+                            <th class="text-end">Costo Unit.</th>
+                            <th class="text-end">Costo Total</th>
+                            <th>Notas</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for comp in components %}
+                        <tr>
+                            <td class="fw-semibold">{{ comp.component.name }}</td>
+                            <td><span class="text-muted">{{ comp.component.sku }}</span></td>
+                            <td class="text-center">{{ comp.quantity|floatformat:2 }}</td>
+                            <td>{{ comp.unit.abbreviation }}</td>
+                            <td class="text-end">S/ {{ comp.component.purchase_price|floatformat:2|intcomma }}</td>
+                            <td class="text-end fw-semibold">S/ {{ comp.cost|floatformat:2|intcomma }}</td>
+                            <td>{{ comp.notes|default:"-" }}</td>
+                            <td>
+                                <a href="{% url 'manufacturing:bom_remove_component' bom.pk comp.pk %}" class="btn btn-sm btn-outline-danger" onclick="return confirm('Eliminar componente?')"><i class="bi bi-trash"></i></a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="8" class="text-center text-muted py-4">No hay componentes. Agregue materiales a esta BOM.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                    {% if components %}
+                    <tfoot>
+                        <tr>
+                            <td colspan="5" class="text-end fw-bold">Costo Total Estimado:</td>
+                            <td class="text-end fw-bold" style="color: var(--neon-green);">S/ {{ bom.estimated_cost|floatformat:2|intcomma }}</td>
+                            <td colspan="2"></td>
+                        </tr>
+                    </tfoot>
+                    {% endif %}
+                </table>
+            </div>
+        </div>
+
+        <!-- Add Component Form -->
+        <div class="card stat-card">
+            <div class="card-header"><i class="bi bi-plus-circle me-2"></i>Agregar Componente</div>
+            <div class="card-body">
+                <form method="post" action="{% url 'manufacturing:bom_add_component' bom.pk %}">
+                    {% csrf_token %}
+                    <div class="row g-2 align-items-end">
+                        <div class="col-md-4">
+                            <label class="form-label">Componente</label>
+                            {{ component_form.component }}
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Cantidad</label>
+                            {{ component_form.quantity }}
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Unidad</label>
+                            {{ component_form.unit }}
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Notas</label>
+                            {{ component_form.notes }}
+                        </div>
+                        <div class="col-md-2">
+                            <button type="submit" class="btn btn-primary w-100"><i class="bi bi-plus-lg me-1"></i>Agregar</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Column -->
+    <div class="col-lg-4">
+        <div class="card stat-card mb-3">
+            <div class="card-header"><i class="bi bi-info-circle me-2"></i>Informacion</div>
+            <div class="card-body">
+                <div class="mb-2">
+                    <small class="text-muted">Producto Final</small>
+                    <div class="fw-semibold">{{ bom.product.name }}</div>
+                </div>
+                <div class="mb-2">
+                    <small class="text-muted">SKU</small>
+                    <div>{{ bom.product.sku }}</div>
+                </div>
+                <div class="mb-2">
+                    <small class="text-muted">Nombre BOM</small>
+                    <div>{{ bom.name }}</div>
+                </div>
+                <div class="mb-2">
+                    <small class="text-muted">Cantidad a Producir</small>
+                    <div>{{ bom.quantity|floatformat:0 }} {{ bom.product.unit.abbreviation }}</div>
+                </div>
+                <div class="mb-2">
+                    <small class="text-muted">Tiempo Estimado</small>
+                    <div>{{ bom.estimated_time_minutes }} minutos</div>
+                </div>
+                <hr style="border-color: var(--border-color);">
+                <div class="mb-2">
+                    <small class="text-muted">Costo Estimado</small>
+                    <div class="fw-bold" style="font-size: 1.2rem; color: var(--neon-green);">S/ {{ bom.estimated_cost|floatformat:2|intcomma }}</div>
+                </div>
+                {% if bom.product.sale_price %}
+                <div>
+                    <small class="text-muted">Precio de Venta</small>
+                    <div>S/ {{ bom.product.sale_price|floatformat:2|intcomma }}</div>
+                    <small class="text-success">Margen: S/ {{ bom.product.sale_price|floatformat:2 }}</small>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        {% if bom.notes %}
+        <div class="card stat-card">
+            <div class="card-header"><i class="bi bi-chat-left-text me-2"></i>Notas</div>
+            <div class="card-body">{{ bom.notes }}</div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

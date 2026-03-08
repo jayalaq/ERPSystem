@@ -136,7 +136,7 @@ services:
     environment:
       <<: *common-env
       DEBUG: "True"
-      ALLOWED_HOSTS: "${ERP_TESTING_HOST:-erp-testing.${DOMAIN}},localhost"
+      ALLOWED_HOSTS: "${ERP_TESTING_HOST:-erp-testing.tailoringconsult.com},localhost"
       DATABASE_URL: postgres://erp_user:${DB_TESTING_PASSWORD:-change_me_testing}@erp-db-testing:5432/erp_testing
       DJANGO_SETTINGS_MODULE: erp_system.settings
       ENVIRONMENT: testing
@@ -153,7 +153,7 @@ services:
       - hostinger-network
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.erp-test.rule=Host(`${ERP_TESTING_HOST:-erp-testing.${DOMAIN}}`)"
+      - "traefik.http.routers.erp-test.rule=Host(`${ERP_TESTING_HOST:-erp-testing.tailoringconsult.com}`)"
       - "traefik.http.routers.erp-test.tls=true"
       - "traefik.http.routers.erp-test.tls.certresolver=letsencrypt"
       - "traefik.http.services.erp-test.loadbalancer.server.port=8000"

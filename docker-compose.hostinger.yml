@@ -225,6 +225,7 @@ services:
       - "traefik.http.routers.erp-nginx.entrypoints=websecure"
       - "traefik.http.routers.erp-nginx.tls.certresolver=mytlschallenge"
       - "traefik.http.services.erp-nginx.loadbalancer.server.port=80"
+      - "traefik.docker.network=${HOSTINGER_NETWORK:-root_default}"
 
 volumes:
   erp_pg_production:

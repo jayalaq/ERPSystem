@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from .models import User, Company, Branch, Currency, AuditLog, SystemConfig
+from .models import User, Company, Branch, Currency, AuditLog, SystemConfig, FeatureFlag
 
 
 @admin.register(User)
@@ -37,3 +37,11 @@ class AuditLogAdmin(admin.ModelAdmin):
 @admin.register(SystemConfig)
 class SystemConfigAdmin(admin.ModelAdmin):
     list_display = ['key', 'value', 'description']
+
+
+@admin.register(FeatureFlag)
+class FeatureFlagAdmin(admin.ModelAdmin):
+    list_display = ['code', 'name', 'module', 'is_enabled', 'environment', 'updated_at']
+    list_filter = ['is_enabled', 'environment', 'module']
+    list_editable = ['is_enabled', 'environment']
+    search_fields = ['code', 'name']

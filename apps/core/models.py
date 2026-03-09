@@ -137,3 +137,52 @@ class SystemConfig(models.Model):
 
     def __str__(self):
         return self.key
+
+
+class FeatureFlag(models.Model):
+    """Feature flags to control what's deployed in production vs testing."""
+
+    class Environment(models.TextChoices):
+        ALL = 'all', 'Todos los entornos'
+        TESTING = 'testing', 'Solo Testing'
+        PRODUCTION = 'production', 'Solo Producción'
+
+    code = models.CharField(max_length=80, unique=True, verbose_name='Código')
+    name = models.CharField(max_length=200, verbose_name='Nombre')
+    description = models.TextField(blank=True, verbose_name='Descripción')
+    is_enabled = models.BooleanField(default=False, verbose_name='Habilitado')
+    environment = models.CharField(
+        max_length=20, choices=Environment.choices, default=Environment.TESTING,
+        verbose_name='Entorno',
+    )
+    module = models.CharField(max_length=50, blank=True, verbose_name='Módulo')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = 'Feature Flag'
+        verbose_name_plural = 'Feature Flags'
+        ordering = ['module', 'code']
+
+    def __str__(self):
+        status = 'ON' if self.is_enabled else 'OFF'
+        return f"[{status}] {self.name} ({self.environment})"
+
+    @classmethod
+    def is_active(cls, code):
+        """Check if a feature flag is active for the current environment."""
+        import os
+        current_env = os.environ.get('ENVIRONMENT', 'development')
+        try:
+            flag = cls.objects.get(code=code)
+        except cls.DoesNotExist:
+            return False
+        if not flag.is_enabled:
+            return False
+        if flag.environment == 'all':
+            return True
+        if flag.environment == 'testing' and current_env in ('testing', 'development'):
+            return True
+        if flag.environment == 'production' and current_env == 'production':
+            return True
+        return False

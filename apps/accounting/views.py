@@ -1,4 +1,5 @@
 from django.contrib.auth.decorators import login_required
+from django.http import HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.db.models import Q, Sum, Count, Min, Max
@@ -8,7 +9,7 @@ from datetime import timedelta
 
 from .models import Invoice, InvoiceItem, PaymentRecord, AccountPayable, DocumentSeries
 from .forms import InvoiceForm, PaymentRecordForm, DocumentSeriesForm
-from apps.sunat_integration.services import SunatService
+from apps.sunat_integration.services import SunatService, _flag_active
 
 
 @login_required
@@ -50,6 +51,14 @@ def invoice_create(request):
             invoice = form.save(commit=False)
             invoice.created_by = request.user
 
+            # Series validation (if enabled)
+            if _flag_active('invoice_series_validation'):
+                valid_prefixes = {'01': 'F', '03': 'B', '07': 'F', '08': 'F'}
+                expected = valid_prefixes.get(invoice.doc_type, '')
+                if expected and not invoice.series.startswith(expected):
+                    messages.error(request, f'Serie invalida. Para {invoice.get_doc_type_display()} debe iniciar con "{expected}" (ej: {expected}001).')
+                    return render(request, 'accounting/invoice_form.html', {'form': form, 'title': 'Nuevo Comprobante'})
+
             # Get next correlative
             doc_series = DocumentSeries.objects.filter(
                 doc_type=invoice.doc_type, series=invoice.series, is_active=True
@@ -61,9 +70,26 @@ def invoice_create(request):
 
             invoice.save()
             messages.success(request, f'Comprobante {invoice.full_number} creado.')
+
+            # Auto-send to SUNAT if enabled
+            if _flag_active('invoice_auto_send_sunat') and invoice.status == 'draft':
+                invoice.status = 'issued'
+                invoice.save(update_fields=['status'])
+                try:
+                    from apps.sunat_integration.tasks import send_invoice_to_sunat
+                    send_invoice_to_sunat.delay(invoice.pk)
+                    messages.info(request, 'Comprobante enviado a SUNAT en segundo plano.')
+                except Exception:
+                    pass
+
             return redirect('accounting:invoice_detail', pk=invoice.pk)
     else:
-        form = InvoiceForm(initial={'issue_date': timezone.now().date()})
+        # Handle doc_type from URL param (PWA shortcut support)
+        initial = {'issue_date': timezone.now().date()}
+        doc_type_param = request.GET.get('doc_type', '')
+        if doc_type_param in ('01', '03', '07', '08'):
+            initial['doc_type'] = doc_type_param
+        form = InvoiceForm(initial=initial)
     return render(request, 'accounting/invoice_form.html', {'form': form, 'title': 'Nuevo Comprobante'})
 
 
@@ -78,6 +104,8 @@ def invoice_detail(request, pk):
     return render(request, 'accounting/invoice_detail.html', {
         'invoice': invoice, 'items': items, 'payments': payments,
         'total_paid': total_paid, 'balance': balance,
+        'pdf_enabled': _flag_active('invoice_pdf_generation'),
+        'void_enabled': _flag_active('sunat_comunicacion_baja'),
     })
 
 
@@ -90,6 +118,55 @@ def invoice_send_sunat(request, pk):
         messages.success(request, result['message'])
     else:
         messages.error(request, result['message'])
+    return redirect('accounting:invoice_detail', pk=pk)
+
+
+@login_required
+def invoice_download_pdf(request, pk):
+    """Generate and download invoice PDF."""
+    invoice = get_object_or_404(Invoice, pk=pk)
+
+    if not _flag_active('invoice_pdf_generation'):
+        messages.warning(request, 'Generacion de PDF no habilitada. Activar feature flag: invoice_pdf_generation')
+        return redirect('accounting:invoice_detail', pk=pk)
+
+    service = SunatService()
+    pdf_content = service.generate_invoice_pdf(invoice)
+
+    if pdf_content:
+        from django.core.files.base import ContentFile
+        pdf_filename = f"{invoice.full_number}.pdf"
+        invoice.pdf_file.save(pdf_filename, ContentFile(pdf_content), save=True)
+
+        response = HttpResponse(pdf_content, content_type='application/pdf')
+        response['Content-Disposition'] = f'inline; filename="{pdf_filename}"'
+        return response
+    else:
+        messages.error(request, 'Error al generar el PDF.')
+        return redirect('accounting:invoice_detail', pk=pk)
+
+
+@login_required
+def invoice_void(request, pk):
+    """Void an invoice via Comunicacion de Baja."""
+    invoice = get_object_or_404(Invoice, pk=pk)
+
+    if not _flag_active('sunat_comunicacion_baja'):
+        messages.warning(request, 'Comunicacion de Baja no habilitada. Activar feature flag: sunat_comunicacion_baja')
+        return redirect('accounting:invoice_detail', pk=pk)
+
+    if request.method == 'POST':
+        reason = request.POST.get('reason', 'Anulacion de comprobante')
+        invoice.notes = reason
+        invoice.save(update_fields=['notes'])
+
+        service = SunatService()
+        result = service.send_voided_documents(timezone.now().date(), [invoice])
+        if result['success']:
+            messages.success(request, result['message'])
+        else:
+            messages.error(request, result['message'])
+
     return redirect('accounting:invoice_detail', pk=pk)
 
 
@@ -342,9 +419,22 @@ def daily_receipt_summary(request):
         total=Sum('total'),
     ).order_by('series')
 
+    # Handle Resumen Diario sending
+    if request.method == 'POST' and 'send_resumen' in request.POST:
+        if _flag_active('sunat_resumen_diario'):
+            service = SunatService()
+            result = service.send_daily_summary(filter_date, list(boletas))
+            if result['success']:
+                messages.success(request, result['message'])
+            else:
+                messages.error(request, result['message'])
+        else:
+            messages.warning(request, 'Resumen Diario no habilitado. Activar feature flag: sunat_resumen_diario')
+
     return render(request, 'accounting/daily_receipt_summary.html', {
         'boletas': boletas, 'filter_date': filter_date,
         'summary': total, 'by_series': by_series,
+        'resumen_enabled': _flag_active('sunat_resumen_diario'),
     })
 
 

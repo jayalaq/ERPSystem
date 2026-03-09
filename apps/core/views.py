@@ -371,3 +371,50 @@ def system_customize(request):
     return render(request, 'core/system_customize.html', {
         'company': company, 'configs': configs,
     })
+
+
+@login_required
+def feature_flags_config(request):
+    """Feature flags configuration view - control what's deployed."""
+    from apps.core.models import FeatureFlag
+
+    if request.method == 'POST':
+        flag_id = request.POST.get('flag_id')
+        action = request.POST.get('action')  # 'enable', 'disable', 'set_env'
+
+        try:
+            flag = FeatureFlag.objects.get(pk=flag_id)
+            if action == 'enable':
+                flag.is_enabled = True
+                flag.save(update_fields=['is_enabled', 'updated_at'])
+            elif action == 'disable':
+                flag.is_enabled = False
+                flag.save(update_fields=['is_enabled', 'updated_at'])
+            elif action == 'set_env':
+                new_env = request.POST.get('environment', 'testing')
+                if new_env in ('all', 'testing', 'production'):
+                    flag.environment = new_env
+                    flag.save(update_fields=['environment', 'updated_at'])
+
+            from django.contrib import messages as msg
+            msg.success(request, f'Feature "{flag.name}" actualizado.')
+        except FeatureFlag.DoesNotExist:
+            pass
+
+        return redirect('feature_flags')
+
+    flags = FeatureFlag.objects.all().order_by('module', 'code')
+    modules = {}
+    for flag in flags:
+        module = flag.module or 'general'
+        if module not in modules:
+            modules[module] = []
+        modules[module].append(flag)
+
+    import os
+    current_env = os.environ.get('ENVIRONMENT', 'development')
+
+    return render(request, 'core/feature_flags.html', {
+        'modules': modules,
+        'current_env': current_env,
+    })

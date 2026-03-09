@@ -51,3 +51,54 @@ def bulk_send_pending_invoices():
     for invoice in pending:
         send_invoice_to_sunat.delay(invoice.pk)
     return f"Queued {pending.count()} invoices"
+
+
+@shared_task
+def send_daily_summary_task(date_str=None):
+    """Send Resumen Diario de Boletas to SUNAT."""
+    from datetime import datetime, date
+    from apps.accounting.models import Invoice
+    from .services import SunatService, _flag_active
+
+    if not _flag_active('sunat_resumen_diario'):
+        return 'Feature deshabilitada: sunat_resumen_diario'
+
+    if date_str:
+        summary_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+    else:
+        summary_date = date.today()
+
+    boletas = list(Invoice.objects.filter(
+        doc_type='03',
+        issue_date=summary_date,
+        status__in=['issued', 'accepted'],
+    ))
+
+    if not boletas:
+        return f'No hay boletas para {summary_date}'
+
+    service = SunatService()
+    result = service.send_daily_summary(summary_date, boletas)
+    logger.info(f"Daily summary {summary_date}: {result}")
+    return result
+
+
+@shared_task(bind=True, max_retries=3, default_retry_delay=120)
+def send_voided_documents_task(self, invoice_ids):
+    """Send Comunicacion de Baja asynchronously."""
+    from datetime import date
+    from apps.accounting.models import Invoice
+    from .services import SunatService, _flag_active
+
+    if not _flag_active('sunat_comunicacion_baja'):
+        return 'Feature deshabilitada: sunat_comunicacion_baja'
+
+    try:
+        invoices = list(Invoice.objects.filter(pk__in=invoice_ids))
+        service = SunatService()
+        result = service.send_voided_documents(date.today(), invoices)
+        logger.info(f"Voided documents: {result}")
+        return result
+    except Exception as exc:
+        logger.error(f"Error sending voided documents: {exc}")
+        raise self.retry(exc=exc)

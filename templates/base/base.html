@@ -11,9 +11,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
         :root {
-            --sidebar-width: 260px;
-            --sidebar-collapsed: 60px;
-            --topbar-height: 50px;
+            --topbar-height: 48px;
             --primary: #6366f1;
             --primary-dark: #4f46e5;
             --primary-light: #818cf8;
@@ -55,114 +53,79 @@
         ::-webkit-scrollbar-thumb { background: rgba(99, 102, 241, 0.3); border-radius: 3px; }
         ::-webkit-scrollbar-thumb:hover { background: var(--primary); }
 
-        /* ========== SIDEBAR ========== */
-        .sidebar {
-            position: fixed; top: 0; left: 0; bottom: 0;
-            width: var(--sidebar-width); background: var(--bg-sidebar);
-            z-index: 1040; overflow-y: auto; overflow-x: hidden;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        /* ========== TOPBAR (Odoo Enterprise style) ========== */
+        .main-topbar {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 1040;
+            height: var(--topbar-height);
+            background: var(--bg-sidebar);
+            border-bottom: 1px solid var(--border-color);
+            display: flex; align-items: center;
+            padding: 0 1rem;
+            backdrop-filter: blur(20px) saturate(180%);
+        }
+        .main-topbar .brand-section {
+            display: flex; align-items: center; gap: 0.6rem;
+            padding-right: 1rem;
             border-right: 1px solid var(--border-color);
-            backdrop-filter: blur(20px);
+            margin-right: 0.5rem;
         }
-
-        .sidebar-brand {
-            padding: 0.85rem 1rem; border-bottom: 1px solid var(--border-color);
-            display: flex; align-items: center; gap: 0.7rem;
-            background: linear-gradient(180deg, rgba(99, 102, 241, 0.08) 0%, transparent 100%);
-            position: sticky; top: 0; z-index: 10;
-        }
-        .sidebar-brand .brand-icon {
-            width: 36px; height: 36px; min-width: 36px;
+        .main-topbar .brand-icon {
+            width: 32px; height: 32px; min-width: 32px;
             background: linear-gradient(135deg, var(--primary), var(--accent));
-            border-radius: 10px; display: flex; align-items: center; justify-content: center;
-            color: white; font-size: 1rem; font-weight: 800;
-            box-shadow: 0 0 20px rgba(99, 102, 241, 0.4);
-            animation: pulse-glow 3s ease-in-out infinite;
+            border-radius: 8px; display: flex; align-items: center; justify-content: center;
+            color: white; font-size: 0.85rem; font-weight: 800;
+            box-shadow: 0 0 15px rgba(99, 102, 241, 0.3);
         }
-        @keyframes pulse-glow {
-            0%, 100% { box-shadow: 0 0 15px rgba(99, 102, 241, 0.3); }
-            50% { box-shadow: 0 0 25px rgba(99, 102, 241, 0.6), 0 0 40px rgba(6, 182, 212, 0.2); }
-        }
-        .sidebar-brand .brand-text h6 {
-            color: #fff; margin: 0; font-weight: 700; font-size: 0.9rem; line-height: 1.2;
+        .main-topbar .brand-name {
+            font-weight: 700; font-size: 0.85rem; color: #fff;
             background: linear-gradient(135deg, #fff, var(--accent));
             -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-        }
-        .sidebar-brand .brand-text small {
-            color: var(--text-muted); font-size: 0.6rem; font-weight: 600;
-            letter-spacing: 0.12em; text-transform: uppercase;
+            white-space: nowrap;
         }
 
-        .sidebar-nav { padding: 0.5rem 0; }
-        .nav-section {
-            padding: 1.2rem 1rem 0.4rem; color: var(--text-muted); font-size: 0.6rem;
-            text-transform: uppercase; letter-spacing: 0.12em; font-weight: 700;
+        /* App Switcher Button */
+        .app-switcher-btn {
+            width: 36px; height: 36px; border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background: transparent; color: var(--text-secondary);
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: all 0.2s; margin-right: 0.75rem;
+            position: relative;
         }
-        .nav-section:first-child { padding-top: 0.5rem; }
+        .app-switcher-btn:hover, .app-switcher-btn.active {
+            background: rgba(99, 102, 241, 0.15); color: var(--accent);
+            border-color: var(--border-glow); box-shadow: 0 0 12px var(--accent-glow);
+        }
 
-        .sidebar-nav .nav-link {
-            display: flex; align-items: center; gap: 0.7rem;
-            padding: 0.5rem 1rem; color: var(--text-secondary);
-            font-size: 0.8rem; transition: all 0.2s ease; text-decoration: none;
-            border-radius: 0; margin: 1px 0; position: relative;
-            font-weight: 400;
+        /* Module Navigation Tabs (within modules) */
+        .module-nav {
+            display: flex; align-items: center; gap: 0.25rem;
+            flex: 1; overflow-x: auto; padding: 0 0.5rem;
         }
-        .sidebar-nav .nav-link:hover {
+        .module-nav::-webkit-scrollbar { display: none; }
+        .module-nav .nav-tab {
+            padding: 0.4rem 0.75rem; font-size: 0.8rem; font-weight: 500;
+            color: var(--text-secondary); text-decoration: none;
+            border-radius: 6px; transition: all 0.15s; white-space: nowrap;
+        }
+        .module-nav .nav-tab:hover {
             background: rgba(99, 102, 241, 0.08); color: var(--text-primary);
         }
-        .sidebar-nav .nav-link.active {
-            background: linear-gradient(90deg, rgba(99, 102, 241, 0.15), transparent);
-            color: #fff; font-weight: 500;
-        }
-        .sidebar-nav .nav-link.active::before {
-            content: ''; position: absolute; left: 0; top: 6px; bottom: 6px;
-            width: 3px; background: linear-gradient(180deg, var(--primary), var(--accent));
-            border-radius: 0 3px 3px 0;
-            box-shadow: 0 0 10px var(--accent-glow);
-        }
-        .sidebar-nav .nav-link i {
-            font-size: 1rem; width: 1.3rem; text-align: center; opacity: 0.7;
-            transition: all 0.2s;
-        }
-        .sidebar-nav .nav-link:hover i { opacity: 1; color: var(--accent); }
-        .sidebar-nav .nav-link.active i { opacity: 1; color: var(--accent); }
-        .sidebar-nav .nav-link .badge {
-            margin-left: auto; font-size: 0.6rem; padding: 0.2em 0.55em;
-            background: linear-gradient(135deg, var(--primary), var(--accent));
-            border-radius: 10px; font-weight: 600;
+        .module-nav .nav-tab.active {
+            background: rgba(99, 102, 241, 0.15); color: #fff; font-weight: 600;
         }
 
-        .nav-group-toggle { cursor: pointer; }
-        .nav-group-toggle::after {
-            content: '\F282'; font-family: 'bootstrap-icons';
-            margin-left: auto; font-size: 0.65rem; transition: transform 0.3s; opacity: 0.4;
+        .topbar-right {
+            display: flex; align-items: center; gap: 0.5rem; margin-left: auto;
         }
-        .nav-group-toggle[aria-expanded="true"]::after { transform: rotate(90deg); opacity: 0.8; }
-        .nav-submenu .nav-link { padding-left: 2.8rem; font-size: 0.78rem; }
-
-        /* ========== TOPBAR ========== */
-        .main-content { margin-left: var(--sidebar-width); min-height: 100vh; transition: margin 0.3s; }
-        .topbar {
-            background: rgba(10, 14, 26, 0.8);
-            backdrop-filter: blur(20px) saturate(180%);
-            border-bottom: 1px solid var(--border-color);
-            padding: 0 1.25rem; display: flex; align-items: center; justify-content: space-between;
-            position: sticky; top: 0; z-index: 1030; height: var(--topbar-height);
-        }
-        .topbar-left { display: flex; align-items: center; gap: 0.75rem; }
-        .topbar-right { display: flex; align-items: center; gap: 0.5rem; }
-
-        .breadcrumb { margin: 0; font-size: 0.8rem; }
-        .breadcrumb-item a { color: var(--primary-light); text-decoration: none; }
-        .breadcrumb-item.active { color: var(--text-secondary); }
-
-        .topbar .btn-icon {
-            width: 34px; height: 34px; border-radius: 8px; border: 1px solid var(--border-color);
-            background: transparent; color: var(--text-secondary); display: flex;
+        .topbar-right .btn-icon {
+            width: 34px; height: 34px; border-radius: 8px;
+            border: 1px solid var(--border-color); background: transparent;
+            color: var(--text-secondary); display: flex;
             align-items: center; justify-content: center; cursor: pointer;
             transition: all 0.2s;
         }
-        .topbar .btn-icon:hover {
+        .topbar-right .btn-icon:hover {
             background: rgba(99, 102, 241, 0.1); color: var(--accent);
             border-color: var(--border-glow); box-shadow: 0 0 10px var(--accent-glow);
         }
@@ -182,7 +145,68 @@
         }
         .user-name { font-size: 0.8rem; color: var(--text-primary); font-weight: 500; }
 
-        /* ========== CONTENT ========== */
+        /* ========== APP SWITCHER DROPDOWN ========== */
+        .app-switcher-panel {
+            display: none; position: fixed;
+            top: var(--topbar-height); left: 0; right: 0; bottom: 0;
+            z-index: 1035;
+        }
+        .app-switcher-panel.show { display: block; }
+        .app-switcher-overlay {
+            position: absolute; inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+        }
+        .app-switcher-grid {
+            position: absolute; top: 0; left: 0; right: 0;
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border-color);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+            padding: 1.5rem 2rem 2rem;
+            max-height: calc(100vh - var(--topbar-height));
+            overflow-y: auto;
+            animation: slideDown 0.2s ease-out;
+        }
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .app-switcher-grid .app-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+            gap: 0.75rem;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .app-switcher-grid .app-tile {
+            display: flex; flex-direction: column; align-items: center;
+            padding: 1rem 0.5rem; border-radius: 12px; text-decoration: none;
+            transition: all 0.2s; cursor: pointer;
+            border: 1px solid transparent;
+        }
+        .app-switcher-grid .app-tile:hover {
+            background: var(--bg-surface);
+            border-color: var(--border-color);
+            transform: translateY(-2px);
+        }
+        .app-switcher-grid .app-tile .tile-icon {
+            width: 44px; height: 44px; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.2rem; color: #fff; margin-bottom: 0.5rem;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+        }
+        .app-switcher-grid .app-tile .tile-label {
+            font-size: 0.75rem; font-weight: 500; color: var(--text-primary);
+            text-align: center; line-height: 1.2;
+        }
+        .app-section-title {
+            font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.1em;
+            color: var(--text-muted); font-weight: 700; margin-bottom: 0.75rem;
+            padding-bottom: 0.35rem; border-bottom: 1px solid var(--border-color);
+        }
+
+        /* ========== MAIN CONTENT ========== */
+        .main-content { padding-top: var(--topbar-height); min-height: 100vh; }
         .content-area { padding: 1.5rem; }
 
         /* ========== CARDS (Glassmorphism) ========== */
@@ -197,8 +221,7 @@
         .stat-card::before {
             content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
             background: linear-gradient(90deg, transparent, var(--accent), transparent);
-            opacity: 0;
-            transition: opacity 0.3s;
+            opacity: 0; transition: opacity 0.3s;
         }
         .stat-card:hover {
             border-color: var(--border-glow);
@@ -424,17 +447,20 @@
             0%, 100% { opacity: 1; } 50% { opacity: 0.5; }
         }
 
+        /* ========== BREADCRUMB ========== */
+        .breadcrumb { margin: 0; font-size: 0.8rem; }
+        .breadcrumb-item a { color: var(--primary-light); text-decoration: none; }
+        .breadcrumb-item.active { color: var(--text-secondary); }
+
         /* ========== RESPONSIVE ========== */
-        @media (max-width: 991px) {
-            .sidebar { transform: translateX(-100%); }
-            .sidebar.show { transform: translateX(0); box-shadow: 4px 0 30px rgba(0, 0, 0, 0.6); }
-            .main-content { margin-left: 0; }
-            .sidebar-overlay {
-                display: none; position: fixed; inset: 0;
-                background: rgba(0, 0, 0, 0.6); z-index: 1035;
-                backdrop-filter: blur(4px);
+        @media (max-width: 768px) {
+            .app-switcher-grid { padding: 1rem; }
+            .app-switcher-grid .app-grid {
+                grid-template-columns: repeat(auto-fill, minmax(85px, 1fr));
+                gap: 0.5rem;
             }
-            .sidebar-overlay.show { display: block; }
+            .brand-name { display: none; }
+            .module-nav { display: none; }
         }
 
         /* ========== ANIMATIONS ========== */
@@ -447,176 +473,204 @@
     {% block extra_css %}{% endblock %}
 </head>
 <body>
-    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
 
-    <!-- Sidebar -->
-    <nav class="sidebar" id="sidebar">
-        <div class="sidebar-brand">
-            <div class="brand-icon">
-                <i class="bi bi-hexagon-fill" style="font-size:0.9rem;"></i>
-            </div>
-            <div class="brand-text">
-                <h6>{{ company.name|default:"NexusERP" }}</h6>
-                <small>Sistema Integral</small>
-            </div>
+    <!-- ========== TOP NAVBAR (Odoo Enterprise style) ========== -->
+    <nav class="main-topbar">
+        <!-- Brand -->
+        <div class="brand-section">
+            <a href="{% url 'dashboard' %}" style="text-decoration: none; display: flex; align-items: center; gap: 0.6rem;">
+                <div class="brand-icon">
+                    <i class="bi bi-hexagon-fill" style="font-size:0.8rem;"></i>
+                </div>
+                <span class="brand-name">{{ company.name|default:"NexusERP" }}</span>
+            </a>
         </div>
-        <div class="sidebar-nav">
-            <!-- Principal -->
-            <div class="nav-section">Principal</div>
-            <a href="{% url 'dashboard' %}" class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
-                <i class="bi bi-grid-1x2"></i> Dashboard
-            </a>
 
-            <!-- Ventas -->
-            <div class="nav-section">Ventas & Facturaci&oacute;n</div>
-            <a href="{% url 'pos:terminal' %}" class="nav-link {% if request.resolver_match.url_name == 'pos_terminal' %}active{% endif %}">
-                <i class="bi bi-display"></i> Punto de Venta
-            </a>
-            <a href="{% url 'pos:sales_history' %}" class="nav-link {% if request.resolver_match.url_name == 'sales_history' %}active{% endif %}">
-                <i class="bi bi-receipt"></i> Ventas POS
-            </a>
-            <a href="{% url 'sales:quotation_list' %}" class="nav-link {% if request.resolver_match.url_name == 'quotation_list' %}active{% endif %}">
-                <i class="bi bi-file-earmark-richtext"></i> Cotizaciones
-            </a>
-            <a href="{% url 'sales:order_list' %}" class="nav-link {% if request.resolver_match.url_name == 'order_list' %}active{% endif %}">
-                <i class="bi bi-cart-check"></i> Pedidos de Venta
-            </a>
-            <a href="{% url 'sales:picking_list' %}" class="nav-link {% if request.resolver_match.url_name == 'picking_list' %}active{% endif %}">
-                <i class="bi bi-box-seam"></i> Picking
-            </a>
-            <a href="{% url 'accounting:invoice_list' %}" class="nav-link {% if request.resolver_match.url_name == 'invoice_list' %}active{% endif %}">
-                <i class="bi bi-file-earmark-text"></i> Comprobantes
-            </a>
-            <a href="{% url 'accounting:daily_receipt_summary' %}" class="nav-link {% if request.resolver_match.url_name == 'daily_receipt_summary' %}active{% endif %}">
-                <i class="bi bi-journal-text"></i> Resumen Diario
-            </a>
+        <!-- App Switcher -->
+        <button class="app-switcher-btn" id="appSwitcherBtn" onclick="toggleAppSwitcher()" title="Aplicaciones">
+            <i class="bi bi-grid-3x3-gap-fill" style="font-size: 1.1rem;"></i>
+        </button>
 
-            <!-- CRM -->
-            <div class="nav-section">CRM</div>
-            <a href="{% url 'crm:customer_list' %}" class="nav-link {% if request.resolver_match.url_name == 'customer_list' %}active{% endif %}">
-                <i class="bi bi-people"></i> Clientes
-            </a>
-            <a href="{% url 'crm:opportunity_list' %}" class="nav-link {% if request.resolver_match.url_name == 'opportunity_list' %}active{% endif %}">
-                <i class="bi bi-funnel"></i> Oportunidades
-            </a>
-            <a href="{% url 'crm:supplier_list' %}" class="nav-link {% if request.resolver_match.url_name == 'supplier_list' %}active{% endif %}">
-                <i class="bi bi-truck"></i> Proveedores
-            </a>
+        <!-- Module Navigation Tabs (context-sensitive) -->
+        <div class="module-nav">
+            {% block module_nav %}{% endblock %}
+        </div>
 
-            <!-- Inventario -->
-            <div class="nav-section">Inventario & Log&iacute;stica</div>
-            <a href="{% url 'logistics:product_list' %}" class="nav-link {% if request.resolver_match.url_name == 'product_list' %}active{% endif %}">
-                <i class="bi bi-box-seam"></i> Productos
-            </a>
-            <a href="{% url 'logistics:warehouse_list' %}" class="nav-link {% if request.resolver_match.url_name == 'warehouse_list' %}active{% endif %}">
-                <i class="bi bi-building"></i> Almacenes
-            </a>
-            <a href="{% url 'logistics:purchase_order_list' %}" class="nav-link {% if request.resolver_match.url_name == 'purchase_order_list' %}active{% endif %}">
-                <i class="bi bi-bag-check"></i> Compras
-            </a>
-            <a href="{% url 'logistics:dispatch_guide_list' %}" class="nav-link {% if request.resolver_match.url_name == 'dispatch_guide_list' %}active{% endif %}">
-                <i class="bi bi-send"></i> Gu&iacute;as de Remisi&oacute;n
-            </a>
-
-            <!-- Fabricacion -->
-            <div class="nav-section">Fabricaci&oacute;n</div>
-            <a href="{% url 'manufacturing:bom_list' %}" class="nav-link {% if request.resolver_match.url_name == 'bom_list' %}active{% endif %}">
-                <i class="bi bi-diagram-3"></i> Lista de Materiales
-            </a>
-            <a href="{% url 'manufacturing:production_order_list' %}" class="nav-link {% if request.resolver_match.url_name == 'production_order_list' %}active{% endif %}">
-                <i class="bi bi-gear-wide-connected"></i> Producci&oacute;n
-            </a>
-
-            <!-- Finanzas -->
-            <div class="nav-section">Finanzas</div>
-            <a href="{% url 'accounting:petty_cash' %}" class="nav-link {% if request.resolver_match.url_name == 'petty_cash' %}active{% endif %}">
-                <i class="bi bi-safe"></i> Caja Chica
-            </a>
-            <a href="{% url 'accounting:accounts_receivable' %}" class="nav-link {% if request.resolver_match.url_name == 'accounts_receivable' %}active{% endif %}">
-                <i class="bi bi-wallet2"></i> Cuentas por Cobrar
-            </a>
-            <a href="{% url 'accounting:accounts_payable' %}" class="nav-link {% if request.resolver_match.url_name == 'accounts_payable' %}active{% endif %}">
-                <i class="bi bi-cash-coin"></i> Cuentas por Pagar
-            </a>
-            <a href="{% url 'accounting:reports' %}" class="nav-link {% if request.resolver_match.url_name == 'reports_dashboard' %}active{% endif %}">
-                <i class="bi bi-bar-chart-line"></i> Reportes
-            </a>
-
-            <!-- SUNAT -->
-            <div class="nav-section">SUNAT</div>
-            <a href="{% url 'sunat:sire_dashboard' %}" class="nav-link {% if request.resolver_match.url_name == 'sire_dashboard' %}active{% endif %}">
-                <i class="bi bi-bank"></i> SIRE
-            </a>
-            <a href="{% url 'sunat:logs' %}" class="nav-link {% if request.resolver_match.url_name == 'sunat_logs' %}active{% endif %}">
-                <i class="bi bi-cloud-upload"></i> Logs SUNAT
-            </a>
-            <a href="{% url 'accounting:document_series' %}" class="nav-link">
-                <i class="bi bi-hash"></i> Series
-            </a>
-
-            <!-- Sistema -->
-            <div class="nav-section">Sistema</div>
-            <a href="#sistemaMenu" class="nav-link nav-group-toggle" data-bs-toggle="collapse" aria-expanded="false">
-                <i class="bi bi-gear"></i> Configuraci&oacute;n
-            </a>
-            <div class="collapse nav-submenu" id="sistemaMenu">
-                <a href="{% url 'accounting:taxpayer_list' %}" class="nav-link"><i class="bi bi-building-gear"></i> Contribuyentes</a>
-                <a href="{% url 'system_customize' %}" class="nav-link"><i class="bi bi-palette"></i> Personalizar</a>
-                <a href="{% url 'admin:index' %}" class="nav-link"><i class="bi bi-shield-lock"></i> Admin Django</a>
-                <a href="{% url 'video_tutorials' %}" class="nav-link"><i class="bi bi-play-circle"></i> Tutoriales</a>
+        <!-- Right side -->
+        <div class="topbar-right">
+            <div class="search-box d-none d-md-block">
+                <i class="bi bi-search search-icon"></i>
+                <input type="text" class="form-control" placeholder="Buscar..." style="width: 200px;">
             </div>
-
-            <div style="padding: 1rem;">
-                <a href="{% url 'logout' %}" class="btn btn-outline-danger btn-sm w-100">
-                    <i class="bi bi-box-arrow-left me-1"></i> Cerrar Sesi&oacute;n
-                </a>
+            <button class="btn-icon" title="Notificaciones">
+                <i class="bi bi-bell"></i>
+            </button>
+            <div class="user-menu dropdown">
+                <div data-bs-toggle="dropdown" aria-expanded="false">
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="user-avatar">
+                            {{ request.user.first_name|default:request.user.username|make_list|first|upper }}
+                        </div>
+                        <span class="user-name d-none d-md-inline">{{ request.user.get_full_name|default:request.user.username }}</span>
+                        <i class="bi bi-chevron-down" style="font-size: 0.6rem; color: var(--text-muted);"></i>
+                    </div>
+                </div>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li><a class="dropdown-item" href="{% url 'admin:index' %}"><i class="bi bi-gear me-2"></i>Administraci&oacute;n</a></li>
+                    <li><a class="dropdown-item" href="{% url 'system_customize' %}"><i class="bi bi-palette me-2"></i>Personalizar</a></li>
+                    <li><a class="dropdown-item" href="{% url 'video_tutorials' %}"><i class="bi bi-play-circle me-2"></i>Tutoriales</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item text-danger" href="{% url 'logout' %}"><i class="bi bi-box-arrow-left me-2"></i>Cerrar Sesi&oacute;n</a></li>
+                </ul>
             </div>
         </div>
     </nav>
 
-    <!-- Main Content -->
-    <div class="main-content">
-        <div class="topbar">
-            <div class="topbar-left">
-                <button class="btn-icon d-lg-none" onclick="toggleSidebar()" aria-label="Menu">
-                    <i class="bi bi-list" style="font-size: 1.2rem;"></i>
-                </button>
-                <nav aria-label="breadcrumb">
-                    <ol class="breadcrumb">
-                        {% block breadcrumb %}
-                        <li class="breadcrumb-item active">Dashboard</li>
-                        {% endblock %}
-                    </ol>
-                </nav>
+    <!-- ========== APP SWITCHER PANEL ========== -->
+    <div class="app-switcher-panel" id="appSwitcherPanel">
+        <div class="app-switcher-overlay" onclick="toggleAppSwitcher()"></div>
+        <div class="app-switcher-grid">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="fw-bold mb-0" style="font-size: 0.9rem;"><i class="bi bi-grid-3x3-gap me-2"></i>Aplicaciones</h6>
+                <a href="{% url 'dashboard' %}" class="btn btn-sm btn-outline-primary" style="font-size: 0.7rem;">
+                    <i class="bi bi-house me-1"></i>Inicio
+                </a>
             </div>
-            <div class="topbar-right">
-                <div class="search-box d-none d-md-block">
-                    <i class="bi bi-search search-icon"></i>
-                    <input type="text" class="form-control" placeholder="Buscar..." style="width: 220px;">
-                </div>
-                <button class="btn-icon" title="Notificaciones">
-                    <i class="bi bi-bell"></i>
-                </button>
-                <div class="user-menu dropdown">
-                    <div data-bs-toggle="dropdown" aria-expanded="false">
-                        <div class="d-flex align-items-center gap-2">
-                            <div class="user-avatar">
-                                {{ request.user.first_name|default:request.user.username|make_list|first|upper }}
-                            </div>
-                            <span class="user-name d-none d-md-inline">{{ request.user.get_full_name|default:request.user.username }}</span>
-                            <i class="bi bi-chevron-down" style="font-size: 0.6rem; color: var(--text-muted);"></i>
-                        </div>
-                    </div>
-                    <ul class="dropdown-menu dropdown-menu-end">
-                        <li><a class="dropdown-item" href="{% url 'admin:index' %}"><i class="bi bi-gear me-2"></i>Administraci&oacute;n</a></li>
-                        <li><a class="dropdown-item" href="{% url 'system_customize' %}"><i class="bi bi-palette me-2"></i>Personalizar</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="{% url 'logout' %}"><i class="bi bi-box-arrow-left me-2"></i>Cerrar Sesi&oacute;n</a></li>
-                    </ul>
-                </div>
+
+            <!-- Ventas -->
+            <div class="app-section-title mt-2">Ventas</div>
+            <div class="app-grid mb-3">
+                <a href="{% url 'pos:terminal' %}" class="app-tile" onclick="toggleAppSwitcher()">
+                    <div class="tile-icon" style="background: linear-gradient(135deg, #6366f1, #8b5cf6);"><i class="bi bi-display"></i></div>
+                    <span class="tile-label">Punto de Venta</span>
+                </a>
+                <a href="{% url 'sales:quotation_list' %}" class="app-tile" onclick="toggleAppSwitcher()">
+                    <div class="tile-icon" style="background: linear-gradient(135deg, #06b6d4, #22d3ee);"><i class="bi bi-file-earmark-richtext"></i></div>
+                    <span class="tile-label">Cotizaciones</span>
+                </a>
+                <a href="{% url 'sales:order_list' %}" class="app-tile" onclick="toggleAppSwitcher()">
+                    <div class="tile-icon" style="background: linear-gradient(135deg, #10b981, #34d399);"><i class="bi bi-cart-check"></i></div>
+                    <span class="tile-label">Pedidos Venta</span>
+                </a>
+                <a href="{% url 'sales:picking_list' %}" class="app-tile" onclick="toggleAppSwitcher()">
+                    <div class="tile-icon" style="background: linear-gradient(135deg, #f59e0b, #fbbf24);"><i class="bi bi-box-seam"></i></div>
+                    <span class="tile-label">Picking</span>
+                </a>
+                <a href="{% url 'accounting:invoice_list' %}" class="app-tile" onclick="toggleAppSwitcher()">
+                    <div class="tile-icon" style="background: linear-gradient(135deg, #8b5cf6, #a78bfa);"><i class="bi bi-file-earmark-text"></i></div>
+                    <span class="tile-label">Comprobantes</span>
+                </a>
+                <a href="{% url 'accounting:daily_receipt_summary' %}" class="app-tile" onclick="toggleAppSwitcher()">
+                    <div class="tile-icon" style="background: linear-gradient(135deg, #7c3aed, #a855f7);"><i class="bi bi-journal-text"></i></div>
+                    <span class="tile-label">Resumen Diario</span>
+                </a>
+            </div>
+
+            <!-- CRM -->
+            <div class="app-section-title">CRM</div>
+            <div class="app-grid mb-3">
+                <a href="{% url 'crm:customer_list' %}" class="app-tile" onclick="toggleAppSwitcher()">
+                    <div class="tile-icon" style="background: linear-gradient(135deg, #ec4899, #f472b6);"><i class="bi bi-people"></i></div>
+                    <span class="tile-label">Clientes</span>
+                </a>
+                <a href="{% url 'crm:opportunity_list' %}" class="app-tile" onclick="toggleAppSwitcher()">
+                    <div class="tile-icon" style="background: linear-gradient(135deg, #d946ef, #e879f9);"><i class="bi bi-funnel"></i></div>
+                    <span class="tile-label">Oportunidades</span>
+                </a>
+                <a href="{% url 'crm:supplier_list' %}" class="app-tile" onclick="toggleAppSwitcher()">
+                    <div class="tile-icon" style="background: linear-gradient(135deg, #f97316, #fb923c);"><i class="bi bi-truck"></i></div>
+                    <span class="tile-label">Proveedores</span>
+                </a>
+            </div>
+
+            <!-- Inventario -->
+            <div class="app-section-title">Inventario & Log&iacute;stica</div>
+            <div class="app-grid mb-3">
+                <a href="{% url 'logistics:product_list' %}" class="app-tile" onclick="toggleAppSwitcher()">
+                    <div class="tile-icon" style="background: linear-gradient(135deg, #14b8a6, #2dd4bf);"><i class="bi bi-tags"></i></div>
+                    <span class="tile-label">Productos</span>
+                </a>
+                <a href="{% url 'logistics:warehouse_list' %}" class="app-tile" onclick="toggleAppSwitcher()">
+                    <div class="tile-icon" style="background: linear-gradient(135deg, #0ea5e9, #38bdf8);"><i class="bi bi-building"></i></div>
+                    <span class="tile-label">Almacenes</span>
+                </a>
+                <a href="{% url 'logistics:purchase_order_list' %}" class="app-tile" onclick="toggleAppSwitcher()">
+                    <div class="tile-icon" style="background: linear-gradient(135deg, #ef4444, #f87171);"><i class="bi bi-bag-check"></i></div>
+                    <span class="tile-label">Compras</span>
+                </a>
+                <a href="{% url 'logistics:dispatch_guide_list' %}" class="app-tile" onclick="toggleAppSwitcher()">
+                    <div class="tile-icon" style="background: linear-gradient(135deg, #0891b2, #22d3ee);"><i class="bi bi-send"></i></div>
+                    <span class="tile-label">Gu&iacute;as Remisi&oacute;n</span>
+                </a>
+            </div>
+
+            <!-- Fabricacion -->
+            <div class="app-section-title">Fabricaci&oacute;n</div>
+            <div class="app-grid mb-3">
+                <a href="{% url 'manufacturing:bom_list' %}" class="app-tile" onclick="toggleAppSwitcher()">
+                    <div class="tile-icon" style="background: linear-gradient(135deg, #f97316, #fb923c);"><i class="bi bi-diagram-3"></i></div>
+                    <span class="tile-label">Lista Materiales</span>
+                </a>
+                <a href="{% url 'manufacturing:production_order_list' %}" class="app-tile" onclick="toggleAppSwitcher()">
+                    <div class="tile-icon" style="background: linear-gradient(135deg, #eab308, #facc15);"><i class="bi bi-gear-wide-connected"></i></div>
+                    <span class="tile-label">Producci&oacute;n</span>
+                </a>
+            </div>
+
+            <!-- Finanzas -->
+            <div class="app-section-title">Finanzas</div>
+            <div class="app-grid mb-3">
+                <a href="{% url 'accounting:petty_cash' %}" class="app-tile" onclick="toggleAppSwitcher()">
+                    <div class="tile-icon" style="background: linear-gradient(135deg, #84cc16, #a3e635);"><i class="bi bi-safe"></i></div>
+                    <span class="tile-label">Caja Chica</span>
+                </a>
+                <a href="{% url 'accounting:accounts_receivable' %}" class="app-tile" onclick="toggleAppSwitcher()">
+                    <div class="tile-icon" style="background: linear-gradient(135deg, #10b981, #34d399);"><i class="bi bi-wallet2"></i></div>
+                    <span class="tile-label">Por Cobrar</span>
+                </a>
+                <a href="{% url 'accounting:accounts_payable' %}" class="app-tile" onclick="toggleAppSwitcher()">
+                    <div class="tile-icon" style="background: linear-gradient(135deg, #ef4444, #f87171);"><i class="bi bi-cash-coin"></i></div>
+                    <span class="tile-label">Por Pagar</span>
+                </a>
+                <a href="{% url 'accounting:reports' %}" class="app-tile" onclick="toggleAppSwitcher()">
+                    <div class="tile-icon" style="background: linear-gradient(135deg, #6366f1, #818cf8);"><i class="bi bi-bar-chart-line"></i></div>
+                    <span class="tile-label">Reportes</span>
+                </a>
+            </div>
+
+            <!-- SUNAT & Sistema -->
+            <div class="app-section-title">SUNAT & Sistema</div>
+            <div class="app-grid">
+                <a href="{% url 'sunat:sire_dashboard' %}" class="app-tile" onclick="toggleAppSwitcher()">
+                    <div class="tile-icon" style="background: linear-gradient(135deg, #64748b, #94a3b8);"><i class="bi bi-bank"></i></div>
+                    <span class="tile-label">SIRE</span>
+                </a>
+                <a href="{% url 'sunat:logs' %}" class="app-tile" onclick="toggleAppSwitcher()">
+                    <div class="tile-icon" style="background: linear-gradient(135deg, #475569, #64748b);"><i class="bi bi-cloud-upload"></i></div>
+                    <span class="tile-label">Logs SUNAT</span>
+                </a>
+                <a href="{% url 'accounting:document_series' %}" class="app-tile" onclick="toggleAppSwitcher()">
+                    <div class="tile-icon" style="background: linear-gradient(135deg, #71717a, #a1a1aa);"><i class="bi bi-hash"></i></div>
+                    <span class="tile-label">Series</span>
+                </a>
+                <a href="{% url 'accounting:taxpayer_list' %}" class="app-tile" onclick="toggleAppSwitcher()">
+                    <div class="tile-icon" style="background: linear-gradient(135deg, #78716c, #a8a29e);"><i class="bi bi-building-gear"></i></div>
+                    <span class="tile-label">Contribuyentes</span>
+                </a>
+                <a href="{% url 'system_customize' %}" class="app-tile" onclick="toggleAppSwitcher()">
+                    <div class="tile-icon" style="background: linear-gradient(135deg, #6366f1, #a78bfa);"><i class="bi bi-palette"></i></div>
+                    <span class="tile-label">Personalizar</span>
+                </a>
+                <a href="{% url 'admin:index' %}" class="app-tile" onclick="toggleAppSwitcher()">
+                    <div class="tile-icon" style="background: linear-gradient(135deg, #334155, #475569);"><i class="bi bi-shield-lock"></i></div>
+                    <span class="tile-label">Admin</span>
+                </a>
             </div>
         </div>
+    </div>
 
+    <!-- ========== MAIN CONTENT ========== -->
+    <div class="main-content">
         <div class="content-area">
             {% if messages %}
             {% for message in messages %}
@@ -635,28 +689,23 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <script>
-        function toggleSidebar() {
-            document.getElementById('sidebar').classList.toggle('show');
-            document.getElementById('sidebarOverlay').classList.toggle('show');
+        // App Switcher toggle
+        function toggleAppSwitcher() {
+            var panel = document.getElementById('appSwitcherPanel');
+            var btn = document.getElementById('appSwitcherBtn');
+            panel.classList.toggle('show');
+            btn.classList.toggle('active');
         }
 
-        document.querySelectorAll('.nav-submenu .nav-link.active').forEach(function(el) {
-            var submenu = el.closest('.nav-submenu');
-            if (submenu) {
-                submenu.classList.add('show');
-                var toggle = submenu.previousElementSibling;
-                if (toggle) toggle.setAttribute('aria-expanded', 'true');
+        // Close app switcher with Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                var panel = document.getElementById('appSwitcherPanel');
+                if (panel.classList.contains('show')) {
+                    toggleAppSwitcher();
+                }
             }
         });
-
-        (function() {
-            var path = window.location.pathname;
-            document.querySelectorAll('.sidebar-nav .nav-link:not(.nav-group-toggle)').forEach(function(link) {
-                if (link.getAttribute('href') === path) {
-                    link.classList.add('active');
-                }
-            });
-        })();
 
         // Chart.js dark theme defaults
         if (typeof Chart !== 'undefined') {

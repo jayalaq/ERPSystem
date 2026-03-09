@@ -201,6 +201,15 @@ def dashboard(request):
     return render(request, 'dashboard/dashboard.html', context)
 
 
+def service_worker(request):
+    """Serve service worker from root scope."""
+    import os
+    from django.http import HttpResponse
+    sw_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'static', 'pwa', 'service-worker.js')
+    with open(sw_path, 'r') as f:
+        return HttpResponse(f.read(), content_type='application/javascript')
+
+
 def health_check(request):
     """Health check endpoint for load balancers and monitoring."""
     import os

@@ -1,5 +1,4 @@
 {% load static %}
-{% load humanize %}
 <!DOCTYPE html>
 <html lang="es" data-bs-theme="dark">
 <head>
@@ -509,7 +508,7 @@
                 <div data-bs-toggle="dropdown" aria-expanded="false">
                     <div class="d-flex align-items-center gap-2">
                         <div class="user-avatar">
-                            {{ request.user.first_name|default:request.user.username|make_list|first|upper }}
+                            {{ request.user.username|first|upper }}
                         </div>
                         <span class="user-name d-none d-md-inline">{{ request.user.get_full_name|default:request.user.username }}</span>
                         <i class="bi bi-chevron-down" style="font-size: 0.6rem; color: var(--text-muted);"></i>

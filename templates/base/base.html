@@ -723,44 +723,95 @@
     </script>
     {% block extra_js %}{% endblock %}
 
-    <!-- PWA Install Banner (Odoo Enterprise style) -->
-    <div id="pwaInstallBanner" style="display:none; position:fixed; bottom:0; left:0; right:0; z-index:9999; background:linear-gradient(135deg, #111827 0%, #0f1629 100%); border-top:1px solid rgba(99,102,241,0.2); padding:0.875rem 1rem; box-shadow:0 -4px 24px rgba(0,0,0,0.5);">
-        <div style="max-width:600px; margin:0 auto; display:flex; align-items:center; gap:0.875rem;">
-            <img src="{% static 'pwa/icons/icon-96x96.png' %}" alt="NexusERP" style="width:48px; height:48px; border-radius:12px; flex-shrink:0;">
-            <div style="flex:1; min-width:0;">
-                <div style="font-weight:600; font-size:0.95rem; color:#e2e8f0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Instalar NexusERP</div>
-                <div style="font-size:0.8rem; color:#94a3b8; margin-top:2px;">Accede mas rapido desde tu pantalla de inicio</div>
+    <!-- PWA Install Banner (Odoo Enterprise style - Peru E-Invoicing) -->
+    <div id="pwaInstallBanner" style="display:none; position:fixed; bottom:0; left:0; right:0; z-index:9999; background:linear-gradient(135deg, #111827 0%, #0f1629 100%); border-top:1px solid rgba(99,102,241,0.2); padding:0; box-shadow:0 -4px 24px rgba(0,0,0,0.5);">
+        <div style="max-width:600px; margin:0 auto; padding:0.875rem 1rem;">
+            <div style="display:flex; align-items:center; gap:0.875rem;">
+                <img src="{% static 'pwa/icons/icon-96x96.png' %}" alt="NexusERP" style="width:48px; height:48px; border-radius:12px; flex-shrink:0;">
+                <div style="flex:1; min-width:0;">
+                    <div style="font-weight:600; font-size:0.95rem; color:#e2e8f0;">Instalar NexusERP</div>
+                    <div style="font-size:0.78rem; color:#94a3b8; margin-top:2px;">Facturacion electronica SUNAT desde tu celular</div>
+                </div>
+                <button id="pwaInstallBtn" style="flex-shrink:0; padding:0.5rem 1.25rem; background:linear-gradient(135deg, #6366f1, #4f46e5); color:white; border:none; border-radius:8px; font-size:0.85rem; font-weight:600; cursor:pointer;">Instalar</button>
+                <button id="pwaInstallDismiss" style="flex-shrink:0; background:none; border:none; color:#64748b; font-size:1.25rem; cursor:pointer; padding:0.25rem; line-height:1;">&times;</button>
             </div>
-            <button id="pwaInstallBtn" style="flex-shrink:0; padding:0.5rem 1.25rem; background:linear-gradient(135deg, #6366f1, #4f46e5); color:white; border:none; border-radius:8px; font-size:0.85rem; font-weight:600; cursor:pointer; transition:all 0.2s;">Instalar</button>
-            <button id="pwaInstallDismiss" style="flex-shrink:0; background:none; border:none; color:#64748b; font-size:1.25rem; cursor:pointer; padding:0.25rem; line-height:1;">&times;</button>
+            <div style="display:flex; gap:0.75rem; margin-top:0.625rem; padding-left:3.625rem;">
+                <span style="font-size:0.7rem; color:#64748b; display:flex; align-items:center; gap:0.25rem;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="#10b981" viewBox="0 0 16 16"><path d="M16 8A8 8 0 110 8a8 8 0 0116 0zm-3.97-3.03a.75.75 0 00-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 00-1.06 1.06L6.97 11.03a.75.75 0 001.079-.02l3.992-4.99a.75.75 0 00-.01-1.05z"/></svg>
+                    Facturas y Boletas
+                </span>
+                <span style="font-size:0.7rem; color:#64748b; display:flex; align-items:center; gap:0.25rem;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="#10b981" viewBox="0 0 16 16"><path d="M16 8A8 8 0 110 8a8 8 0 0116 0zm-3.97-3.03a.75.75 0 00-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 00-1.06 1.06L6.97 11.03a.75.75 0 001.079-.02l3.992-4.99a.75.75 0 00-.01-1.05z"/></svg>
+                    POS
+                </span>
+                <span style="font-size:0.7rem; color:#64748b; display:flex; align-items:center; gap:0.25rem;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="#10b981" viewBox="0 0 16 16"><path d="M16 8A8 8 0 110 8a8 8 0 0116 0zm-3.97-3.03a.75.75 0 00-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 00-1.06 1.06L6.97 11.03a.75.75 0 001.079-.02l3.992-4.99a.75.75 0 00-.01-1.05z"/></svg>
+                    Offline
+                </span>
+            </div>
         </div>
     </div>
 
-    <!-- PWA Service Worker & Install Prompt -->
+    <!-- PWA Offline Queue Indicator -->
+    <div id="pwaQueueIndicator" style="display:none; position:fixed; bottom:70px; right:16px; z-index:9998; background:#1e293b; border:1px solid rgba(245,158,11,0.3); border-radius:10px; padding:0.5rem 0.75rem; box-shadow:0 4px 12px rgba(0,0,0,0.4); cursor:pointer;" onclick="this.style.display='none'">
+        <div style="display:flex; align-items:center; gap:0.5rem;">
+            <div style="width:8px; height:8px; background:#f59e0b; border-radius:50%; animation:status-pulse 2s infinite;"></div>
+            <span style="font-size:0.75rem; color:#fbbf24; font-weight:600;" id="queueBadgeCount">0</span>
+            <span style="font-size:0.72rem; color:#94a3b8;">en cola SUNAT</span>
+        </div>
+    </div>
+
+    <!-- PWA Service Worker & Install Prompt (Peru E-Invoicing) -->
     <script>
-        // Service Worker Registration (Odoo pattern)
+        // ========== Service Worker Registration ==========
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', function() {
                 navigator.serviceWorker.register('/service-worker.js', { scope: '/' })
                     .then(function(reg) {
-                        console.log('[PWA] SW registered, scope:', reg.scope);
-                        // Auto-update check
+                        console.log('[NexusERP] SW registrado, scope:', reg.scope);
+
+                        // Register background sync for invoice queue
+                        if ('sync' in reg) {
+                            reg.sync.register('invoice-queue-sync').catch(function() {});
+                        }
+
+                        // Auto-update detection
                         reg.addEventListener('updatefound', function() {
                             var newWorker = reg.installing;
                             newWorker.addEventListener('statechange', function() {
                                 if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                                    // New version available - auto-activate
                                     newWorker.postMessage({ type: 'SKIP_WAITING' });
                                     window.location.reload();
                                 }
                             });
                         });
                     })
-                    .catch(function(err) { console.log('[PWA] SW registration failed:', err); });
+                    .catch(function(err) { console.log('[NexusERP] SW error:', err); });
+
+                // Listen for queue sync messages from SW
+                navigator.serviceWorker.addEventListener('message', function(event) {
+                    if (event.data && event.data.type === 'QUEUE_SYNCED') {
+                        if (event.data.remaining === 0) {
+                            document.getElementById('pwaQueueIndicator').style.display = 'none';
+                        }
+                    }
+                    if (event.data && event.data.type === 'QUEUE_COUNT') {
+                        var count = event.data.count;
+                        if (count > 0) {
+                            document.getElementById('pwaQueueIndicator').style.display = 'block';
+                            document.getElementById('queueBadgeCount').textContent = count;
+                        }
+                    }
+                });
+
+                // Check queue on load
+                if (navigator.serviceWorker.controller) {
+                    navigator.serviceWorker.controller.postMessage({ type: 'GET_QUEUE_COUNT' });
+                }
             });
         }
 
-        // A2HS / Install Prompt (Odoo Enterprise style)
+        // ========== A2HS / Install Prompt ==========
         var deferredPrompt = null;
         var installBanner = document.getElementById('pwaInstallBanner');
         var installBtn = document.getElementById('pwaInstallBtn');
@@ -769,7 +820,6 @@
         window.addEventListener('beforeinstallprompt', function(e) {
             e.preventDefault();
             deferredPrompt = e;
-            // Don't show if user dismissed recently
             var dismissed = localStorage.getItem('pwa_install_dismissed');
             if (dismissed && (Date.now() - parseInt(dismissed)) < 7 * 24 * 60 * 60 * 1000) return;
             installBanner.style.display = 'block';
@@ -780,9 +830,6 @@
                 if (!deferredPrompt) return;
                 deferredPrompt.prompt();
                 deferredPrompt.userChoice.then(function(result) {
-                    if (result.outcome === 'accepted') {
-                        console.log('[PWA] App installed');
-                    }
                     deferredPrompt = null;
                     installBanner.style.display = 'none';
                 });
@@ -796,26 +843,32 @@
             });
         }
 
-        // Hide banner if already installed
         window.addEventListener('appinstalled', function() {
             installBanner.style.display = 'none';
             deferredPrompt = null;
-            console.log('[PWA] App installed successfully');
         });
 
-        // iOS detection - show manual install hint
+        // ========== iOS Install Instructions ==========
         if (/iPad|iPhone|iPod/.test(navigator.userAgent) && !navigator.standalone && !window.matchMedia('(display-mode: standalone)').matches) {
             var iosHint = localStorage.getItem('pwa_ios_hint_dismissed');
             if (!iosHint || (Date.now() - parseInt(iosHint)) > 30 * 24 * 60 * 60 * 1000) {
                 installBanner.style.display = 'block';
-                installBtn.textContent = 'Como instalar';
-                installBtn.addEventListener('click', function() {
-                    alert('Para instalar NexusERP en tu iPhone/iPad:\n\n1. Toca el boton de compartir (cuadrado con flecha)\n2. Selecciona "Agregar a pantalla de inicio"\n3. Confirma tocando "Agregar"');
+                installBtn.textContent = 'Ver pasos';
+                installBtn.onclick = function() {
+                    alert('Para instalar NexusERP en tu iPhone/iPad:\n\n1. Toca el boton de compartir (cuadrado con flecha arriba)\n2. Desplaza y selecciona "Agregar a pantalla de inicio"\n3. Toca "Agregar" para confirmar\n\nLa app se abrira como aplicacion nativa con acceso directo a facturacion electronica.');
                     installBanner.style.display = 'none';
                     localStorage.setItem('pwa_ios_hint_dismissed', Date.now().toString());
-                });
+                };
             }
         }
+
+        // ========== Online/Offline Status ==========
+        window.addEventListener('online', function() {
+            // Trigger queue replay when back online
+            if (navigator.serviceWorker.controller) {
+                navigator.serviceWorker.controller.postMessage({ type: 'REPLAY_QUEUE' });
+            }
+        });
     </script>
 </body>
 </html>

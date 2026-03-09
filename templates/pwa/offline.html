@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es-PE">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,19 +13,20 @@
             color: #e2e8f0;
             min-height: 100vh;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
-            overflow: hidden;
+            padding: 1.5rem;
         }
         .offline-container {
             text-align: center;
-            padding: 2rem;
-            max-width: 420px;
+            max-width: 440px;
+            width: 100%;
         }
         .offline-icon {
-            width: 120px;
-            height: 120px;
-            margin: 0 auto 2rem;
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 1.5rem;
             background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(6, 182, 212, 0.1));
             border-radius: 50%;
             display: flex;
@@ -34,56 +35,124 @@
             border: 2px solid rgba(99, 102, 241, 0.2);
             animation: pulse 3s ease-in-out infinite;
         }
-        .offline-icon svg {
-            width: 56px;
-            height: 56px;
-            opacity: 0.7;
-        }
+        .offline-icon svg { width: 48px; height: 48px; opacity: 0.7; }
         h1 {
-            font-size: 1.5rem;
+            font-size: 1.4rem;
             font-weight: 700;
-            margin-bottom: 0.75rem;
+            margin-bottom: 0.5rem;
             background: linear-gradient(135deg, #6366f1, #06b6d4);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
-        p {
+        .subtitle {
             color: #94a3b8;
-            font-size: 0.95rem;
-            line-height: 1.6;
-            margin-bottom: 2rem;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            margin-bottom: 1.5rem;
         }
+
+        /* Queue Status Card */
+        .queue-card {
+            background: rgba(99, 102, 241, 0.08);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 12px;
+            padding: 1rem 1.25rem;
+            margin-bottom: 1.5rem;
+            display: none;
+        }
+        .queue-card.visible { display: block; }
+        .queue-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #818cf8;
+            margin-bottom: 0.5rem;
+        }
+        .queue-header svg { width: 16px; height: 16px; }
+        .queue-count {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: #e2e8f0;
+        }
+        .queue-label {
+            font-size: 0.8rem;
+            color: #94a3b8;
+        }
+
+        /* Info Cards */
+        .info-cards {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+        .info-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 10px;
+            padding: 0.875rem;
+            text-align: left;
+        }
+        .info-card-icon {
+            font-size: 1.25rem;
+            margin-bottom: 0.375rem;
+        }
+        .info-card-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #e2e8f0;
+            margin-bottom: 0.2rem;
+        }
+        .info-card-desc {
+            font-size: 0.7rem;
+            color: #64748b;
+            line-height: 1.4;
+        }
+
         .retry-btn {
             display: inline-flex;
             align-items: center;
             gap: 0.5rem;
-            padding: 0.75rem 2rem;
+            padding: 0.7rem 1.75rem;
             background: linear-gradient(135deg, #6366f1, #4f46e5);
             color: white;
             border: none;
             border-radius: 10px;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.2s;
             text-decoration: none;
         }
         .retry-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.3);
         }
         .brand {
-            margin-top: 3rem;
-            opacity: 0.3;
-            font-size: 0.8rem;
+            margin-top: 2rem;
+            opacity: 0.25;
+            font-size: 0.7rem;
             font-weight: 600;
             letter-spacing: 2px;
             text-transform: uppercase;
         }
+        .sunat-note {
+            margin-top: 1.25rem;
+            font-size: 0.75rem;
+            color: #64748b;
+            line-height: 1.5;
+            padding: 0.75rem;
+            background: rgba(245, 158, 11, 0.05);
+            border: 1px solid rgba(245, 158, 11, 0.15);
+            border-radius: 8px;
+        }
+        .sunat-note strong { color: #f59e0b; }
         @keyframes pulse {
             0%, 100% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.05); opacity: 0.8; }
+            50% { transform: scale(1.03); opacity: 0.85; }
         }
     </style>
 </head>
@@ -96,15 +165,74 @@
             </svg>
         </div>
         <h1>Sin conexion a Internet</h1>
-        <p>No se puede acceder al servidor en este momento. Verifica tu conexion a Internet e intenta nuevamente.</p>
+        <p class="subtitle">No se puede conectar al servidor. Las operaciones pendientes se enviaran automaticamente cuando vuelvas a estar en linea.</p>
+
+        <!-- Offline Queue Status -->
+        <div class="queue-card" id="queueCard">
+            <div class="queue-header">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M8 16A8 8 0 108 0a8 8 0 000 16zm.93-9.412l-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.399l-.244-.002.024-.088 1.777-.367.023-.01zm.121-1.585a.7.7 0 11-1.4 0 .7.7 0 011.4 0z"/>
+                </svg>
+                Operaciones en cola
+            </div>
+            <div class="queue-count" id="queueCount">0</div>
+            <div class="queue-label">comprobantes pendientes de envio a SUNAT</div>
+        </div>
+
+        <!-- Peru E-Invoicing Info -->
+        <div class="info-cards">
+            <div class="info-card">
+                <div class="info-card-icon">&#128196;</div>
+                <div class="info-card-title">Facturas y Boletas</div>
+                <div class="info-card-desc">Se guardaran como borrador hasta recuperar conexion</div>
+            </div>
+            <div class="info-card">
+                <div class="info-card-icon">&#128722;</div>
+                <div class="info-card-title">Punto de Venta</div>
+                <div class="info-card-desc">Ventas en cola se procesaran automaticamente</div>
+            </div>
+            <div class="info-card">
+                <div class="info-card-icon">&#128230;</div>
+                <div class="info-card-title">Envio SUNAT</div>
+                <div class="info-card-desc">XMLs pendientes se enviaran al reconectar</div>
+            </div>
+            <div class="info-card">
+                <div class="info-card-icon">&#128202;</div>
+                <div class="info-card-title">Datos en cache</div>
+                <div class="info-card-desc">Paginas visitadas disponibles sin conexion</div>
+            </div>
+        </div>
+
         <a href="javascript:window.location.reload()" class="retry-btn">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
                 <path fill-rule="evenodd" d="M8 3a5 5 0 104.546 2.914.5.5 0 01.908-.418A6 6 0 118 2v1z"/>
                 <path d="M8 4.466V.534a.25.25 0 01.41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 018 4.466z"/>
             </svg>
-            Reintentar
+            Reintentar conexion
         </a>
-        <div class="brand">NexusERP</div>
+
+        <div class="sunat-note">
+            <strong>SUNAT:</strong> Los comprobantes electronicos requieren conexion a Internet para su emision y validacion. Los documentos en cola se enviaran en orden cuando se restablezca la conexion.
+        </div>
+
+        <div class="brand">NexusERP - Facturacion Electronica Peru</div>
     </div>
+
+    <script>
+        // Check offline queue count
+        if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+            navigator.serviceWorker.controller.postMessage({ type: 'GET_QUEUE_COUNT' });
+            navigator.serviceWorker.addEventListener('message', function(event) {
+                if (event.data && event.data.type === 'QUEUE_COUNT' && event.data.count > 0) {
+                    document.getElementById('queueCard').classList.add('visible');
+                    document.getElementById('queueCount').textContent = event.data.count;
+                }
+            });
+        }
+        // Auto-retry when back online
+        window.addEventListener('online', function() {
+            window.location.reload();
+        });
+    </script>
 </body>
 </html>

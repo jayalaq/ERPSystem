@@ -211,7 +211,7 @@ def service_worker(request):
 
 
 def pwa_manifest(request):
-    """Dynamic manifest.webmanifest served from DB config (Odoo Enterprise pattern)."""
+    """Dynamic manifest.webmanifest - Peru e-invoicing ERP (Odoo Enterprise pattern)."""
     import json
     from django.http import HttpResponse
     from apps.core.models import Company, SystemConfig
@@ -236,24 +236,53 @@ def pwa_manifest(request):
         })
 
     manifest = {
-        'name': app_name,
+        'name': f'{app_name} - Facturacion Electronica',
         'short_name': short_name,
-        'description': f'{app_name} - Sistema ERP integrado',
+        'description': f'{app_name} - Sistema de Facturacion Electronica SUNAT Peru. '
+                       f'Emite facturas, boletas, notas de credito, guias de remision.',
         'start_url': '/app/',
         'scope': '/',
         'display': 'standalone',
         'orientation': 'any',
         'background_color': bg_color,
         'theme_color': theme_color,
-        'lang': 'es',
-        'categories': ['business', 'productivity'],
+        'lang': 'es-PE',
+        'dir': 'ltr',
+        'categories': ['business', 'productivity', 'finance'],
         'icons': icons,
+        'screenshots': [],
         'shortcuts': [
-            {'name': 'Punto de Venta', 'short_name': 'POS', 'url': '/pos/', 'icons': [{'src': '/static/pwa/icons/icon-96x96.png', 'sizes': '96x96'}]},
-            {'name': 'CRM', 'short_name': 'CRM', 'url': '/crm/', 'icons': [{'src': '/static/pwa/icons/icon-96x96.png', 'sizes': '96x96'}]},
-            {'name': 'Inventario', 'short_name': 'Stock', 'url': '/logistics/', 'icons': [{'src': '/static/pwa/icons/icon-96x96.png', 'sizes': '96x96'}]},
-            {'name': 'Facturación', 'short_name': 'Factura', 'url': '/accounting/', 'icons': [{'src': '/static/pwa/icons/icon-96x96.png', 'sizes': '96x96'}]},
+            {
+                'name': 'Nueva Factura',
+                'short_name': 'Factura',
+                'description': 'Emitir factura electronica (01)',
+                'url': '/accounting/invoices/new/?doc_type=01',
+                'icons': [{'src': '/static/pwa/icons/icon-96x96.png', 'sizes': '96x96'}],
+            },
+            {
+                'name': 'Nueva Boleta',
+                'short_name': 'Boleta',
+                'description': 'Emitir boleta de venta (03)',
+                'url': '/accounting/invoices/new/?doc_type=03',
+                'icons': [{'src': '/static/pwa/icons/icon-96x96.png', 'sizes': '96x96'}],
+            },
+            {
+                'name': 'Punto de Venta',
+                'short_name': 'POS',
+                'description': 'Terminal de punto de venta con emision automatica',
+                'url': '/pos/',
+                'icons': [{'src': '/static/pwa/icons/icon-96x96.png', 'sizes': '96x96'}],
+            },
+            {
+                'name': 'Consultar RUC',
+                'short_name': 'RUC',
+                'description': 'Consultar RUC en SUNAT',
+                'url': '/sunat/consult-ruc/',
+                'icons': [{'src': '/static/pwa/icons/icon-96x96.png', 'sizes': '96x96'}],
+            },
         ],
+        'related_applications': [],
+        'prefer_related_applications': False,
     }
 
     return HttpResponse(

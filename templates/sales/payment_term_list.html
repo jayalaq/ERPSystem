@@ -1,0 +1,42 @@
+{% extends "base/base.html" %}
+{% block title %}Terminos de Pago{% endblock %}
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+<li class="breadcrumb-item"><a href="{% url 'sales:quotation_list' %}">Ventas</a></li>
+<li class="breadcrumb-item active">Terminos de Pago</li>
+{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h4><i class="bi bi-cash-stack me-2"></i>Terminos de Pago</h4>
+    <a href="{% url 'sales:payment_term_create' %}" class="btn btn-primary btn-sm"><i class="bi bi-plus-lg me-1"></i>Nuevo Termino</a>
+</div>
+
+<div class="card stat-card">
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead>
+                <tr><th>Nombre</th><th>Codigo</th><th class="text-center">Cuotas</th><th class="text-center">Dias Totales</th><th class="text-center">Estado</th><th class="text-center">Inmediato</th><th></th></tr>
+            </thead>
+            <tbody>
+                {% for term in terms %}
+                <tr>
+                    <td class="fw-semibold">{{ term.name }}</td>
+                    <td><code>{{ term.code }}</code></td>
+                    <td class="text-center"><span class="badge bg-primary">{{ term.installment_count }}</span></td>
+                    <td class="text-center">{{ term.total_days }} dias</td>
+                    <td class="text-center">
+                        {% if term.is_active %}<span class="badge bg-success">Activo</span>{% else %}<span class="badge bg-secondary">Inactivo</span>{% endif %}
+                    </td>
+                    <td class="text-center">
+                        {% if term.is_immediate %}<i class="bi bi-check-circle-fill text-success"></i>{% else %}-{% endif %}
+                    </td>
+                    <td><a href="{% url 'sales:payment_term_detail' term.pk %}" class="btn btn-sm btn-outline-primary"><i class="bi bi-eye"></i></a></td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="7" class="text-center text-muted py-4">No hay terminos de pago. Cree uno para empezar.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

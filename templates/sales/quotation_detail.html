@@ -14,7 +14,10 @@
             {{ quotation.get_status_display }}
         </span>
     </div>
-    <div class="d-flex gap-2">
+    <div class="d-flex gap-2 flex-wrap">
+        <a href="{% url 'sales:quotation_pdf' quotation.pk %}" class="btn btn-outline-secondary btn-sm" target="_blank">
+            <i class="bi bi-file-earmark-pdf me-1"></i>PDF
+        </a>
         {% if quotation.status == 'draft' %}
         <a href="{% url 'sales:quotation_edit' quotation.pk %}" class="btn btn-outline-primary btn-sm"><i class="bi bi-pencil me-1"></i>Editar</a>
         {% endif %}
@@ -32,8 +35,9 @@
 </div>
 
 <div class="row g-4">
-    <!-- Info -->
+    <!-- Left Column -->
     <div class="col-lg-8">
+        <!-- Customer Info -->
         <div class="card stat-card mb-3">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <span><i class="bi bi-person me-2"></i>Datos del Cliente</span>
@@ -120,7 +124,7 @@
 
         <!-- Add Item Form -->
         {% if quotation.status == 'draft' %}
-        <div class="card stat-card">
+        <div class="card stat-card mb-3">
             <div class="card-header"><i class="bi bi-plus-circle me-2"></i>Agregar Item</div>
             <div class="card-body">
                 <form method="post" action="{% url 'sales:quotation_add_item' quotation.pk %}">
@@ -154,6 +158,96 @@
             </div>
         </div>
         {% endif %}
+
+        <!-- Signature Section -->
+        <div class="card stat-card mb-3">
+            <div class="card-header"><i class="bi bi-pen me-2"></i>Firma del Cliente</div>
+            <div class="card-body">
+                {% if quotation.signature %}
+                <div class="text-center mb-2">
+                    <img src="{{ quotation.signature }}" alt="Firma" style="max-width: 300px; max-height: 150px; border: 1px solid var(--border-color); border-radius: 8px; padding: 8px; background: #fff;">
+                </div>
+                <div class="text-center">
+                    {% if quotation.signed_by %}<small class="text-muted">Firmado por: {{ quotation.signed_by }}</small><br>{% endif %}
+                    {% if quotation.signed_at %}<small class="text-muted">{{ quotation.signed_at|date:"d/m/Y H:i" }}</small>{% endif %}
+                </div>
+                {% else %}
+                <form method="post" action="{% url 'sales:quotation_sign' quotation.pk %}" id="signatureForm">
+                    {% csrf_token %}
+                    <div class="mb-2">
+                        <label class="form-label">Nombre del firmante</label>
+                        <input type="text" name="signed_by" class="form-control" placeholder="Nombre completo">
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label">Firma</label>
+                        <canvas id="signatureCanvas" width="500" height="200" style="border: 2px solid var(--border-color); border-radius: 8px; cursor: crosshair; background: #fff; display: block; width: 100%; touch-action: none;"></canvas>
+                        <input type="hidden" name="signature" id="signatureData">
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button type="button" id="clearSignature" class="btn btn-outline-secondary btn-sm"><i class="bi bi-eraser me-1"></i>Limpiar</button>
+                        <button type="submit" class="btn btn-primary btn-sm"><i class="bi bi-check-circle me-1"></i>Guardar Firma</button>
+                    </div>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Activity Log / Chatter -->
+        <div class="card stat-card">
+            <div class="card-header"><i class="bi bi-chat-dots me-2"></i>Historial de Actividades</div>
+            <div class="card-body">
+                <!-- Add note -->
+                <form method="post" action="{% url 'sales:quotation_add_note' quotation.pk %}" class="mb-3">
+                    {% csrf_token %}
+                    <div class="input-group">
+                        <input type="text" name="note" class="form-control" placeholder="Escribir una nota...">
+                        <button type="submit" class="btn btn-outline-primary"><i class="bi bi-send"></i></button>
+                    </div>
+                </form>
+                <!-- Activity list -->
+                <div class="activity-timeline">
+                    {% for activity in activities %}
+                    <div class="d-flex mb-3" style="gap: 12px;">
+                        <div class="flex-shrink-0">
+                            <div style="width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem;
+                                {% if activity.activity_type == 'status_change' %}background: rgba(99, 102, 241, 0.2); color: var(--primary);
+                                {% elif activity.activity_type == 'signature' %}background: rgba(16, 185, 129, 0.2); color: var(--neon-green);
+                                {% else %}background: var(--bg-surface); color: var(--text-muted);{% endif %}">
+                                {% if activity.activity_type == 'status_change' %}<i class="bi bi-arrow-repeat"></i>
+                                {% elif activity.activity_type == 'signature' %}<i class="bi bi-pen"></i>
+                                {% elif activity.activity_type == 'email' %}<i class="bi bi-envelope"></i>
+                                {% else %}<i class="bi bi-chat-left-text"></i>{% endif %}
+                            </div>
+                        </div>
+                        <div class="flex-grow-1">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <span class="fw-semibold" style="font-size: 0.85rem;">{{ activity.title }}</span>
+                                    {% if activity.old_value and activity.new_value %}
+                                    <span class="ms-1" style="font-size: 0.75rem;">
+                                        <span class="badge bg-secondary" style="font-size: 0.65rem;">{{ activity.old_value }}</span>
+                                        <i class="bi bi-arrow-right" style="font-size: 0.6rem;"></i>
+                                        <span class="badge bg-primary" style="font-size: 0.65rem;">{{ activity.new_value }}</span>
+                                    </span>
+                                    {% endif %}
+                                </div>
+                                <small class="text-muted" style="font-size: 0.7rem; white-space: nowrap;">{{ activity.created_at|date:"d/m/Y H:i" }}</small>
+                            </div>
+                            {% if activity.description %}
+                            <div class="text-muted" style="font-size: 0.8rem;">{{ activity.description }}</div>
+                            {% endif %}
+                            <small class="text-muted" style="font-size: 0.7rem;">{{ activity.user.get_full_name|default:activity.user.username }}</small>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="text-center text-muted py-3">
+                        <i class="bi bi-clock-history" style="font-size: 1.5rem;"></i>
+                        <p class="mb-0 mt-1" style="font-size: 0.85rem;">No hay actividades registradas.</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Right Column - Summary -->
@@ -184,7 +278,7 @@
         </div>
 
         <div class="card stat-card mb-3">
-            <div class="card-header"><i class="bi bi-calendar me-2"></i>Fechas</div>
+            <div class="card-header"><i class="bi bi-calendar me-2"></i>Fechas y Condiciones</div>
             <div class="card-body">
                 <div class="mb-2">
                     <small class="text-muted">Fecha de Emision</small>
@@ -196,7 +290,18 @@
                         {% if quotation.is_expired %}<span class="badge bg-danger ms-1">Expirada</span>{% endif %}
                     </div>
                 </div>
-                {% if quotation.payment_terms %}
+                {% if quotation.price_list %}
+                <div class="mb-2">
+                    <small class="text-muted">Lista de Precios</small>
+                    <div><a href="{% url 'sales:price_list_detail' quotation.price_list.pk %}">{{ quotation.price_list }}</a></div>
+                </div>
+                {% endif %}
+                {% if quotation.payment_term %}
+                <div class="mb-2">
+                    <small class="text-muted">Termino de Pago</small>
+                    <div><a href="{% url 'sales:payment_term_detail' quotation.payment_term.pk %}">{{ quotation.payment_term }}</a></div>
+                </div>
+                {% elif quotation.payment_terms %}
                 <div class="mb-2">
                     <small class="text-muted">Condiciones de Pago</small>
                     <div>{{ quotation.payment_terms }}</div>
@@ -217,6 +322,28 @@
             </div>
         </div>
 
+        <!-- Payment Term Installments -->
+        {% if quotation.payment_term and quotation.payment_term.installments.exists %}
+        <div class="card stat-card mb-3">
+            <div class="card-header"><i class="bi bi-cash-stack me-2"></i>Cuotas de Pago</div>
+            <div class="card-body p-0">
+                <table class="table table-sm mb-0">
+                    <thead><tr><th>Cuota</th><th class="text-center">%</th><th class="text-center">Dias</th><th class="text-end">Monto</th></tr></thead>
+                    <tbody>
+                        {% for inst in quotation.payment_term.installments.all %}
+                        <tr>
+                            <td>{{ inst.sequence }}</td>
+                            <td class="text-center">{{ inst.percentage }}%</td>
+                            <td class="text-center">{{ inst.days }}d</td>
+                            <td class="text-end">S/ {{ quotation.total|floatformat:2 }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+
         <div class="card stat-card">
             <div class="card-header"><i class="bi bi-clock-history me-2"></i>Auditoria</div>
             <div class="card-body">
@@ -232,4 +359,66 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Signature pad
+(function() {
+    const canvas = document.getElementById('signatureCanvas');
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    let drawing = false;
+    let lastX = 0, lastY = 0;
+
+    function getPos(e) {
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        return { x: (clientX - rect.left) * scaleX, y: (clientY - rect.top) * scaleY };
+    }
+
+    function startDraw(e) {
+        e.preventDefault();
+        drawing = true;
+        const pos = getPos(e);
+        lastX = pos.x;
+        lastY = pos.y;
+    }
+    function draw(e) {
+        if (!drawing) return;
+        e.preventDefault();
+        const pos = getPos(e);
+        ctx.beginPath();
+        ctx.moveTo(lastX, lastY);
+        ctx.lineTo(pos.x, pos.y);
+        ctx.strokeStyle = '#1a1a2e';
+        ctx.lineWidth = 2;
+        ctx.lineCap = 'round';
+        ctx.stroke();
+        lastX = pos.x;
+        lastY = pos.y;
+    }
+    function stopDraw() { drawing = false; }
+
+    canvas.addEventListener('mousedown', startDraw);
+    canvas.addEventListener('mousemove', draw);
+    canvas.addEventListener('mouseup', stopDraw);
+    canvas.addEventListener('mouseleave', stopDraw);
+    canvas.addEventListener('touchstart', startDraw);
+    canvas.addEventListener('touchmove', draw);
+    canvas.addEventListener('touchend', stopDraw);
+
+    document.getElementById('clearSignature').addEventListener('click', function() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+    });
+
+    document.getElementById('signatureForm').addEventListener('submit', function() {
+        document.getElementById('signatureData').value = canvas.toDataURL('image/png');
+    });
+})();
+</script>
 {% endblock %}

@@ -239,7 +239,7 @@
 
         <!-- Picking Orders -->
         {% if picking_orders %}
-        <div class="card stat-card">
+        <div class="card stat-card mb-3">
             <div class="card-header"><i class="bi bi-box-seam me-2"></i>Ordenes de Picking</div>
             <div class="table-responsive">
                 <table class="table table-hover mb-0">
@@ -271,6 +271,58 @@
             </div>
         </div>
         {% endif %}
+
+        <!-- Activity Log / Chatter -->
+        <div class="card stat-card">
+            <div class="card-header"><i class="bi bi-chat-dots me-2"></i>Historial de Actividades</div>
+            <div class="card-body">
+                <form method="post" action="{% url 'sales:order_add_note' order.pk %}" class="mb-3">
+                    {% csrf_token %}
+                    <div class="input-group">
+                        <input type="text" name="note" class="form-control" placeholder="Escribir una nota...">
+                        <button type="submit" class="btn btn-outline-primary"><i class="bi bi-send"></i></button>
+                    </div>
+                </form>
+                <div class="activity-timeline">
+                    {% for activity in activities %}
+                    <div class="d-flex mb-3" style="gap: 12px;">
+                        <div class="flex-shrink-0">
+                            <div style="width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem;
+                                {% if activity.activity_type == 'status_change' %}background: rgba(99, 102, 241, 0.2); color: var(--primary);
+                                {% else %}background: var(--bg-surface); color: var(--text-muted);{% endif %}">
+                                {% if activity.activity_type == 'status_change' %}<i class="bi bi-arrow-repeat"></i>
+                                {% else %}<i class="bi bi-chat-left-text"></i>{% endif %}
+                            </div>
+                        </div>
+                        <div class="flex-grow-1">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <span class="fw-semibold" style="font-size: 0.85rem;">{{ activity.title }}</span>
+                                    {% if activity.old_value and activity.new_value %}
+                                    <span class="ms-1" style="font-size: 0.75rem;">
+                                        <span class="badge bg-secondary" style="font-size: 0.65rem;">{{ activity.old_value }}</span>
+                                        <i class="bi bi-arrow-right" style="font-size: 0.6rem;"></i>
+                                        <span class="badge bg-primary" style="font-size: 0.65rem;">{{ activity.new_value }}</span>
+                                    </span>
+                                    {% endif %}
+                                </div>
+                                <small class="text-muted" style="font-size: 0.7rem; white-space: nowrap;">{{ activity.created_at|date:"d/m/Y H:i" }}</small>
+                            </div>
+                            {% if activity.description %}
+                            <div class="text-muted" style="font-size: 0.8rem;">{{ activity.description }}</div>
+                            {% endif %}
+                            <small class="text-muted" style="font-size: 0.7rem;">{{ activity.user.get_full_name|default:activity.user.username }}</small>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="text-center text-muted py-3">
+                        <i class="bi bi-clock-history" style="font-size: 1.5rem;"></i>
+                        <p class="mb-0 mt-1" style="font-size: 0.85rem;">No hay actividades registradas.</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Right Column -->
@@ -314,9 +366,21 @@
                 </div>
                 {% endif %}
                 {% if order.delivery_date %}
-                <div>
+                <div class="mb-2">
                     <small class="text-muted">Entrega Real</small>
                     <div class="text-success">{{ order.delivery_date|date:"d/m/Y" }}</div>
+                </div>
+                {% endif %}
+                {% if order.price_list %}
+                <div class="mb-2">
+                    <small class="text-muted">Lista de Precios</small>
+                    <div><a href="{% url 'sales:price_list_detail' order.price_list.pk %}">{{ order.price_list }}</a></div>
+                </div>
+                {% endif %}
+                {% if order.payment_term %}
+                <div>
+                    <small class="text-muted">Termino de Pago</small>
+                    <div><a href="{% url 'sales:payment_term_detail' order.payment_term.pk %}">{{ order.payment_term }}</a></div>
                 </div>
                 {% endif %}
             </div>

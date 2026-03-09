@@ -1,0 +1,59 @@
+{% extends "base/base.html" %}
+{% block title %}{{ title }}{% endblock %}
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+<li class="breadcrumb-item"><a href="{% url 'sales:price_list_list' %}">Listas de Precios</a></li>
+<li class="breadcrumb-item active">{{ title }}</li>
+{% endblock %}
+{% block content %}
+<div class="page-header"><h4><i class="bi bi-tags me-2"></i>{{ title }}</h4></div>
+<div class="card stat-card">
+    <div class="card-body">
+        <form method="post">
+            {% csrf_token %}
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">Nombre</label>
+                    {{ form.name }}
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Codigo</label>
+                    {{ form.code }}
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Moneda</label>
+                    {{ form.currency }}
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Vigente Desde</label>
+                    {{ form.valid_from }}
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Vigente Hasta</label>
+                    {{ form.valid_until }}
+                </div>
+                <div class="col-md-3">
+                    <div class="form-check mt-4">
+                        {{ form.is_active }}
+                        <label class="form-check-label">Activa</label>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-check mt-4">
+                        {{ form.is_default }}
+                        <label class="form-check-label">Por Defecto</label>
+                    </div>
+                </div>
+                <div class="col-12">
+                    <label class="form-label">Notas</label>
+                    {{ form.notes }}
+                </div>
+            </div>
+            <div class="mt-3">
+                <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg me-1"></i>Guardar</button>
+                <a href="{% url 'sales:price_list_list' %}" class="btn btn-outline-secondary ms-2">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

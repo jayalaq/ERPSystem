@@ -679,6 +679,13 @@
     <!-- ========== MAIN CONTENT ========== -->
     <div class="main-content">
         <div class="content-area">
+            {% block breadcrumb_wrapper %}
+            <nav aria-label="breadcrumb" class="mb-3">
+                <ol class="breadcrumb">
+                    {% block breadcrumb %}{% endblock %}
+                </ol>
+            </nav>
+            {% endblock %}
             {% if messages %}
             {% for message in messages %}
             <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert" style="margin-bottom: 1rem;">

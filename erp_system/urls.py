@@ -3,10 +3,12 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 
-from apps.core.views import service_worker
+from apps.core.views import service_worker, pwa_manifest, pwa_offline
 
 urlpatterns = [
     path('service-worker.js', service_worker, name='service_worker'),
+    path('manifest.webmanifest', pwa_manifest, name='pwa_manifest'),
+    path('offline/', pwa_offline, name='pwa_offline'),
     path('admin/', admin.site.urls),
     path('', include('apps.website.urls')),
     path('app/', include('apps.core.urls')),

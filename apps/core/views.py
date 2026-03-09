@@ -202,12 +202,69 @@ def dashboard(request):
 
 
 def service_worker(request):
-    """Serve service worker from root scope."""
-    import os
+    """Serve service worker from root scope (Odoo-style controller pattern)."""
+    return render(
+        request,
+        'pwa/service-worker.js',
+        content_type='application/javascript; charset=utf-8',
+    )
+
+
+def pwa_manifest(request):
+    """Dynamic manifest.webmanifest served from DB config (Odoo Enterprise pattern)."""
+    import json
     from django.http import HttpResponse
-    sw_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'static', 'pwa', 'service-worker.js')
-    with open(sw_path, 'r') as f:
-        return HttpResponse(f.read(), content_type='application/javascript')
+    from apps.core.models import Company, SystemConfig
+
+    company = Company.objects.first()
+    configs = {c.key: c.value for c in SystemConfig.objects.filter(
+        key__in=['primary_color', 'accent_color', 'pwa_short_name', 'pwa_theme_color', 'pwa_background_color']
+    )}
+
+    app_name = company.trade_name or company.name if company else 'NexusERP'
+    short_name = configs.get('pwa_short_name', app_name[:12])
+    theme_color = configs.get('pwa_theme_color', configs.get('primary_color', '#714B67'))
+    bg_color = configs.get('pwa_background_color', '#0a0e1a')
+
+    icons = []
+    for size in [72, 96, 128, 144, 152, 192, 384, 512]:
+        icons.append({
+            'src': f'/static/pwa/icons/icon-{size}x{size}.png',
+            'sizes': f'{size}x{size}',
+            'type': 'image/png',
+            'purpose': 'any maskable',
+        })
+
+    manifest = {
+        'name': app_name,
+        'short_name': short_name,
+        'description': f'{app_name} - Sistema ERP integrado',
+        'start_url': '/app/',
+        'scope': '/',
+        'display': 'standalone',
+        'orientation': 'any',
+        'background_color': bg_color,
+        'theme_color': theme_color,
+        'lang': 'es',
+        'categories': ['business', 'productivity'],
+        'icons': icons,
+        'shortcuts': [
+            {'name': 'Punto de Venta', 'short_name': 'POS', 'url': '/pos/', 'icons': [{'src': '/static/pwa/icons/icon-96x96.png', 'sizes': '96x96'}]},
+            {'name': 'CRM', 'short_name': 'CRM', 'url': '/crm/', 'icons': [{'src': '/static/pwa/icons/icon-96x96.png', 'sizes': '96x96'}]},
+            {'name': 'Inventario', 'short_name': 'Stock', 'url': '/logistics/', 'icons': [{'src': '/static/pwa/icons/icon-96x96.png', 'sizes': '96x96'}]},
+            {'name': 'Facturación', 'short_name': 'Factura', 'url': '/accounting/', 'icons': [{'src': '/static/pwa/icons/icon-96x96.png', 'sizes': '96x96'}]},
+        ],
+    }
+
+    return HttpResponse(
+        json.dumps(manifest, ensure_ascii=False),
+        content_type='application/manifest+json; charset=utf-8',
+    )
+
+
+def pwa_offline(request):
+    """Offline fallback page."""
+    return render(request, 'pwa/offline.html')
 
 
 def health_check(request):

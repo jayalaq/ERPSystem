@@ -8,8 +8,10 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="NexusERP">
-    <link rel="manifest" href="{% static 'pwa/manifest.json' %}">
-    <link rel="apple-touch-icon" href="{% static 'pwa/icons/icon-152x152.png' %}">
+    <link rel="manifest" href="/manifest.webmanifest">
+    <link rel="apple-touch-icon" sizes="152x152" href="{% static 'pwa/icons/icon-152x152.png' %}">
+    <link rel="apple-touch-icon" sizes="192x192" href="{% static 'pwa/icons/icon-192x192.png' %}">
+    <link rel="icon" type="image/png" sizes="192x192" href="{% static 'pwa/icons/icon-192x192.png' %}">
     <title>{% block title %}ERP System{% endblock %} | {{ company.name|default:"NexusERP" }}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
@@ -721,14 +723,98 @@
     </script>
     {% block extra_js %}{% endblock %}
 
-    <!-- PWA Service Worker -->
+    <!-- PWA Install Banner (Odoo Enterprise style) -->
+    <div id="pwaInstallBanner" style="display:none; position:fixed; bottom:0; left:0; right:0; z-index:9999; background:linear-gradient(135deg, #111827 0%, #0f1629 100%); border-top:1px solid rgba(99,102,241,0.2); padding:0.875rem 1rem; box-shadow:0 -4px 24px rgba(0,0,0,0.5);">
+        <div style="max-width:600px; margin:0 auto; display:flex; align-items:center; gap:0.875rem;">
+            <img src="{% static 'pwa/icons/icon-96x96.png' %}" alt="NexusERP" style="width:48px; height:48px; border-radius:12px; flex-shrink:0;">
+            <div style="flex:1; min-width:0;">
+                <div style="font-weight:600; font-size:0.95rem; color:#e2e8f0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Instalar NexusERP</div>
+                <div style="font-size:0.8rem; color:#94a3b8; margin-top:2px;">Accede mas rapido desde tu pantalla de inicio</div>
+            </div>
+            <button id="pwaInstallBtn" style="flex-shrink:0; padding:0.5rem 1.25rem; background:linear-gradient(135deg, #6366f1, #4f46e5); color:white; border:none; border-radius:8px; font-size:0.85rem; font-weight:600; cursor:pointer; transition:all 0.2s;">Instalar</button>
+            <button id="pwaInstallDismiss" style="flex-shrink:0; background:none; border:none; color:#64748b; font-size:1.25rem; cursor:pointer; padding:0.25rem; line-height:1;">&times;</button>
+        </div>
+    </div>
+
+    <!-- PWA Service Worker & Install Prompt -->
     <script>
+        // Service Worker Registration (Odoo pattern)
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', function() {
                 navigator.serviceWorker.register('/service-worker.js', { scope: '/' })
-                    .then(function(reg) { console.log('SW registered:', reg.scope); })
-                    .catch(function(err) { console.log('SW registration failed:', err); });
+                    .then(function(reg) {
+                        console.log('[PWA] SW registered, scope:', reg.scope);
+                        // Auto-update check
+                        reg.addEventListener('updatefound', function() {
+                            var newWorker = reg.installing;
+                            newWorker.addEventListener('statechange', function() {
+                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                    // New version available - auto-activate
+                                    newWorker.postMessage({ type: 'SKIP_WAITING' });
+                                    window.location.reload();
+                                }
+                            });
+                        });
+                    })
+                    .catch(function(err) { console.log('[PWA] SW registration failed:', err); });
             });
+        }
+
+        // A2HS / Install Prompt (Odoo Enterprise style)
+        var deferredPrompt = null;
+        var installBanner = document.getElementById('pwaInstallBanner');
+        var installBtn = document.getElementById('pwaInstallBtn');
+        var dismissBtn = document.getElementById('pwaInstallDismiss');
+
+        window.addEventListener('beforeinstallprompt', function(e) {
+            e.preventDefault();
+            deferredPrompt = e;
+            // Don't show if user dismissed recently
+            var dismissed = localStorage.getItem('pwa_install_dismissed');
+            if (dismissed && (Date.now() - parseInt(dismissed)) < 7 * 24 * 60 * 60 * 1000) return;
+            installBanner.style.display = 'block';
+        });
+
+        if (installBtn) {
+            installBtn.addEventListener('click', function() {
+                if (!deferredPrompt) return;
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then(function(result) {
+                    if (result.outcome === 'accepted') {
+                        console.log('[PWA] App installed');
+                    }
+                    deferredPrompt = null;
+                    installBanner.style.display = 'none';
+                });
+            });
+        }
+
+        if (dismissBtn) {
+            dismissBtn.addEventListener('click', function() {
+                installBanner.style.display = 'none';
+                localStorage.setItem('pwa_install_dismissed', Date.now().toString());
+            });
+        }
+
+        // Hide banner if already installed
+        window.addEventListener('appinstalled', function() {
+            installBanner.style.display = 'none';
+            deferredPrompt = null;
+            console.log('[PWA] App installed successfully');
+        });
+
+        // iOS detection - show manual install hint
+        if (/iPad|iPhone|iPod/.test(navigator.userAgent) && !navigator.standalone && !window.matchMedia('(display-mode: standalone)').matches) {
+            var iosHint = localStorage.getItem('pwa_ios_hint_dismissed');
+            if (!iosHint || (Date.now() - parseInt(iosHint)) > 30 * 24 * 60 * 60 * 1000) {
+                installBanner.style.display = 'block';
+                installBtn.textContent = 'Como instalar';
+                installBtn.addEventListener('click', function() {
+                    alert('Para instalar NexusERP en tu iPhone/iPad:\n\n1. Toca el boton de compartir (cuadrado con flecha)\n2. Selecciona "Agregar a pantalla de inicio"\n3. Confirma tocando "Agregar"');
+                    installBanner.style.display = 'none';
+                    localStorage.setItem('pwa_ios_hint_dismissed', Date.now().toString());
+                });
+            }
         }
     </script>
 </body>

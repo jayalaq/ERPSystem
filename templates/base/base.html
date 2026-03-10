@@ -544,36 +544,20 @@
                 </a>
             </div>
 
-            <!-- Ventas -->
-            <div class="app-section-title mt-2">Ventas</div>
+            <!-- Aplicaciones principales (estilo Odoo) -->
+            <div class="app-section-title mt-2">Aplicaciones</div>
             <div class="app-grid mb-3">
-                <a href="{% url 'pos:terminal' %}" class="app-tile" onclick="toggleAppSwitcher()">
-                    <div class="tile-icon" style="background: linear-gradient(135deg, #6366f1, #8b5cf6);"><i class="bi bi-display"></i></div>
-                    <span class="tile-label">Punto de Venta</span>
-                </a>
                 <a href="{% url 'sales:quotation_list' %}" class="app-tile" onclick="toggleAppSwitcher()">
-                    <div class="tile-icon" style="background: linear-gradient(135deg, #06b6d4, #22d3ee);"><i class="bi bi-file-earmark-richtext"></i></div>
-                    <span class="tile-label">Cotizaciones</span>
+                    <div class="tile-icon" style="background: linear-gradient(135deg, #6366f1, #8b5cf6);"><i class="bi bi-graph-up-arrow"></i></div>
+                    <span class="tile-label">Ventas</span>
                 </a>
-                <a href="{% url 'sales:order_list' %}" class="app-tile" onclick="toggleAppSwitcher()">
-                    <div class="tile-icon" style="background: linear-gradient(135deg, #10b981, #34d399);"><i class="bi bi-cart-check"></i></div>
-                    <span class="tile-label">Pedidos Venta</span>
-                </a>
-                <a href="{% url 'sales:picking_list' %}" class="app-tile" onclick="toggleAppSwitcher()">
-                    <div class="tile-icon" style="background: linear-gradient(135deg, #f59e0b, #fbbf24);"><i class="bi bi-box-seam"></i></div>
-                    <span class="tile-label">Picking</span>
-                </a>
-                <a href="{% url 'sales:price_list_list' %}" class="app-tile" onclick="toggleAppSwitcher()">
-                    <div class="tile-icon" style="background: linear-gradient(135deg, #ec4899, #f472b6);"><i class="bi bi-tags"></i></div>
-                    <span class="tile-label">Listas Precio</span>
-                </a>
-                <a href="{% url 'sales:payment_term_list' %}" class="app-tile" onclick="toggleAppSwitcher()">
-                    <div class="tile-icon" style="background: linear-gradient(135deg, #14b8a6, #2dd4bf);"><i class="bi bi-cash-stack"></i></div>
-                    <span class="tile-label">Terminos Pago</span>
+                <a href="{% url 'pos:terminal' %}" class="app-tile" onclick="toggleAppSwitcher()">
+                    <div class="tile-icon" style="background: linear-gradient(135deg, #06b6d4, #22d3ee);"><i class="bi bi-display"></i></div>
+                    <span class="tile-label">Punto de Venta</span>
                 </a>
                 <a href="{% url 'accounting:invoice_list' %}" class="app-tile" onclick="toggleAppSwitcher()">
                     <div class="tile-icon" style="background: linear-gradient(135deg, #8b5cf6, #a78bfa);"><i class="bi bi-file-earmark-text"></i></div>
-                    <span class="tile-label">Comprobantes</span>
+                    <span class="tile-label">Facturaci&oacute;n</span>
                 </a>
                 <a href="{% url 'accounting:daily_receipt_summary' %}" class="app-tile" onclick="toggleAppSwitcher()">
                     <div class="tile-icon" style="background: linear-gradient(135deg, #7c3aed, #a855f7);"><i class="bi bi-journal-text"></i></div>

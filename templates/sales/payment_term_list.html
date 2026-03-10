@@ -1,9 +1,7 @@
-{% extends "base/base.html" %}
+{% extends "sales/base_sales.html" %}
 {% block title %}Terminos de Pago{% endblock %}
-{% block breadcrumb %}
-<li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
-<li class="breadcrumb-item"><a href="{% url 'sales:quotation_list' %}">Ventas</a></li>
-<li class="breadcrumb-item active">Terminos de Pago</li>
+{% block sales_breadcrumb %}
+<li class="breadcrumb-item active">T&eacute;rminos de Pago</li>
 {% endblock %}
 {% block content %}
 <div class="page-header">

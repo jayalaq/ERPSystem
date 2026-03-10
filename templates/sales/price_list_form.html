@@ -1,7 +1,6 @@
-{% extends "base/base.html" %}
+{% extends "sales/base_sales.html" %}
 {% block title %}{{ title }}{% endblock %}
-{% block breadcrumb %}
-<li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+{% block sales_breadcrumb %}
 <li class="breadcrumb-item"><a href="{% url 'sales:price_list_list' %}">Listas de Precios</a></li>
 <li class="breadcrumb-item active">{{ title }}</li>
 {% endblock %}

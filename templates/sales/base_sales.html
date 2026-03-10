@@ -1,0 +1,55 @@
+{% extends "base/base.html" %}
+
+{% block module_nav %}
+<!-- Odoo-style Sales Module Navigation - active state from URL path -->
+{% with path=request.path %}
+<div class="dropdown">
+    <a class="nav-tab dropdown-toggle {% if '/cotizaciones/' in path or '/pedidos/' in path %}active{% endif %}" href="#" data-bs-toggle="dropdown" data-bs-auto-close="outside">
+        <i class="bi bi-receipt me-1"></i>Pedidos
+    </a>
+    <ul class="dropdown-menu dropdown-menu-dark" style="background: var(--bg-card); border: 1px solid var(--border-color); min-width: 200px;">
+        <li>
+            <a class="dropdown-item {% if '/cotizaciones/' in path %}active{% endif %}" href="{% url 'sales:quotation_list' %}">
+                <i class="bi bi-file-earmark-richtext me-2"></i>Cotizaciones
+            </a>
+        </li>
+        <li>
+            <a class="dropdown-item {% if '/pedidos/' in path %}active{% endif %}" href="{% url 'sales:order_list' %}">
+                <i class="bi bi-cart-check me-2"></i>&Oacute;rdenes de Venta
+            </a>
+        </li>
+    </ul>
+</div>
+
+<a class="nav-tab {% if '/picking/' in path %}active{% endif %}" href="{% url 'sales:picking_list' %}">
+    <i class="bi bi-box-seam me-1"></i>Picking
+</a>
+
+<a class="nav-tab {% if '/accounting/' in path %}active{% endif %}" href="{% url 'accounting:invoice_list' %}">
+    <i class="bi bi-file-earmark-text me-1"></i>Facturaci&oacute;n
+</a>
+
+<div class="dropdown">
+    <a class="nav-tab dropdown-toggle {% if '/listas-precio/' in path or '/terminos-pago/' in path %}active{% endif %}" href="#" data-bs-toggle="dropdown" data-bs-auto-close="outside">
+        <i class="bi bi-gear me-1"></i>Configuraci&oacute;n
+    </a>
+    <ul class="dropdown-menu dropdown-menu-dark" style="background: var(--bg-card); border: 1px solid var(--border-color); min-width: 200px;">
+        <li>
+            <a class="dropdown-item {% if '/listas-precio/' in path %}active{% endif %}" href="{% url 'sales:price_list_list' %}">
+                <i class="bi bi-tags me-2"></i>Listas de Precio
+            </a>
+        </li>
+        <li>
+            <a class="dropdown-item {% if '/terminos-pago/' in path %}active{% endif %}" href="{% url 'sales:payment_term_list' %}">
+                <i class="bi bi-cash-stack me-2"></i>T&eacute;rminos de Pago
+            </a>
+        </li>
+    </ul>
+</div>
+{% endwith %}
+{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'sales:quotation_list' %}">Ventas</a></li>
+{% block sales_breadcrumb %}{% endblock %}
+{% endblock %}

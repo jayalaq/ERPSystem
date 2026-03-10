@@ -1,9 +1,8 @@
-{% extends "base/base.html" %}
+{% extends "sales/base_sales.html" %}
 {% load humanize %}
 {% block title %}Pedidos de Venta{% endblock %}
-{% block breadcrumb %}
-<li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
-<li class="breadcrumb-item active">Pedidos de Venta</li>
+{% block sales_breadcrumb %}
+<li class="breadcrumb-item active">&Oacute;rdenes de Venta</li>
 {% endblock %}
 {% block content %}
 <div class="page-header">

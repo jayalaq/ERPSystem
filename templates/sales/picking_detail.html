@@ -1,8 +1,7 @@
-{% extends "base/base.html" %}
+{% extends "sales/base_sales.html" %}
 {% load humanize %}
 {% block title %}{{ picking.number }}{% endblock %}
-{% block breadcrumb %}
-<li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+{% block sales_breadcrumb %}
 <li class="breadcrumb-item"><a href="{% url 'sales:picking_list' %}">Picking</a></li>
 <li class="breadcrumb-item active">{{ picking.number }}</li>
 {% endblock %}

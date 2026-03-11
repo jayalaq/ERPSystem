@@ -1,13 +1,13 @@
 {% extends "base/base.html" %}
 
 {% block module_nav %}
-<!-- Odoo-style Sales Module Navigation - active state from URL path -->
+<!-- Odoo-style Sales Module Navigation -->
 {% with path=request.path %}
 <div class="dropdown">
     <a class="nav-tab dropdown-toggle {% if '/cotizaciones/' in path or '/pedidos/' in path %}active{% endif %}" href="#" data-bs-toggle="dropdown" data-bs-auto-close="outside">
         <i class="bi bi-receipt me-1"></i>Pedidos
     </a>
-    <ul class="dropdown-menu dropdown-menu-dark" style="background: var(--bg-card); border: 1px solid var(--border-color); min-width: 200px;">
+    <ul class="dropdown-menu">
         <li>
             <a class="dropdown-item {% if '/cotizaciones/' in path %}active{% endif %}" href="{% url 'sales:quotation_list' %}">
                 <i class="bi bi-file-earmark-richtext me-2"></i>Cotizaciones
@@ -33,7 +33,7 @@
     <a class="nav-tab dropdown-toggle {% if '/listas-precio/' in path or '/terminos-pago/' in path %}active{% endif %}" href="#" data-bs-toggle="dropdown" data-bs-auto-close="outside">
         <i class="bi bi-gear me-1"></i>Configuraci&oacute;n
     </a>
-    <ul class="dropdown-menu dropdown-menu-dark" style="background: var(--bg-card); border: 1px solid var(--border-color); min-width: 200px;">
+    <ul class="dropdown-menu">
         <li>
             <a class="dropdown-item {% if '/listas-precio/' in path %}active{% endif %}" href="{% url 'sales:price_list_list' %}">
                 <i class="bi bi-tags me-2"></i>Listas de Precio

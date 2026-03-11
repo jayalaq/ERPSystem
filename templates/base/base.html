@@ -1,12 +1,12 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="es" data-bs-theme="dark">
+<html lang="es" data-bs-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="theme-color" content="#0a0e1a">
+    <meta name="theme-color" content="#714B67">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="NexusERP">
     <link rel="manifest" href="/manifest.webmanifest">
     <link rel="apple-touch-icon" sizes="152x152" href="{% static 'pwa/icons/icon-152x152.png' %}">
@@ -18,141 +18,126 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
         :root {
-            --topbar-height: 48px;
-            --primary: {{ theme.primary|default:"#6366f1" }};
-            --primary-dark: #4f46e5;
-            --primary-light: #818cf8;
-            --accent: {{ theme.accent|default:"#06b6d4" }};
-            --accent-glow: rgba(6, 182, 212, 0.4);
-            --neon-green: #10b981;
-            --neon-pink: #ec4899;
-            --neon-orange: #f59e0b;
-            --neon-red: #ef4444;
-            --bg-dark: #0a0e1a;
-            --bg-card: #111827;
-            --bg-card-hover: #1a2236;
-            --bg-surface: #0f1629;
-            --bg-sidebar: {{ theme.sidebar|default:"#070b14" }};
-            --border-color: rgba(99, 102, 241, 0.15);
-            --border-glow: rgba(6, 182, 212, 0.3);
-            --text-primary: #e2e8f0;
-            --text-secondary: #94a3b8;
-            --text-muted: #64748b;
-            --glass-bg: rgba(17, 24, 39, 0.7);
-            --glass-border: rgba(99, 102, 241, 0.2);
-            --card-shadow: 0 4px 24px rgba(0, 0, 0, 0.3), 0 0 0 1px var(--border-color);
-            --glow-shadow: 0 0 20px var(--accent-glow);
+            --topbar-height: 46px;
+            --o-brand: {{ theme.primary|default:"#714B67" }};
+            --o-brand-dark: #5B3D54;
+            --o-brand-light: #8F6382;
+            --o-action: {{ theme.accent|default:"#00A09D" }};
+            --o-action-light: #00B3B0;
+            --o-success: #28A745;
+            --o-warning: #F0AD4E;
+            --o-danger: #DC3545;
+            --o-info: #17A2B8;
+            --o-bg: #F8F9FA;
+            --o-bg-view: #FFFFFF;
+            --o-bg-100: #F1F0F0;
+            --o-bg-200: #E9ECEF;
+            --o-border: #DEE2E6;
+            --o-border-light: #E9ECEF;
+            --o-text: #212529;
+            --o-text-secondary: #6C757D;
+            --o-text-muted: #ADB5BD;
+            --o-shadow-sm: 0 1px 2px rgba(0,0,0,0.06);
+            --o-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            --o-shadow-lg: 0 4px 12px rgba(0,0,0,0.1);
         }
 
         * { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }
         body {
-            background: var(--bg-dark);
+            background: var(--o-bg);
             min-height: 100vh; margin: 0; font-size: 0.875rem;
-            color: var(--text-primary);
-            background-image:
-                radial-gradient(ellipse at 10% 20%, rgba(99, 102, 241, 0.06) 0%, transparent 50%),
-                radial-gradient(ellipse at 90% 80%, rgba(6, 182, 212, 0.04) 0%, transparent 50%);
+            color: var(--o-text);
         }
 
         /* ========== SCROLLBAR ========== */
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: rgba(99, 102, 241, 0.3); border-radius: 3px; }
-        ::-webkit-scrollbar-thumb:hover { background: var(--primary); }
+        ::-webkit-scrollbar-thumb { background: #CCC; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #AAA; }
 
-        /* ========== TOPBAR (Odoo Enterprise style) ========== */
+        /* ========== TOPBAR (Odoo style) ========== */
         .main-topbar {
             position: fixed; top: 0; left: 0; right: 0; z-index: 1040;
             height: var(--topbar-height);
-            background: var(--bg-sidebar);
-            border-bottom: 1px solid var(--border-color);
+            background: var(--o-brand);
             display: flex; align-items: center;
-            padding: 0 1rem;
-            backdrop-filter: blur(20px) saturate(180%);
+            padding: 0 0.75rem;
         }
         .main-topbar .brand-section {
-            display: flex; align-items: center; gap: 0.6rem;
-            padding-right: 1rem;
-            border-right: 1px solid var(--border-color);
+            display: flex; align-items: center; gap: 0.5rem;
+            padding-right: 0.75rem;
+            border-right: 1px solid rgba(255,255,255,0.2);
             margin-right: 0.5rem;
         }
         .main-topbar .brand-icon {
-            width: 32px; height: 32px; min-width: 32px;
-            background: linear-gradient(135deg, var(--primary), var(--accent));
-            border-radius: 8px; display: flex; align-items: center; justify-content: center;
-            color: white; font-size: 0.85rem; font-weight: 800;
-            box-shadow: 0 0 15px rgba(99, 102, 241, 0.3);
+            width: 30px; height: 30px; min-width: 30px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 6px; display: flex; align-items: center; justify-content: center;
+            color: white; font-size: 0.8rem; font-weight: 800;
         }
         .main-topbar .brand-name {
             font-weight: 700; font-size: 0.85rem; color: #fff;
-            background: linear-gradient(135deg, #fff, var(--accent));
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
             white-space: nowrap;
         }
 
         /* App Switcher Button */
         .app-switcher-btn {
-            width: 36px; height: 36px; border-radius: 8px;
-            border: 1px solid var(--border-color);
-            background: transparent; color: var(--text-secondary);
+            width: 34px; height: 34px; border-radius: 6px;
+            border: none;
+            background: rgba(255,255,255,0.15); color: #fff;
             display: flex; align-items: center; justify-content: center;
-            cursor: pointer; transition: all 0.2s; margin-right: 0.75rem;
-            position: relative;
+            cursor: pointer; transition: all 0.15s; margin-right: 0.5rem;
         }
         .app-switcher-btn:hover, .app-switcher-btn.active {
-            background: rgba(99, 102, 241, 0.15); color: var(--accent);
-            border-color: var(--border-glow); box-shadow: 0 0 12px var(--accent-glow);
+            background: rgba(255,255,255,0.25);
         }
 
-        /* Module Navigation Tabs (within modules) */
+        /* Module Navigation Tabs */
         .module-nav {
-            display: flex; align-items: center; gap: 0.25rem;
-            flex: 1; overflow-x: auto; padding: 0 0.5rem;
+            display: flex; align-items: center; gap: 0.15rem;
+            flex: 1; overflow-x: auto; padding: 0 0.25rem;
         }
         .module-nav::-webkit-scrollbar { display: none; }
         .module-nav .nav-tab {
-            padding: 0.4rem 0.75rem; font-size: 0.8rem; font-weight: 500;
-            color: var(--text-secondary); text-decoration: none;
-            border-radius: 6px; transition: all 0.15s; white-space: nowrap;
+            padding: 0.35rem 0.65rem; font-size: 0.8rem; font-weight: 500;
+            color: rgba(255,255,255,0.75); text-decoration: none;
+            border-radius: 4px; transition: all 0.15s; white-space: nowrap;
         }
         .module-nav .nav-tab:hover {
-            background: rgba(99, 102, 241, 0.08); color: var(--text-primary);
+            background: rgba(255,255,255,0.1); color: #fff;
         }
         .module-nav .nav-tab.active {
-            background: rgba(99, 102, 241, 0.15); color: #fff; font-weight: 600;
+            background: rgba(255,255,255,0.2); color: #fff; font-weight: 600;
         }
 
         .topbar-right {
-            display: flex; align-items: center; gap: 0.5rem; margin-left: auto;
+            display: flex; align-items: center; gap: 0.4rem; margin-left: auto;
         }
         .topbar-right .btn-icon {
-            width: 34px; height: 34px; border-radius: 8px;
-            border: 1px solid var(--border-color); background: transparent;
-            color: var(--text-secondary); display: flex;
+            width: 32px; height: 32px; border-radius: 6px;
+            border: none; background: transparent;
+            color: rgba(255,255,255,0.75); display: flex;
             align-items: center; justify-content: center; cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.15s;
         }
         .topbar-right .btn-icon:hover {
-            background: rgba(99, 102, 241, 0.1); color: var(--accent);
-            border-color: var(--border-glow); box-shadow: 0 0 10px var(--accent-glow);
+            background: rgba(255,255,255,0.15); color: #fff;
         }
 
         .user-menu {
-            display: flex; align-items: center; gap: 0.5rem; cursor: pointer;
-            padding: 0.3rem 0.7rem; border-radius: 8px; transition: all 0.2s;
-            border: 1px solid transparent;
+            display: flex; align-items: center; gap: 0.4rem; cursor: pointer;
+            padding: 0.25rem 0.5rem; border-radius: 6px; transition: all 0.15s;
         }
-        .user-menu:hover { background: rgba(99, 102, 241, 0.08); border-color: var(--border-color); }
+        .user-menu:hover { background: rgba(255,255,255,0.1); }
         .user-avatar {
-            width: 30px; height: 30px; border-radius: 8px;
-            background: linear-gradient(135deg, var(--primary), var(--accent));
+            width: 28px; height: 28px; border-radius: 50%;
+            background: rgba(255,255,255,0.25);
             color: white; display: flex; align-items: center; justify-content: center;
             font-size: 0.7rem; font-weight: 700;
-            box-shadow: 0 0 12px rgba(99, 102, 241, 0.3);
         }
-        .user-name { font-size: 0.8rem; color: var(--text-primary); font-weight: 500; }
+        .user-name { font-size: 0.8rem; color: #fff; font-weight: 500; }
 
-        /* ========== APP SWITCHER DROPDOWN ========== */
+        /* ========== APP SWITCHER PANEL (Odoo Home Menu) ========== */
         .app-switcher-panel {
             display: none; position: fixed;
             top: var(--topbar-height); left: 0; right: 0; bottom: 0;
@@ -161,333 +146,389 @@
         .app-switcher-panel.show { display: block; }
         .app-switcher-overlay {
             position: absolute; inset: 0;
-            background: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(4px);
+            background: rgba(0, 0, 0, 0.3);
         }
         .app-switcher-grid {
             position: absolute; top: 0; left: 0; right: 0;
-            background: var(--bg-card);
-            border-bottom: 1px solid var(--border-color);
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+            background: var(--o-bg-100);
+            border-bottom: 1px solid var(--o-border);
+            box-shadow: var(--o-shadow-lg);
             padding: 1.5rem 2rem 2rem;
             max-height: calc(100vh - var(--topbar-height));
             overflow-y: auto;
-            animation: slideDown 0.2s ease-out;
+            animation: slideDown 0.15s ease-out;
         }
         @keyframes slideDown {
-            from { opacity: 0; transform: translateY(-10px); }
+            from { opacity: 0; transform: translateY(-8px); }
             to { opacity: 1; transform: translateY(0); }
         }
         .app-switcher-grid .app-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
-            gap: 0.75rem;
-            max-width: 900px;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 0.5rem;
+            max-width: 800px;
             margin: 0 auto;
         }
         .app-switcher-grid .app-tile {
             display: flex; flex-direction: column; align-items: center;
-            padding: 1rem 0.5rem; border-radius: 12px; text-decoration: none;
-            transition: all 0.2s; cursor: pointer;
-            border: 1px solid transparent;
+            padding: 0.85rem 0.5rem; border-radius: 8px; text-decoration: none;
+            transition: all 0.15s; cursor: pointer;
         }
         .app-switcher-grid .app-tile:hover {
-            background: var(--bg-surface);
-            border-color: var(--border-color);
-            transform: translateY(-2px);
+            background: rgba(0,0,0,0.04);
         }
         .app-switcher-grid .app-tile .tile-icon {
-            width: 44px; height: 44px; border-radius: 12px;
+            width: 42px; height: 42px; border-radius: 10px;
             display: flex; align-items: center; justify-content: center;
-            font-size: 1.2rem; color: #fff; margin-bottom: 0.5rem;
-            box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+            font-size: 1.15rem; color: #fff; margin-bottom: 0.4rem;
+            box-shadow: var(--o-shadow-sm);
         }
         .app-switcher-grid .app-tile .tile-label {
-            font-size: 0.75rem; font-weight: 500; color: var(--text-primary);
+            font-size: 0.72rem; font-weight: 500; color: var(--o-text);
             text-align: center; line-height: 1.2;
         }
         .app-section-title {
             font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.1em;
-            color: var(--text-muted); font-weight: 700; margin-bottom: 0.75rem;
-            padding-bottom: 0.35rem; border-bottom: 1px solid var(--border-color);
+            color: var(--o-text-muted); font-weight: 700; margin-bottom: 0.5rem;
+            padding-bottom: 0.3rem; border-bottom: 1px solid var(--o-border-light);
         }
 
         /* ========== MAIN CONTENT ========== */
         .main-content { padding-top: var(--topbar-height); min-height: 100vh; }
-        .content-area { padding: 1.5rem; }
+        .content-area { padding: 1rem 1.25rem; }
 
-        /* ========== CARDS (Glassmorphism) ========== */
+        /* ========== CARDS (Odoo style - clean, flat) ========== */
         .stat-card {
-            border: 1px solid var(--glass-border); border-radius: 12px;
-            background: var(--glass-bg);
-            backdrop-filter: blur(16px);
-            transition: all 0.3s ease;
-            box-shadow: var(--card-shadow);
+            border: 1px solid var(--o-border); border-radius: 8px;
+            background: var(--o-bg-view);
+            transition: all 0.2s ease;
+            box-shadow: var(--o-shadow-sm);
             overflow: hidden;
         }
-        .stat-card::before {
-            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
-            background: linear-gradient(90deg, transparent, var(--accent), transparent);
-            opacity: 0; transition: opacity 0.3s;
-        }
         .stat-card:hover {
-            border-color: var(--border-glow);
-            box-shadow: var(--card-shadow), var(--glow-shadow);
-            transform: translateY(-2px);
+            box-shadow: var(--o-shadow);
         }
-        .stat-card:hover::before { opacity: 1; }
-        .stat-card .card-body { padding: 1.25rem; position: relative; }
+        .stat-card .card-body { padding: 1rem; position: relative; }
         .stat-icon {
-            width: 48px; height: 48px; border-radius: 12px; display: flex;
-            align-items: center; justify-content: center; font-size: 1.3rem;
+            width: 44px; height: 44px; border-radius: 10px; display: flex;
+            align-items: center; justify-content: center; font-size: 1.2rem;
         }
 
         .card {
-            border: 1px solid var(--border-color); border-radius: 12px;
-            background: var(--bg-card); box-shadow: none;
+            border: 1px solid var(--o-border); border-radius: 8px;
+            background: var(--o-bg-view); box-shadow: var(--o-shadow-sm);
             overflow: hidden;
         }
         .card-header {
-            background: rgba(99, 102, 241, 0.05);
-            border-bottom: 1px solid var(--border-color);
-            padding: 0.85rem 1.15rem; font-weight: 600; font-size: 0.85rem;
-            color: var(--text-primary);
+            background: var(--o-bg-100);
+            border-bottom: 1px solid var(--o-border);
+            padding: 0.75rem 1rem; font-weight: 600; font-size: 0.85rem;
+            color: var(--o-text);
         }
         .card-body { background: transparent; }
 
-        /* ========== TABLES ========== */
-        .table { font-size: 0.825rem; color: var(--text-primary); --bs-table-bg: transparent; }
+        /* ========== TABLES (Odoo style) ========== */
+        .table { font-size: 0.825rem; color: var(--o-text); --bs-table-bg: transparent; }
         .table th {
-            font-weight: 600; font-size: 0.7rem; text-transform: uppercase;
-            letter-spacing: 0.06em; color: var(--text-muted);
-            border-bottom: 1px solid var(--border-color) !important;
-            padding: 0.7rem 0.85rem; white-space: nowrap;
-            background: rgba(99, 102, 241, 0.03);
+            font-weight: 600; font-size: 0.75rem; text-transform: uppercase;
+            letter-spacing: 0.04em; color: var(--o-text-secondary);
+            border-bottom: 2px solid var(--o-border) !important;
+            padding: 0.6rem 0.75rem; white-space: nowrap;
+            background: var(--o-bg-100);
         }
         .table td {
-            vertical-align: middle; padding: 0.6rem 0.85rem; color: var(--text-secondary);
-            border-bottom: 1px solid rgba(99, 102, 241, 0.06) !important;
+            vertical-align: middle; padding: 0.55rem 0.75rem; color: var(--o-text);
+            border-bottom: 1px solid var(--o-border-light) !important;
         }
-        .table-hover tbody tr:hover td { background: rgba(99, 102, 241, 0.05) !important; color: var(--text-primary); }
-        .table-striped > tbody > tr:nth-of-type(odd) > * { background: rgba(99, 102, 241, 0.02) !important; }
+        .table-hover tbody tr { cursor: pointer; }
+        .table-hover tbody tr:hover td { background: #F0F0FA !important; }
+        .table-striped > tbody > tr:nth-of-type(odd) > * { background: var(--o-bg) !important; }
 
-        /* ========== BUTTONS ========== */
-        .btn { font-size: 0.8rem; border-radius: 8px; font-weight: 500; transition: all 0.2s; }
-        .btn-sm { font-size: 0.75rem; padding: 0.35rem 0.7rem; border-radius: 6px; }
+        /* ========== BUTTONS (Odoo style) ========== */
+        .btn { font-size: 0.8rem; border-radius: 4px; font-weight: 500; transition: all 0.15s; }
+        .btn-sm { font-size: 0.75rem; padding: 0.3rem 0.6rem; border-radius: 4px; }
         .btn-primary {
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            border: none; box-shadow: 0 2px 10px rgba(99, 102, 241, 0.3);
+            background: var(--o-brand); border-color: var(--o-brand);
         }
         .btn-primary:hover {
-            background: linear-gradient(135deg, var(--primary-light), var(--primary));
-            box-shadow: 0 4px 20px rgba(99, 102, 241, 0.5);
-            transform: translateY(-1px);
+            background: var(--o-brand-dark); border-color: var(--o-brand-dark);
         }
         .btn-outline-primary {
-            color: var(--primary-light); border-color: var(--primary);
+            color: var(--o-brand); border-color: var(--o-brand);
             background: transparent;
         }
         .btn-outline-primary:hover {
-            background: rgba(99, 102, 241, 0.15); border-color: var(--primary-light);
-            color: #fff; box-shadow: 0 0 15px rgba(99, 102, 241, 0.2);
+            background: var(--o-brand); border-color: var(--o-brand);
+            color: #fff;
         }
         .btn-success {
-            background: linear-gradient(135deg, var(--neon-green), #059669);
-            border: none; box-shadow: 0 2px 10px rgba(16, 185, 129, 0.3);
+            background: var(--o-success); border-color: var(--o-success);
         }
         .btn-success:hover {
-            box-shadow: 0 4px 20px rgba(16, 185, 129, 0.5);
-            transform: translateY(-1px);
+            background: #218838; border-color: #1E7E34;
         }
         .btn-danger {
-            background: linear-gradient(135deg, var(--neon-red), #dc2626);
-            border: none;
+            background: var(--o-danger); border-color: var(--o-danger);
         }
         .btn-info {
-            background: linear-gradient(135deg, var(--accent), #0891b2);
-            border: none; color: #fff;
+            background: var(--o-info); border-color: var(--o-info); color: #fff;
         }
         .btn-warning {
-            background: linear-gradient(135deg, var(--neon-orange), #d97706);
-            border: none; color: #fff;
+            background: var(--o-warning); border-color: var(--o-warning); color: #fff;
         }
         .btn-outline-secondary {
-            border-color: var(--border-color); color: var(--text-secondary);
+            border-color: var(--o-border); color: var(--o-text-secondary);
         }
         .btn-outline-secondary:hover {
-            background: rgba(99, 102, 241, 0.1); border-color: var(--primary);
-            color: var(--text-primary);
+            background: var(--o-bg-200); border-color: var(--o-border);
+            color: var(--o-text);
         }
         .btn-outline-danger {
-            border-color: rgba(239, 68, 68, 0.3); color: var(--neon-red);
+            border-color: var(--o-danger); color: var(--o-danger);
         }
         .btn-outline-danger:hover {
-            background: rgba(239, 68, 68, 0.15); border-color: var(--neon-red);
+            background: var(--o-danger); border-color: var(--o-danger);
             color: #fff;
         }
         .btn-secondary {
-            background: rgba(99, 102, 241, 0.1); border: 1px solid var(--border-color);
-            color: var(--text-secondary);
+            background: var(--o-bg-200); border: 1px solid var(--o-border);
+            color: var(--o-text-secondary);
         }
         .btn-secondary:hover {
-            background: rgba(99, 102, 241, 0.2); color: var(--text-primary);
+            background: var(--o-border); color: var(--o-text);
         }
 
-        /* ========== FORMS ========== */
+        /* ========== FORMS (Odoo style) ========== */
         .form-control, .form-select {
-            font-size: 0.825rem; border-radius: 8px;
-            background: rgba(15, 22, 41, 0.8); border: 1px solid var(--border-color);
-            color: var(--text-primary); transition: all 0.2s;
+            font-size: 0.825rem; border-radius: 4px;
+            background: #fff; border: 1px solid var(--o-border);
+            color: var(--o-text); transition: all 0.15s;
         }
         .form-control:focus, .form-select:focus {
-            border-color: var(--primary); background: rgba(15, 22, 41, 0.9);
-            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15), 0 0 15px rgba(99, 102, 241, 0.1);
-            color: #fff;
+            border-color: var(--o-brand); background: #fff;
+            box-shadow: 0 0 0 2px rgba(113, 75, 103, 0.15);
+            color: var(--o-text);
         }
-        .form-control::placeholder { color: var(--text-muted); }
-        .form-label { font-weight: 500; font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.35rem; }
-        .form-select option { background: var(--bg-card); color: var(--text-primary); }
+        .form-control::placeholder { color: var(--o-text-muted); }
+        .form-label { font-weight: 500; font-size: 0.8rem; color: var(--o-text-secondary); margin-bottom: 0.3rem; }
+        .form-select option { background: #fff; color: var(--o-text); }
 
-        /* ========== BADGES ========== */
+        /* ========== BADGES (Odoo style - pill shaped) ========== */
         .badge {
-            font-weight: 600; font-size: 0.68rem; padding: 0.3em 0.65em;
-            border-radius: 6px; letter-spacing: 0.02em;
+            font-weight: 600; font-size: 0.7rem; padding: 0.3em 0.65em;
+            border-radius: 20px; letter-spacing: 0.02em;
         }
-        .badge.bg-primary { background: linear-gradient(135deg, var(--primary), var(--primary-dark)) !important; }
-        .badge.bg-success { background: linear-gradient(135deg, var(--neon-green), #059669) !important; }
-        .badge.bg-warning { background: linear-gradient(135deg, var(--neon-orange), #d97706) !important; color: #fff !important; }
-        .badge.bg-danger { background: linear-gradient(135deg, var(--neon-red), #dc2626) !important; }
-        .badge.bg-info { background: linear-gradient(135deg, var(--accent), #0891b2) !important; }
-        .badge.bg-secondary { background: rgba(99, 102, 241, 0.15) !important; color: var(--text-secondary) !important; }
+        .badge.bg-primary { background: var(--o-brand) !important; }
+        .badge.bg-success { background: var(--o-success) !important; }
+        .badge.bg-warning { background: var(--o-warning) !important; color: #fff !important; }
+        .badge.bg-danger { background: var(--o-danger) !important; }
+        .badge.bg-info { background: var(--o-info) !important; }
+        .badge.bg-secondary { background: var(--o-bg-200) !important; color: var(--o-text-secondary) !important; }
 
         /* ========== MISC ========== */
-        .text-primary { color: var(--primary-light) !important; }
-        .bg-primary { background: var(--primary) !important; }
-        a { color: var(--primary-light); transition: color 0.2s; }
-        a:hover { color: var(--accent); }
+        .text-primary { color: var(--o-brand) !important; }
+        .bg-primary { background: var(--o-brand) !important; }
+        a { color: var(--o-brand); transition: color 0.15s; }
+        a:hover { color: var(--o-brand-dark); }
 
         .page-header {
-            margin-bottom: 1.5rem; display: flex; align-items: center;
+            margin-bottom: 1.25rem; display: flex; align-items: center;
             justify-content: space-between; flex-wrap: wrap; gap: 0.75rem;
         }
         .page-header h4 {
-            font-weight: 800; color: #fff; margin: 0; font-size: 1.2rem;
-            background: linear-gradient(135deg, #fff, var(--primary-light));
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            font-weight: 700; color: var(--o-text); margin: 0; font-size: 1.15rem;
         }
 
         .alert {
-            font-size: 0.825rem; border-radius: 10px;
-            background: var(--glass-bg); border: 1px solid var(--border-color);
-            backdrop-filter: blur(12px);
+            font-size: 0.825rem; border-radius: 6px;
+            border: 1px solid;
         }
-        .alert-success { border-color: rgba(16, 185, 129, 0.3); background: rgba(16, 185, 129, 0.1); color: var(--neon-green); }
-        .alert-danger { border-color: rgba(239, 68, 68, 0.3); background: rgba(239, 68, 68, 0.1); color: var(--neon-red); }
-        .alert-warning { border-color: rgba(245, 158, 11, 0.3); background: rgba(245, 158, 11, 0.1); color: var(--neon-orange); }
-        .alert-info { border-color: rgba(6, 182, 212, 0.3); background: rgba(6, 182, 212, 0.1); color: var(--accent); }
+        .alert-success { border-color: #C3E6CB; background: #D4EDDA; color: #155724; }
+        .alert-danger { border-color: #F5C6CB; background: #F8D7DA; color: #721C24; }
+        .alert-warning { border-color: #FFEEBA; background: #FFF3CD; color: #856404; }
+        .alert-info { border-color: #BEE5EB; background: #D1ECF1; color: #0C5460; }
 
         .search-box { position: relative; }
         .search-box input {
-            padding-left: 2.2rem; background: rgba(15, 22, 41, 0.6);
-            border: 1px solid var(--border-color);
-            border-radius: 8px; font-size: 0.8rem; height: 34px; color: var(--text-primary);
+            padding-left: 2rem; background: #fff;
+            border: 1px solid var(--o-border);
+            border-radius: 4px; font-size: 0.8rem; height: 34px; color: var(--o-text);
         }
-        .search-box input:focus { background: rgba(15, 22, 41, 0.9); border-color: var(--primary); }
-        .search-box input::placeholder { color: var(--text-muted); }
+        .search-box input:focus { background: #fff; border-color: var(--o-brand); }
+        .search-box input::placeholder { color: var(--o-text-muted); }
         .search-box .search-icon {
-            position: absolute; left: 0.7rem; top: 50%; transform: translateY(-50%);
-            color: var(--text-muted); font-size: 0.8rem;
+            position: absolute; left: 0.6rem; top: 50%; transform: translateY(-50%);
+            color: var(--o-text-muted); font-size: 0.8rem;
         }
 
         .dropdown-menu {
-            background: var(--bg-card); border: 1px solid var(--border-color);
-            border-radius: 10px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(20px);
+            background: #fff; border: 1px solid var(--o-border);
+            border-radius: 6px; box-shadow: var(--o-shadow-lg);
         }
-        .dropdown-item { color: var(--text-secondary); font-size: 0.825rem; border-radius: 6px; }
-        .dropdown-item:hover { background: rgba(99, 102, 241, 0.1); color: var(--text-primary); }
-        .dropdown-divider { border-color: var(--border-color); }
+        .dropdown-item { color: var(--o-text); font-size: 0.825rem; border-radius: 4px; }
+        .dropdown-item:hover { background: var(--o-bg-100); color: var(--o-text); }
+        .dropdown-divider { border-color: var(--o-border-light); }
 
         .modal-content {
-            background: var(--bg-card); border: 1px solid var(--border-color);
-            border-radius: 16px; box-shadow: 0 16px 64px rgba(0, 0, 0, 0.6);
+            background: #fff; border: 1px solid var(--o-border);
+            border-radius: 8px; box-shadow: var(--o-shadow-lg);
         }
-        .modal-header { border-bottom: 1px solid var(--border-color); }
-        .modal-footer { border-top: 1px solid var(--border-color); }
+        .modal-header { border-bottom: 1px solid var(--o-border); }
+        .modal-footer { border-top: 1px solid var(--o-border); }
 
         .pagination .page-link {
-            background: var(--bg-card); border-color: var(--border-color);
-            color: var(--text-secondary);
+            background: #fff; border-color: var(--o-border);
+            color: var(--o-text-secondary);
         }
         .pagination .page-link:hover {
-            background: rgba(99, 102, 241, 0.1); color: var(--primary-light);
+            background: var(--o-bg-100); color: var(--o-brand);
         }
         .pagination .active .page-link {
-            background: var(--primary); border-color: var(--primary);
+            background: var(--o-brand); border-color: var(--o-brand);
         }
 
-        .nav-tabs { border-bottom: 1px solid var(--border-color); }
-        .nav-tabs .nav-link { color: var(--text-secondary); border: none; border-bottom: 2px solid transparent; }
-        .nav-tabs .nav-link:hover { color: var(--text-primary); border-color: rgba(99, 102, 241, 0.3); }
+        .nav-tabs { border-bottom: 2px solid var(--o-border-light); }
+        .nav-tabs .nav-link { color: var(--o-text-secondary); border: none; border-bottom: 2px solid transparent; font-size: 0.85rem; }
+        .nav-tabs .nav-link:hover { color: var(--o-text); border-color: var(--o-border); }
         .nav-tabs .nav-link.active {
-            color: var(--primary-light); background: transparent;
-            border-color: var(--primary); font-weight: 600;
+            color: var(--o-brand); background: transparent;
+            border-color: var(--o-brand); font-weight: 600;
         }
 
-        .text-muted { color: var(--text-muted) !important; }
-        .text-success { color: var(--neon-green) !important; }
-        .text-danger { color: var(--neon-red) !important; }
-        .text-warning { color: var(--neon-orange) !important; }
-        .text-info { color: var(--accent) !important; }
-        .fw-bold, .fw-semibold { color: var(--text-primary); }
-        .border-bottom { border-color: var(--border-color) !important; }
+        .text-muted { color: var(--o-text-muted) !important; }
+        .text-success { color: var(--o-success) !important; }
+        .text-danger { color: var(--o-danger) !important; }
+        .text-warning { color: #D39E00 !important; }
+        .text-info { color: var(--o-info) !important; }
+        .fw-bold, .fw-semibold { color: var(--o-text); }
+        .border-bottom { border-color: var(--o-border) !important; }
 
         /* ========== STATUS INDICATORS ========== */
         .status-dot {
             width: 8px; height: 8px; border-radius: 50%; display: inline-block;
-            margin-right: 6px; animation: status-pulse 2s ease-in-out infinite;
+            margin-right: 6px;
         }
-        .status-dot.active { background: var(--neon-green); box-shadow: 0 0 8px rgba(16, 185, 129, 0.5); }
-        .status-dot.warning { background: var(--neon-orange); box-shadow: 0 0 8px rgba(245, 158, 11, 0.5); }
-        .status-dot.danger { background: var(--neon-red); box-shadow: 0 0 8px rgba(239, 68, 68, 0.5); }
-        @keyframes status-pulse {
-            0%, 100% { opacity: 1; } 50% { opacity: 0.5; }
-        }
+        .status-dot.active { background: var(--o-success); }
+        .status-dot.warning { background: var(--o-warning); }
+        .status-dot.danger { background: var(--o-danger); }
 
-        /* ========== BREADCRUMB ========== */
+        /* ========== BREADCRUMB (Odoo style) ========== */
         .breadcrumb { margin: 0; font-size: 0.8rem; }
-        .breadcrumb-item a { color: var(--primary-light); text-decoration: none; }
-        .breadcrumb-item.active { color: var(--text-secondary); }
+        .breadcrumb-item a { color: var(--o-brand); text-decoration: none; }
+        .breadcrumb-item a:hover { text-decoration: underline; }
+        .breadcrumb-item.active { color: var(--o-text-secondary); }
+
+        /* ========== KANBAN VIEW ========== */
+        .o-kanban-group {
+            min-width: 260px; max-width: 320px; flex: 1 1 260px;
+        }
+        .o-kanban-header {
+            padding: 0.5rem 0.75rem; font-weight: 600; font-size: 0.85rem;
+            color: var(--o-text); border-bottom: 2px solid var(--o-border);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .o-kanban-header .badge {
+            font-size: 0.7rem; font-weight: 600;
+        }
+        .o-kanban-column {
+            background: var(--o-bg-100); border-radius: 8px;
+            min-height: 200px; padding: 0.5rem;
+        }
+        .o-kanban-card {
+            background: #fff; border: 1px solid var(--o-border-light);
+            border-radius: 6px; padding: 0.75rem;
+            margin-bottom: 0.5rem; cursor: pointer;
+            transition: box-shadow 0.15s;
+        }
+        .o-kanban-card:hover {
+            box-shadow: var(--o-shadow);
+        }
+        .o-kanban-card .card-title {
+            font-weight: 600; font-size: 0.825rem; color: var(--o-text);
+            margin-bottom: 0.25rem;
+        }
+        .o-kanban-card .card-subtitle {
+            font-size: 0.75rem; color: var(--o-text-secondary);
+        }
+        .o-kanban-card .card-amount {
+            font-weight: 700; font-size: 0.9rem; color: var(--o-brand);
+        }
 
         /* ========== RESPONSIVE ========== */
         @media (max-width: 768px) {
             .app-switcher-grid { padding: 1rem; }
             .app-switcher-grid .app-grid {
-                grid-template-columns: repeat(auto-fill, minmax(85px, 1fr));
+                grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
                 gap: 0.5rem;
             }
             .brand-name { display: none; }
             .module-nav { display: none; }
+            .content-area { padding: 0.75rem; }
         }
 
         /* ========== ANIMATIONS ========== */
         @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(10px); }
+            from { opacity: 0; transform: translateY(6px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        .content-area > * { animation: fadeInUp 0.3s ease-out; }
+        .content-area > * { animation: fadeInUp 0.2s ease-out; }
+
+        /* ========== ODOO-STYLE PROGRESS STEPS ========== */
+        .o-statusbar {
+            display: flex; align-items: center; gap: 0; background: var(--o-bg-100);
+            border-radius: 20px; padding: 0.2rem; overflow-x: auto;
+        }
+        .o-statusbar .o-step {
+            padding: 0.3rem 0.85rem; font-size: 0.75rem; font-weight: 500;
+            color: var(--o-text-muted); white-space: nowrap; border-radius: 20px;
+            transition: all 0.15s;
+        }
+        .o-statusbar .o-step.active {
+            background: var(--o-brand); color: #fff; font-weight: 600;
+        }
+        .o-statusbar .o-step.done {
+            color: var(--o-success); font-weight: 600;
+        }
+
+        /* ========== CHATTER (Odoo style) ========== */
+        .o-chatter {
+            border-top: 1px solid var(--o-border-light);
+            padding-top: 1rem; margin-top: 1rem;
+        }
+        .o-chatter-entry {
+            display: flex; gap: 0.75rem; padding: 0.75rem 0;
+            border-bottom: 1px solid var(--o-border-light);
+        }
+        .o-chatter-avatar {
+            width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0;
+            background: var(--o-bg-200); display: flex; align-items: center;
+            justify-content: center; font-size: 0.7rem; font-weight: 600;
+            color: var(--o-text-secondary);
+        }
+        .o-chatter-body {
+            flex: 1; min-width: 0;
+        }
+        .o-chatter-author {
+            font-weight: 600; font-size: 0.8rem; color: var(--o-text);
+        }
+        .o-chatter-date {
+            font-size: 0.7rem; color: var(--o-text-muted); margin-left: 0.5rem;
+        }
+        .o-chatter-content {
+            font-size: 0.8rem; color: var(--o-text-secondary); margin-top: 0.2rem;
+        }
     </style>
     {% block extra_css %}{% endblock %}
 </head>
 <body>
 
-    <!-- ========== TOP NAVBAR (Odoo Enterprise style) ========== -->
+    <!-- ========== TOP NAVBAR (Odoo style) ========== -->
     <nav class="main-topbar">
         <!-- Brand -->
         <div class="brand-section">
-            <a href="{% url 'dashboard' %}" style="text-decoration: none; display: flex; align-items: center; gap: 0.6rem;">
+            <a href="{% url 'dashboard' %}" style="text-decoration: none; display: flex; align-items: center; gap: 0.5rem;">
                 <div class="brand-icon">
-                    <i class="bi bi-hexagon-fill" style="font-size:0.8rem;"></i>
+                    <i class="bi bi-hexagon-fill" style="font-size:0.75rem;"></i>
                 </div>
                 <span class="brand-name">{{ company.name|default:"NexusERP" }}</span>
             </a>
@@ -495,10 +536,10 @@
 
         <!-- App Switcher -->
         <button class="app-switcher-btn" id="appSwitcherBtn" onclick="toggleAppSwitcher()" title="Aplicaciones">
-            <i class="bi bi-grid-3x3-gap-fill" style="font-size: 1.1rem;"></i>
+            <i class="bi bi-grid-3x3-gap-fill" style="font-size: 1rem;"></i>
         </button>
 
-        <!-- Module Navigation Tabs (context-sensitive) -->
+        <!-- Module Navigation Tabs -->
         <div class="module-nav">
             {% block module_nav %}{% endblock %}
         </div>
@@ -507,7 +548,7 @@
         <div class="topbar-right">
             <div class="search-box d-none d-md-block">
                 <i class="bi bi-search search-icon"></i>
-                <input type="text" class="form-control" placeholder="Buscar..." style="width: 200px;">
+                <input type="text" class="form-control" placeholder="Buscar..." style="width: 180px; background: rgba(255,255,255,0.15); border-color: transparent; color: #fff;">
             </div>
             <button class="btn-icon" title="Notificaciones">
                 <i class="bi bi-bell"></i>
@@ -519,7 +560,7 @@
                             {{ request.user.username|first|upper }}
                         </div>
                         <span class="user-name d-none d-md-inline">{{ request.user.get_full_name|default:request.user.username }}</span>
-                        <i class="bi bi-chevron-down" style="font-size: 0.6rem; color: var(--text-muted);"></i>
+                        <i class="bi bi-chevron-down" style="font-size: 0.55rem; color: rgba(255,255,255,0.6);"></i>
                     </div>
                 </div>
                 <ul class="dropdown-menu dropdown-menu-end">
@@ -533,7 +574,7 @@
         </div>
     </nav>
 
-    <!-- ========== APP SWITCHER PANEL ========== -->
+    <!-- ========== APP SWITCHER PANEL (Odoo Home Menu) ========== -->
     <div class="app-switcher-panel" id="appSwitcherPanel">
         <div class="app-switcher-overlay" onclick="toggleAppSwitcher()"></div>
         <div class="app-switcher-grid">
@@ -544,23 +585,23 @@
                 </a>
             </div>
 
-            <!-- Aplicaciones principales (estilo Odoo) -->
+            <!-- Aplicaciones principales -->
             <div class="app-section-title mt-2">Aplicaciones</div>
             <div class="app-grid mb-3">
                 <a href="{% url 'sales:quotation_list' %}" class="app-tile" onclick="toggleAppSwitcher()">
-                    <div class="tile-icon" style="background: linear-gradient(135deg, #6366f1, #8b5cf6);"><i class="bi bi-graph-up-arrow"></i></div>
+                    <div class="tile-icon" style="background: #714B67;"><i class="bi bi-graph-up-arrow"></i></div>
                     <span class="tile-label">Ventas</span>
                 </a>
                 <a href="{% url 'pos:terminal' %}" class="app-tile" onclick="toggleAppSwitcher()">
-                    <div class="tile-icon" style="background: linear-gradient(135deg, #06b6d4, #22d3ee);"><i class="bi bi-display"></i></div>
+                    <div class="tile-icon" style="background: #2CBBAD;"><i class="bi bi-display"></i></div>
                     <span class="tile-label">Punto de Venta</span>
                 </a>
                 <a href="{% url 'accounting:invoice_list' %}" class="app-tile" onclick="toggleAppSwitcher()">
-                    <div class="tile-icon" style="background: linear-gradient(135deg, #8b5cf6, #a78bfa);"><i class="bi bi-file-earmark-text"></i></div>
+                    <div class="tile-icon" style="background: #00A09D;"><i class="bi bi-file-earmark-text"></i></div>
                     <span class="tile-label">Facturaci&oacute;n</span>
                 </a>
                 <a href="{% url 'accounting:daily_receipt_summary' %}" class="app-tile" onclick="toggleAppSwitcher()">
-                    <div class="tile-icon" style="background: linear-gradient(135deg, #7c3aed, #a855f7);"><i class="bi bi-journal-text"></i></div>
+                    <div class="tile-icon" style="background: #8F6382;"><i class="bi bi-journal-text"></i></div>
                     <span class="tile-label">Resumen Diario</span>
                 </a>
             </div>
@@ -569,15 +610,15 @@
             <div class="app-section-title">CRM</div>
             <div class="app-grid mb-3">
                 <a href="{% url 'crm:customer_list' %}" class="app-tile" onclick="toggleAppSwitcher()">
-                    <div class="tile-icon" style="background: linear-gradient(135deg, #ec4899, #f472b6);"><i class="bi bi-people"></i></div>
+                    <div class="tile-icon" style="background: #E6186B;"><i class="bi bi-people"></i></div>
                     <span class="tile-label">Clientes</span>
                 </a>
                 <a href="{% url 'crm:opportunity_list' %}" class="app-tile" onclick="toggleAppSwitcher()">
-                    <div class="tile-icon" style="background: linear-gradient(135deg, #d946ef, #e879f9);"><i class="bi bi-funnel"></i></div>
+                    <div class="tile-icon" style="background: #D14FA0;"><i class="bi bi-funnel"></i></div>
                     <span class="tile-label">Oportunidades</span>
                 </a>
                 <a href="{% url 'crm:supplier_list' %}" class="app-tile" onclick="toggleAppSwitcher()">
-                    <div class="tile-icon" style="background: linear-gradient(135deg, #f97316, #fb923c);"><i class="bi bi-truck"></i></div>
+                    <div class="tile-icon" style="background: #F4A460;"><i class="bi bi-truck"></i></div>
                     <span class="tile-label">Proveedores</span>
                 </a>
             </div>
@@ -586,19 +627,19 @@
             <div class="app-section-title">Inventario & Log&iacute;stica</div>
             <div class="app-grid mb-3">
                 <a href="{% url 'logistics:product_list' %}" class="app-tile" onclick="toggleAppSwitcher()">
-                    <div class="tile-icon" style="background: linear-gradient(135deg, #14b8a6, #2dd4bf);"><i class="bi bi-tags"></i></div>
+                    <div class="tile-icon" style="background: #017E84;"><i class="bi bi-tags"></i></div>
                     <span class="tile-label">Productos</span>
                 </a>
                 <a href="{% url 'logistics:warehouse_list' %}" class="app-tile" onclick="toggleAppSwitcher()">
-                    <div class="tile-icon" style="background: linear-gradient(135deg, #0ea5e9, #38bdf8);"><i class="bi bi-building"></i></div>
+                    <div class="tile-icon" style="background: #5B899E;"><i class="bi bi-building"></i></div>
                     <span class="tile-label">Almacenes</span>
                 </a>
                 <a href="{% url 'logistics:purchase_order_list' %}" class="app-tile" onclick="toggleAppSwitcher()">
-                    <div class="tile-icon" style="background: linear-gradient(135deg, #ef4444, #f87171);"><i class="bi bi-bag-check"></i></div>
+                    <div class="tile-icon" style="background: #C7254E;"><i class="bi bi-bag-check"></i></div>
                     <span class="tile-label">Compras</span>
                 </a>
                 <a href="{% url 'logistics:dispatch_guide_list' %}" class="app-tile" onclick="toggleAppSwitcher()">
-                    <div class="tile-icon" style="background: linear-gradient(135deg, #0891b2, #22d3ee);"><i class="bi bi-send"></i></div>
+                    <div class="tile-icon" style="background: #0E6251;"><i class="bi bi-send"></i></div>
                     <span class="tile-label">Gu&iacute;as Remisi&oacute;n</span>
                 </a>
             </div>
@@ -607,11 +648,11 @@
             <div class="app-section-title">Fabricaci&oacute;n</div>
             <div class="app-grid mb-3">
                 <a href="{% url 'manufacturing:bom_list' %}" class="app-tile" onclick="toggleAppSwitcher()">
-                    <div class="tile-icon" style="background: linear-gradient(135deg, #f97316, #fb923c);"><i class="bi bi-diagram-3"></i></div>
+                    <div class="tile-icon" style="background: #E67E22;"><i class="bi bi-diagram-3"></i></div>
                     <span class="tile-label">Lista Materiales</span>
                 </a>
                 <a href="{% url 'manufacturing:production_order_list' %}" class="app-tile" onclick="toggleAppSwitcher()">
-                    <div class="tile-icon" style="background: linear-gradient(135deg, #eab308, #facc15);"><i class="bi bi-gear-wide-connected"></i></div>
+                    <div class="tile-icon" style="background: #D4AC0D;"><i class="bi bi-gear-wide-connected"></i></div>
                     <span class="tile-label">Producci&oacute;n</span>
                 </a>
             </div>
@@ -620,19 +661,19 @@
             <div class="app-section-title">Finanzas</div>
             <div class="app-grid mb-3">
                 <a href="{% url 'accounting:petty_cash' %}" class="app-tile" onclick="toggleAppSwitcher()">
-                    <div class="tile-icon" style="background: linear-gradient(135deg, #84cc16, #a3e635);"><i class="bi bi-safe"></i></div>
+                    <div class="tile-icon" style="background: #58A55C;"><i class="bi bi-safe"></i></div>
                     <span class="tile-label">Caja Chica</span>
                 </a>
                 <a href="{% url 'accounting:accounts_receivable' %}" class="app-tile" onclick="toggleAppSwitcher()">
-                    <div class="tile-icon" style="background: linear-gradient(135deg, #10b981, #34d399);"><i class="bi bi-wallet2"></i></div>
+                    <div class="tile-icon" style="background: #28A745;"><i class="bi bi-wallet2"></i></div>
                     <span class="tile-label">Por Cobrar</span>
                 </a>
                 <a href="{% url 'accounting:accounts_payable' %}" class="app-tile" onclick="toggleAppSwitcher()">
-                    <div class="tile-icon" style="background: linear-gradient(135deg, #ef4444, #f87171);"><i class="bi bi-cash-coin"></i></div>
+                    <div class="tile-icon" style="background: #DC3545;"><i class="bi bi-cash-coin"></i></div>
                     <span class="tile-label">Por Pagar</span>
                 </a>
                 <a href="{% url 'accounting:reports' %}" class="app-tile" onclick="toggleAppSwitcher()">
-                    <div class="tile-icon" style="background: linear-gradient(135deg, #6366f1, #818cf8);"><i class="bi bi-bar-chart-line"></i></div>
+                    <div class="tile-icon" style="background: #714B67;"><i class="bi bi-bar-chart-line"></i></div>
                     <span class="tile-label">Reportes</span>
                 </a>
             </div>
@@ -641,27 +682,27 @@
             <div class="app-section-title">SUNAT & Sistema</div>
             <div class="app-grid">
                 <a href="{% url 'sunat:sire_dashboard' %}" class="app-tile" onclick="toggleAppSwitcher()">
-                    <div class="tile-icon" style="background: linear-gradient(135deg, #64748b, #94a3b8);"><i class="bi bi-bank"></i></div>
+                    <div class="tile-icon" style="background: #5A6268;"><i class="bi bi-bank"></i></div>
                     <span class="tile-label">SIRE</span>
                 </a>
                 <a href="{% url 'sunat:logs' %}" class="app-tile" onclick="toggleAppSwitcher()">
-                    <div class="tile-icon" style="background: linear-gradient(135deg, #475569, #64748b);"><i class="bi bi-cloud-upload"></i></div>
+                    <div class="tile-icon" style="background: #495057;"><i class="bi bi-cloud-upload"></i></div>
                     <span class="tile-label">Logs SUNAT</span>
                 </a>
                 <a href="{% url 'accounting:document_series' %}" class="app-tile" onclick="toggleAppSwitcher()">
-                    <div class="tile-icon" style="background: linear-gradient(135deg, #71717a, #a1a1aa);"><i class="bi bi-hash"></i></div>
+                    <div class="tile-icon" style="background: #6C757D;"><i class="bi bi-hash"></i></div>
                     <span class="tile-label">Series</span>
                 </a>
                 <a href="{% url 'accounting:taxpayer_list' %}" class="app-tile" onclick="toggleAppSwitcher()">
-                    <div class="tile-icon" style="background: linear-gradient(135deg, #78716c, #a8a29e);"><i class="bi bi-building-gear"></i></div>
+                    <div class="tile-icon" style="background: #7B8A8B;"><i class="bi bi-building-gear"></i></div>
                     <span class="tile-label">Contribuyentes</span>
                 </a>
                 <a href="{% url 'system_customize' %}" class="app-tile" onclick="toggleAppSwitcher()">
-                    <div class="tile-icon" style="background: linear-gradient(135deg, #6366f1, #a78bfa);"><i class="bi bi-palette"></i></div>
+                    <div class="tile-icon" style="background: #8F6382;"><i class="bi bi-palette"></i></div>
                     <span class="tile-label">Personalizar</span>
                 </a>
                 <a href="{% url 'admin:index' %}" class="app-tile" onclick="toggleAppSwitcher()">
-                    <div class="tile-icon" style="background: linear-gradient(135deg, #334155, #475569);"><i class="bi bi-shield-lock"></i></div>
+                    <div class="tile-icon" style="background: #343A40;"><i class="bi bi-shield-lock"></i></div>
                     <span class="tile-label">Admin</span>
                 </a>
             </div>
@@ -683,7 +724,7 @@
             <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert" style="margin-bottom: 1rem;">
                 <i class="bi bi-{% if message.tags == 'success' %}check-circle{% elif message.tags == 'error' or message.tags == 'danger' %}exclamation-triangle{% elif message.tags == 'warning' %}exclamation-circle{% else %}info-circle{% endif %} me-2"></i>
                 {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" style="font-size: 0.65rem; filter: invert(1);"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" style="font-size: 0.65rem;"></button>
             </div>
             {% endfor %}
             {% endif %}
@@ -713,38 +754,37 @@
             }
         });
 
-        // Chart.js dark theme defaults
+        // Chart.js defaults
         if (typeof Chart !== 'undefined') {
-            Chart.defaults.color = '#94a3b8';
-            Chart.defaults.borderColor = 'rgba(99, 102, 241, 0.1)';
-            Chart.defaults.plugins.legend.labels.color = '#94a3b8';
+            Chart.defaults.color = '#6C757D';
+            Chart.defaults.borderColor = '#E9ECEF';
         }
     </script>
     {% block extra_js %}{% endblock %}
 
-    <!-- PWA Install Banner (Odoo Enterprise style - Peru E-Invoicing) -->
-    <div id="pwaInstallBanner" style="display:none; position:fixed; bottom:0; left:0; right:0; z-index:9999; background:linear-gradient(135deg, #111827 0%, #0f1629 100%); border-top:1px solid rgba(99,102,241,0.2); padding:0; box-shadow:0 -4px 24px rgba(0,0,0,0.5);">
-        <div style="max-width:600px; margin:0 auto; padding:0.875rem 1rem;">
-            <div style="display:flex; align-items:center; gap:0.875rem;">
-                <img src="{% static 'pwa/icons/icon-96x96.png' %}" alt="NexusERP" style="width:48px; height:48px; border-radius:12px; flex-shrink:0;">
+    <!-- PWA Install Banner -->
+    <div id="pwaInstallBanner" style="display:none; position:fixed; bottom:0; left:0; right:0; z-index:9999; background:#fff; border-top:1px solid var(--o-border); padding:0; box-shadow:0 -2px 12px rgba(0,0,0,0.1);">
+        <div style="max-width:600px; margin:0 auto; padding:0.75rem 1rem;">
+            <div style="display:flex; align-items:center; gap:0.75rem;">
+                <img src="{% static 'pwa/icons/icon-96x96.png' %}" alt="NexusERP" style="width:44px; height:44px; border-radius:10px; flex-shrink:0;">
                 <div style="flex:1; min-width:0;">
-                    <div style="font-weight:600; font-size:0.95rem; color:#e2e8f0;">Instalar NexusERP</div>
-                    <div style="font-size:0.78rem; color:#94a3b8; margin-top:2px;">Facturacion electronica SUNAT desde tu celular</div>
+                    <div style="font-weight:600; font-size:0.9rem; color:var(--o-text);">Instalar NexusERP</div>
+                    <div style="font-size:0.75rem; color:var(--o-text-secondary); margin-top:2px;">Facturacion electronica SUNAT desde tu celular</div>
                 </div>
-                <button id="pwaInstallBtn" style="flex-shrink:0; padding:0.5rem 1.25rem; background:linear-gradient(135deg, #6366f1, #4f46e5); color:white; border:none; border-radius:8px; font-size:0.85rem; font-weight:600; cursor:pointer;">Instalar</button>
-                <button id="pwaInstallDismiss" style="flex-shrink:0; background:none; border:none; color:#64748b; font-size:1.25rem; cursor:pointer; padding:0.25rem; line-height:1;">&times;</button>
+                <button id="pwaInstallBtn" style="flex-shrink:0; padding:0.45rem 1rem; background:var(--o-brand); color:white; border:none; border-radius:4px; font-size:0.8rem; font-weight:600; cursor:pointer;">Instalar</button>
+                <button id="pwaInstallDismiss" style="flex-shrink:0; background:none; border:none; color:var(--o-text-muted); font-size:1.25rem; cursor:pointer; padding:0.25rem; line-height:1;">&times;</button>
             </div>
-            <div style="display:flex; gap:0.75rem; margin-top:0.625rem; padding-left:3.625rem;">
-                <span style="font-size:0.7rem; color:#64748b; display:flex; align-items:center; gap:0.25rem;">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="#10b981" viewBox="0 0 16 16"><path d="M16 8A8 8 0 110 8a8 8 0 0116 0zm-3.97-3.03a.75.75 0 00-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 00-1.06 1.06L6.97 11.03a.75.75 0 001.079-.02l3.992-4.99a.75.75 0 00-.01-1.05z"/></svg>
+            <div style="display:flex; gap:0.75rem; margin-top:0.5rem; padding-left:3.375rem;">
+                <span style="font-size:0.7rem; color:var(--o-text-secondary); display:flex; align-items:center; gap:0.25rem;">
+                    <i class="bi bi-check-circle-fill" style="color:var(--o-success);"></i>
                     Facturas y Boletas
                 </span>
-                <span style="font-size:0.7rem; color:#64748b; display:flex; align-items:center; gap:0.25rem;">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="#10b981" viewBox="0 0 16 16"><path d="M16 8A8 8 0 110 8a8 8 0 0116 0zm-3.97-3.03a.75.75 0 00-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 00-1.06 1.06L6.97 11.03a.75.75 0 001.079-.02l3.992-4.99a.75.75 0 00-.01-1.05z"/></svg>
+                <span style="font-size:0.7rem; color:var(--o-text-secondary); display:flex; align-items:center; gap:0.25rem;">
+                    <i class="bi bi-check-circle-fill" style="color:var(--o-success);"></i>
                     POS
                 </span>
-                <span style="font-size:0.7rem; color:#64748b; display:flex; align-items:center; gap:0.25rem;">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="#10b981" viewBox="0 0 16 16"><path d="M16 8A8 8 0 110 8a8 8 0 0116 0zm-3.97-3.03a.75.75 0 00-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 00-1.06 1.06L6.97 11.03a.75.75 0 001.079-.02l3.992-4.99a.75.75 0 00-.01-1.05z"/></svg>
+                <span style="font-size:0.7rem; color:var(--o-text-secondary); display:flex; align-items:center; gap:0.25rem;">
+                    <i class="bi bi-check-circle-fill" style="color:var(--o-success);"></i>
                     Offline
                 </span>
             </div>
@@ -752,15 +792,15 @@
     </div>
 
     <!-- PWA Offline Queue Indicator -->
-    <div id="pwaQueueIndicator" style="display:none; position:fixed; bottom:70px; right:16px; z-index:9998; background:#1e293b; border:1px solid rgba(245,158,11,0.3); border-radius:10px; padding:0.5rem 0.75rem; box-shadow:0 4px 12px rgba(0,0,0,0.4); cursor:pointer;" onclick="this.style.display='none'">
+    <div id="pwaQueueIndicator" style="display:none; position:fixed; bottom:70px; right:16px; z-index:9998; background:#fff; border:1px solid var(--o-border); border-radius:8px; padding:0.5rem 0.75rem; box-shadow:var(--o-shadow-lg); cursor:pointer;" onclick="this.style.display='none'">
         <div style="display:flex; align-items:center; gap:0.5rem;">
-            <div style="width:8px; height:8px; background:#f59e0b; border-radius:50%; animation:status-pulse 2s infinite;"></div>
-            <span style="font-size:0.75rem; color:#fbbf24; font-weight:600;" id="queueBadgeCount">0</span>
-            <span style="font-size:0.72rem; color:#94a3b8;">en cola SUNAT</span>
+            <div class="status-dot warning"></div>
+            <span style="font-size:0.75rem; color:var(--o-warning); font-weight:600;" id="queueBadgeCount">0</span>
+            <span style="font-size:0.72rem; color:var(--o-text-secondary);">en cola SUNAT</span>
         </div>
     </div>
 
-    <!-- PWA Service Worker & Install Prompt (Peru E-Invoicing) -->
+    <!-- PWA Service Worker & Install Prompt -->
     <script>
         // ========== Service Worker Registration ==========
         if ('serviceWorker' in navigator) {
@@ -768,13 +808,9 @@
                 navigator.serviceWorker.register('/service-worker.js', { scope: '/' })
                     .then(function(reg) {
                         console.log('[NexusERP] SW registrado, scope:', reg.scope);
-
-                        // Register background sync for invoice queue
                         if ('sync' in reg) {
                             reg.sync.register('invoice-queue-sync').catch(function() {});
                         }
-
-                        // Auto-update detection
                         reg.addEventListener('updatefound', function() {
                             var newWorker = reg.installing;
                             newWorker.addEventListener('statechange', function() {
@@ -787,7 +823,6 @@
                     })
                     .catch(function(err) { console.log('[NexusERP] SW error:', err); });
 
-                // Listen for queue sync messages from SW
                 navigator.serviceWorker.addEventListener('message', function(event) {
                     if (event.data && event.data.type === 'QUEUE_SYNCED') {
                         if (event.data.remaining === 0) {
@@ -803,7 +838,6 @@
                     }
                 });
 
-                // Check queue on load
                 if (navigator.serviceWorker.controller) {
                     navigator.serviceWorker.controller.postMessage({ type: 'GET_QUEUE_COUNT' });
                 }
@@ -854,7 +888,7 @@
                 installBanner.style.display = 'block';
                 installBtn.textContent = 'Ver pasos';
                 installBtn.onclick = function() {
-                    alert('Para instalar NexusERP en tu iPhone/iPad:\n\n1. Toca el boton de compartir (cuadrado con flecha arriba)\n2. Desplaza y selecciona "Agregar a pantalla de inicio"\n3. Toca "Agregar" para confirmar\n\nLa app se abrira como aplicacion nativa con acceso directo a facturacion electronica.');
+                    alert('Para instalar NexusERP en tu iPhone/iPad:\n\n1. Toca el boton de compartir (cuadrado con flecha arriba)\n2. Desplaza y selecciona "Agregar a pantalla de inicio"\n3. Toca "Agregar" para confirmar');
                     installBanner.style.display = 'none';
                     localStorage.setItem('pwa_ios_hint_dismissed', Date.now().toString());
                 };
@@ -863,7 +897,6 @@
 
         // ========== Online/Offline Status ==========
         window.addEventListener('online', function() {
-            // Trigger queue replay when back online
             if (navigator.serviceWorker.controller) {
                 navigator.serviceWorker.controller.postMessage({ type: 'REPLAY_QUEUE' });
             }

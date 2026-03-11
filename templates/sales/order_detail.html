@@ -33,113 +33,59 @@
     </div>
 </div>
 
-<!-- Workflow Progress -->
-<div class="card stat-card mb-4">
-    <div class="card-body py-3">
-        <div class="d-flex justify-content-between align-items-center" style="position: relative;">
-            <div style="position: absolute; top: 50%; left: 5%; right: 5%; height: 2px; background: var(--border-color); z-index: 0;"></div>
-            {% with steps="Borrador,Confirmado,En Preparacion,Listo,Despachado,Entregado,Facturado" %}
-            {% with status_list="draft,confirmed,in_process,ready,dispatched,delivered,invoiced" %}
-            {% for step in steps|cut:" " %}
-            {% endfor %}
-            {% endwith %}
-            {% endwith %}
-            {% for step_data in "draft:Borrador:bi-pencil,confirmed:Confirmado:bi-check-circle,in_process:En Prep:bi-gear,ready:Listo:bi-box-seam,dispatched:Despachado:bi-truck,delivered:Entregado:bi-house-check,invoiced:Facturado:bi-receipt"|make_list %}
-            {% endfor %}
-            {% with current_step=order.status %}
-            {% with steps="draft,confirmed,in_process,ready,dispatched,delivered,invoiced" %}
-            <div class="text-center" style="z-index: 1; flex: 1;">
-                <div class="mx-auto mb-1" style="width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem;
-                    {% if current_step == 'draft' or current_step == 'confirmed' or current_step == 'in_process' or current_step == 'ready' or current_step == 'dispatched' or current_step == 'delivered' or current_step == 'invoiced' %}
-                    background: var(--neon-green); color: #fff; box-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
-                    {% else %}background: var(--bg-card); border: 2px solid var(--border-color); color: var(--text-muted);{% endif %}">
-                    <i class="bi bi-pencil"></i>
-                </div>
-                <small style="font-size: 0.65rem;" class="{% if current_step == 'draft' %}text-success fw-bold{% else %}text-muted{% endif %}">Borrador</small>
-            </div>
-            <div class="text-center" style="z-index: 1; flex: 1;">
-                <div class="mx-auto mb-1" style="width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem;
-                    {% if current_step == 'confirmed' or current_step == 'in_process' or current_step == 'ready' or current_step == 'dispatched' or current_step == 'delivered' or current_step == 'invoiced' %}
-                    background: var(--neon-green); color: #fff; box-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
-                    {% else %}background: var(--bg-card); border: 2px solid var(--border-color); color: var(--text-muted);{% endif %}">
-                    <i class="bi bi-check-circle"></i>
-                </div>
-                <small style="font-size: 0.65rem;" class="{% if current_step == 'confirmed' %}text-success fw-bold{% else %}text-muted{% endif %}">Confirmado</small>
-            </div>
-            <div class="text-center" style="z-index: 1; flex: 1;">
-                <div class="mx-auto mb-1" style="width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem;
-                    {% if current_step == 'in_process' or current_step == 'ready' or current_step == 'dispatched' or current_step == 'delivered' or current_step == 'invoiced' %}
-                    background: var(--neon-green); color: #fff; box-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
-                    {% elif current_step == 'confirmed' %}background: var(--neon-orange); color: #fff;
-                    {% else %}background: var(--bg-card); border: 2px solid var(--border-color); color: var(--text-muted);{% endif %}">
-                    <i class="bi bi-gear"></i>
-                </div>
-                <small style="font-size: 0.65rem;" class="{% if current_step == 'in_process' %}text-success fw-bold{% else %}text-muted{% endif %}">Preparacion</small>
-            </div>
-            <div class="text-center" style="z-index: 1; flex: 1;">
-                <div class="mx-auto mb-1" style="width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem;
-                    {% if current_step == 'ready' or current_step == 'dispatched' or current_step == 'delivered' or current_step == 'invoiced' %}
-                    background: var(--neon-green); color: #fff; box-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
-                    {% else %}background: var(--bg-card); border: 2px solid var(--border-color); color: var(--text-muted);{% endif %}">
-                    <i class="bi bi-box-seam"></i>
-                </div>
-                <small style="font-size: 0.65rem;" class="{% if current_step == 'ready' %}text-success fw-bold{% else %}text-muted{% endif %}">Listo</small>
-            </div>
-            <div class="text-center" style="z-index: 1; flex: 1;">
-                <div class="mx-auto mb-1" style="width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem;
-                    {% if current_step == 'dispatched' or current_step == 'delivered' or current_step == 'invoiced' %}
-                    background: var(--neon-green); color: #fff; box-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
-                    {% else %}background: var(--bg-card); border: 2px solid var(--border-color); color: var(--text-muted);{% endif %}">
-                    <i class="bi bi-truck"></i>
-                </div>
-                <small style="font-size: 0.65rem;" class="{% if current_step == 'dispatched' %}text-success fw-bold{% else %}text-muted{% endif %}">Despachado</small>
-            </div>
-            <div class="text-center" style="z-index: 1; flex: 1;">
-                <div class="mx-auto mb-1" style="width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem;
-                    {% if current_step == 'delivered' or current_step == 'invoiced' %}
-                    background: var(--neon-green); color: #fff; box-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
-                    {% else %}background: var(--bg-card); border: 2px solid var(--border-color); color: var(--text-muted);{% endif %}">
-                    <i class="bi bi-house-check"></i>
-                </div>
-                <small style="font-size: 0.65rem;" class="{% if current_step == 'delivered' %}text-success fw-bold{% else %}text-muted{% endif %}">Entregado</small>
-            </div>
-            <div class="text-center" style="z-index: 1; flex: 1;">
-                <div class="mx-auto mb-1" style="width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem;
-                    {% if current_step == 'invoiced' %}
-                    background: var(--neon-green); color: #fff; box-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
-                    {% else %}background: var(--bg-card); border: 2px solid var(--border-color); color: var(--text-muted);{% endif %}">
-                    <i class="bi bi-receipt"></i>
-                </div>
-                <small style="font-size: 0.65rem;" class="{% if current_step == 'invoiced' %}text-success fw-bold{% else %}text-muted{% endif %}">Facturado</small>
-            </div>
-            {% endwith %}
-            {% endwith %}
+<!-- Workflow Progress (Odoo Statusbar style) -->
+<div class="card mb-4">
+    <div class="card-body py-2">
+        {% with current_step=order.status %}
+        <div class="o-statusbar">
+            <span class="o-step {% if current_step == 'draft' %}active{% elif current_step != 'draft' %}done{% endif %}">
+                {% if current_step != 'draft' %}<i class="bi bi-check2 me-1"></i>{% endif %}Borrador
+            </span>
+            <span class="o-step {% if current_step == 'confirmed' %}active{% elif current_step == 'in_process' or current_step == 'ready' or current_step == 'dispatched' or current_step == 'delivered' or current_step == 'invoiced' %}done{% endif %}">
+                {% if current_step == 'in_process' or current_step == 'ready' or current_step == 'dispatched' or current_step == 'delivered' or current_step == 'invoiced' %}<i class="bi bi-check2 me-1"></i>{% endif %}Confirmado
+            </span>
+            <span class="o-step {% if current_step == 'in_process' %}active{% elif current_step == 'ready' or current_step == 'dispatched' or current_step == 'delivered' or current_step == 'invoiced' %}done{% endif %}">
+                {% if current_step == 'ready' or current_step == 'dispatched' or current_step == 'delivered' or current_step == 'invoiced' %}<i class="bi bi-check2 me-1"></i>{% endif %}Preparacion
+            </span>
+            <span class="o-step {% if current_step == 'ready' %}active{% elif current_step == 'dispatched' or current_step == 'delivered' or current_step == 'invoiced' %}done{% endif %}">
+                {% if current_step == 'dispatched' or current_step == 'delivered' or current_step == 'invoiced' %}<i class="bi bi-check2 me-1"></i>{% endif %}Listo
+            </span>
+            <span class="o-step {% if current_step == 'dispatched' %}active{% elif current_step == 'delivered' or current_step == 'invoiced' %}done{% endif %}">
+                {% if current_step == 'delivered' or current_step == 'invoiced' %}<i class="bi bi-check2 me-1"></i>{% endif %}Despachado
+            </span>
+            <span class="o-step {% if current_step == 'delivered' %}active{% elif current_step == 'invoiced' %}done{% endif %}">
+                {% if current_step == 'invoiced' %}<i class="bi bi-check2 me-1"></i>{% endif %}Entregado
+            </span>
+            <span class="o-step {% if current_step == 'invoiced' %}active{% endif %}">
+                Facturado
+            </span>
         </div>
+        {% endwith %}
     </div>
 </div>
 
 <div class="row g-4">
     <div class="col-lg-8">
         <!-- Customer Info -->
-        <div class="card stat-card mb-3">
+        <div class="card mb-3">
             <div class="card-header"><i class="bi bi-person me-2"></i>Cliente y Entrega</div>
             <div class="card-body">
                 <div class="row">
                     <div class="col-md-4">
-                        <small class="text-muted">Cliente</small>
+                        <small style="color: var(--o-text-secondary);">Cliente</small>
                         <div class="fw-semibold">{{ order.customer.name }}</div>
                     </div>
                     <div class="col-md-4">
-                        <small class="text-muted">RUC/DNI</small>
+                        <small style="color: var(--o-text-secondary);">RUC/DNI</small>
                         <div>{{ order.customer.document_number|default:"-" }}</div>
                     </div>
                     <div class="col-md-4">
-                        <small class="text-muted">Almacen</small>
+                        <small style="color: var(--o-text-secondary);">Almacen</small>
                         <div>{{ order.warehouse.name }}</div>
                     </div>
                     {% if order.delivery_address %}
                     <div class="col-12 mt-2">
-                        <small class="text-muted">Direccion de Entrega</small>
+                        <small style="color: var(--o-text-secondary);">Direccion de Entrega</small>
                         <div>{{ order.delivery_address }}</div>
                     </div>
                     {% endif %}
@@ -148,7 +94,7 @@
         </div>
 
         <!-- Items -->
-        <div class="card stat-card mb-3">
+        <div class="card mb-3">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <span><i class="bi bi-list-ul me-2"></i>Items del Pedido</span>
                 <span class="badge bg-primary">{{ items|length }} items</span>
@@ -179,7 +125,7 @@
                                         {{ item.delivered_quantity|floatformat:0 }}
                                     </span>
                                 {% else %}
-                                    <span class="text-muted">0</span>
+                                    <span style="color: var(--o-text-muted);">0</span>
                                 {% endif %}
                             </td>
                             <td class="text-end">S/ {{ item.unit_price|floatformat:2|intcomma }}</td>
@@ -192,7 +138,7 @@
                             {% endif %}
                         </tr>
                         {% empty %}
-                        <tr><td colspan="8" class="text-center text-muted py-4">No hay items.</td></tr>
+                        <tr><td colspan="8" class="text-center py-4" style="color: var(--o-text-muted);">No hay items.</td></tr>
                         {% endfor %}
                     </tbody>
                 </table>
@@ -201,7 +147,7 @@
 
         <!-- Add Item (only for draft) -->
         {% if order.status == 'draft' %}
-        <div class="card stat-card mb-3">
+        <div class="card mb-3">
             <div class="card-header"><i class="bi bi-plus-circle me-2"></i>Agregar Item</div>
             <div class="card-body">
                 <form method="post" action="{% url 'sales:order_add_item' order.pk %}">
@@ -238,7 +184,7 @@
 
         <!-- Picking Orders -->
         {% if picking_orders %}
-        <div class="card stat-card mb-3">
+        <div class="card mb-3">
             <div class="card-header"><i class="bi bi-box-seam me-2"></i>Ordenes de Picking</div>
             <div class="table-responsive">
                 <table class="table table-hover mb-0">
@@ -257,10 +203,10 @@
                                 </span>
                             </td>
                             <td>
-                                <div class="progress" style="height: 6px; background: var(--bg-surface);">
+                                <div class="progress" style="height: 6px;">
                                     <div class="progress-bar bg-success" style="width: {{ pick.progress_percent }}%"></div>
                                 </div>
-                                <small class="text-muted">{{ pick.progress_percent }}%</small>
+                                <small style="color: var(--o-text-secondary);">{{ pick.progress_percent }}%</small>
                             </td>
                             <td><a href="{% url 'sales:picking_detail' pick.pk %}" class="btn btn-sm btn-outline-primary"><i class="bi bi-eye"></i></a></td>
                         </tr>
@@ -271,8 +217,8 @@
         </div>
         {% endif %}
 
-        <!-- Activity Log / Chatter -->
-        <div class="card stat-card">
+        <!-- Activity Log / Chatter (Odoo style) -->
+        <div class="card">
             <div class="card-header"><i class="bi bi-chat-dots me-2"></i>Historial de Actividades</div>
             <div class="card-body">
                 <form method="post" action="{% url 'sales:order_add_note' order.pk %}" class="mb-3">
@@ -282,39 +228,36 @@
                         <button type="submit" class="btn btn-outline-primary"><i class="bi bi-send"></i></button>
                     </div>
                 </form>
-                <div class="activity-timeline">
+                <div class="o-chatter">
                     {% for activity in activities %}
-                    <div class="d-flex mb-3" style="gap: 12px;">
-                        <div class="flex-shrink-0">
-                            <div style="width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem;
-                                {% if activity.activity_type == 'status_change' %}background: rgba(99, 102, 241, 0.2); color: var(--primary);
-                                {% else %}background: var(--bg-surface); color: var(--text-muted);{% endif %}">
-                                {% if activity.activity_type == 'status_change' %}<i class="bi bi-arrow-repeat"></i>
-                                {% else %}<i class="bi bi-chat-left-text"></i>{% endif %}
-                            </div>
+                    <div class="o-chatter-entry">
+                        <div class="o-chatter-avatar">
+                            {% if activity.activity_type == 'status_change' %}
+                                <i class="bi bi-arrow-repeat"></i>
+                            {% else %}
+                                <i class="bi bi-chat-left-text"></i>
+                            {% endif %}
                         </div>
-                        <div class="flex-grow-1">
-                            <div class="d-flex justify-content-between align-items-start">
-                                <div>
-                                    <span class="fw-semibold" style="font-size: 0.85rem;">{{ activity.title }}</span>
-                                    {% if activity.old_value and activity.new_value %}
-                                    <span class="ms-1" style="font-size: 0.75rem;">
-                                        <span class="badge bg-secondary" style="font-size: 0.65rem;">{{ activity.old_value }}</span>
-                                        <i class="bi bi-arrow-right" style="font-size: 0.6rem;"></i>
-                                        <span class="badge bg-primary" style="font-size: 0.65rem;">{{ activity.new_value }}</span>
-                                    </span>
-                                    {% endif %}
-                                </div>
-                                <small class="text-muted" style="font-size: 0.7rem; white-space: nowrap;">{{ activity.created_at|date:"d/m/Y H:i" }}</small>
+                        <div class="o-chatter-body">
+                            <div>
+                                <span class="o-chatter-author">{{ activity.title }}</span>
+                                {% if activity.old_value and activity.new_value %}
+                                <span class="ms-1" style="font-size: 0.75rem;">
+                                    <span class="badge bg-secondary" style="font-size: 0.65rem;">{{ activity.old_value }}</span>
+                                    <i class="bi bi-arrow-right" style="font-size: 0.6rem;"></i>
+                                    <span class="badge bg-primary" style="font-size: 0.65rem;">{{ activity.new_value }}</span>
+                                </span>
+                                {% endif %}
+                                <span class="o-chatter-date">{{ activity.created_at|date:"d/m/Y H:i" }}</span>
                             </div>
                             {% if activity.description %}
-                            <div class="text-muted" style="font-size: 0.8rem;">{{ activity.description }}</div>
+                            <div class="o-chatter-content">{{ activity.description }}</div>
                             {% endif %}
-                            <small class="text-muted" style="font-size: 0.7rem;">{{ activity.user.get_full_name|default:activity.user.username }}</small>
+                            <div style="font-size: 0.7rem; color: var(--o-text-muted); margin-top: 0.15rem;">{{ activity.user.get_full_name|default:activity.user.username }}</div>
                         </div>
                     </div>
                     {% empty %}
-                    <div class="text-center text-muted py-3">
+                    <div class="text-center py-3" style="color: var(--o-text-muted);">
                         <i class="bi bi-clock-history" style="font-size: 1.5rem;"></i>
                         <p class="mb-0 mt-1" style="font-size: 0.85rem;">No hay actividades registradas.</p>
                     </div>
@@ -326,74 +269,74 @@
 
     <!-- Right Column -->
     <div class="col-lg-4">
-        <div class="card stat-card mb-3">
+        <div class="card mb-3">
             <div class="card-header"><i class="bi bi-calculator me-2"></i>Resumen</div>
             <div class="card-body">
                 <div class="d-flex justify-content-between mb-2">
-                    <span class="text-muted">Subtotal</span>
+                    <span style="color: var(--o-text-secondary);">Subtotal</span>
                     <span>S/ {{ order.subtotal|floatformat:2|intcomma }}</span>
                 </div>
                 {% if order.discount_amount %}
                 <div class="d-flex justify-content-between mb-2">
-                    <span class="text-muted">Descuento</span>
+                    <span style="color: var(--o-text-secondary);">Descuento</span>
                     <span class="text-danger">- S/ {{ order.discount_amount|floatformat:2|intcomma }}</span>
                 </div>
                 {% endif %}
                 <div class="d-flex justify-content-between mb-2">
-                    <span class="text-muted">IGV (18%)</span>
+                    <span style="color: var(--o-text-secondary);">IGV (18%)</span>
                     <span>S/ {{ order.igv|floatformat:2|intcomma }}</span>
                 </div>
-                <hr style="border-color: var(--border-color);">
+                <hr style="border-color: var(--o-border);">
                 <div class="d-flex justify-content-between">
                     <span class="fw-bold" style="font-size: 1.1rem;">TOTAL</span>
-                    <span class="fw-bold" style="font-size: 1.2rem; color: var(--neon-green);">S/ {{ order.total|floatformat:2|intcomma }}</span>
+                    <span class="fw-bold" style="font-size: 1.2rem; color: var(--o-brand);">S/ {{ order.total|floatformat:2|intcomma }}</span>
                 </div>
             </div>
         </div>
 
-        <div class="card stat-card mb-3">
+        <div class="card mb-3">
             <div class="card-header"><i class="bi bi-calendar me-2"></i>Fechas</div>
             <div class="card-body">
                 <div class="mb-2">
-                    <small class="text-muted">Fecha de Pedido</small>
+                    <small style="color: var(--o-text-secondary);">Fecha de Pedido</small>
                     <div>{{ order.order_date|date:"d/m/Y" }}</div>
                 </div>
                 {% if order.expected_date %}
                 <div class="mb-2">
-                    <small class="text-muted">Entrega Esperada</small>
+                    <small style="color: var(--o-text-secondary);">Entrega Esperada</small>
                     <div>{{ order.expected_date|date:"d/m/Y" }}</div>
                 </div>
                 {% endif %}
                 {% if order.delivery_date %}
                 <div class="mb-2">
-                    <small class="text-muted">Entrega Real</small>
+                    <small style="color: var(--o-text-secondary);">Entrega Real</small>
                     <div class="text-success">{{ order.delivery_date|date:"d/m/Y" }}</div>
                 </div>
                 {% endif %}
                 {% if order.price_list %}
                 <div class="mb-2">
-                    <small class="text-muted">Lista de Precios</small>
+                    <small style="color: var(--o-text-secondary);">Lista de Precios</small>
                     <div><a href="{% url 'sales:price_list_detail' order.price_list.pk %}">{{ order.price_list }}</a></div>
                 </div>
                 {% endif %}
                 {% if order.payment_term %}
                 <div>
-                    <small class="text-muted">Termino de Pago</small>
+                    <small style="color: var(--o-text-secondary);">Termino de Pago</small>
                     <div><a href="{% url 'sales:payment_term_detail' order.payment_term.pk %}">{{ order.payment_term }}</a></div>
                 </div>
                 {% endif %}
             </div>
         </div>
 
-        <div class="card stat-card">
+        <div class="card">
             <div class="card-header"><i class="bi bi-clock-history me-2"></i>Auditoria</div>
             <div class="card-body">
                 <div class="mb-2">
-                    <small class="text-muted">Creado por</small>
+                    <small style="color: var(--o-text-secondary);">Creado por</small>
                     <div>{{ order.created_by.get_full_name|default:order.created_by.username }}</div>
                 </div>
                 <div>
-                    <small class="text-muted">Fecha</small>
+                    <small style="color: var(--o-text-secondary);">Fecha</small>
                     <div>{{ order.created_at|date:"d/m/Y H:i" }}</div>
                 </div>
             </div>

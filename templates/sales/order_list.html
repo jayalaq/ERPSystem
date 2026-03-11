@@ -10,55 +10,55 @@
     <a href="{% url 'sales:order_create' %}" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i> Nuevo Pedido</a>
 </div>
 
-<!-- Stats -->
+<!-- Stats (Odoo style - colored top border) -->
 <div class="row g-3 mb-4">
     <div class="col-6 col-md-3">
-        <div class="stat-card position-relative">
+        <div class="card" style="border-top: 3px solid var(--o-brand);">
             <div class="card-body d-flex align-items-center gap-3">
-                <div class="stat-icon" style="background: rgba(99, 102, 241, 0.15); color: var(--primary-light);">
+                <div class="stat-icon" style="background: rgba(113, 75, 103, 0.1); color: var(--o-brand);">
                     <i class="bi bi-cart-check"></i>
                 </div>
                 <div>
-                    <div class="text-muted" style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em;">Total</div>
+                    <div style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--o-text-secondary);">Total</div>
                     <div class="fw-bold" style="font-size: 1.3rem;">{{ stats.total }}</div>
                 </div>
             </div>
         </div>
     </div>
     <div class="col-6 col-md-3">
-        <div class="stat-card position-relative">
+        <div class="card" style="border-top: 3px solid var(--o-info);">
             <div class="card-body d-flex align-items-center gap-3">
-                <div class="stat-icon" style="background: rgba(6, 182, 212, 0.15); color: var(--accent);">
+                <div class="stat-icon" style="background: rgba(23, 162, 184, 0.1); color: var(--o-info);">
                     <i class="bi bi-check2-circle"></i>
                 </div>
                 <div>
-                    <div class="text-muted" style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em;">Confirmados</div>
+                    <div style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--o-text-secondary);">Confirmados</div>
                     <div class="fw-bold" style="font-size: 1.3rem;">{{ stats.confirmed }}</div>
                 </div>
             </div>
         </div>
     </div>
     <div class="col-6 col-md-3">
-        <div class="stat-card position-relative">
+        <div class="card" style="border-top: 3px solid var(--o-warning);">
             <div class="card-body d-flex align-items-center gap-3">
-                <div class="stat-icon" style="background: rgba(245, 158, 11, 0.15); color: var(--neon-orange);">
+                <div class="stat-icon" style="background: rgba(240, 173, 78, 0.1); color: var(--o-warning);">
                     <i class="bi bi-gear"></i>
                 </div>
                 <div>
-                    <div class="text-muted" style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em;">En Proceso</div>
+                    <div style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--o-text-secondary);">En Proceso</div>
                     <div class="fw-bold" style="font-size: 1.3rem;">{{ stats.in_process }}</div>
                 </div>
             </div>
         </div>
     </div>
     <div class="col-6 col-md-3">
-        <div class="stat-card position-relative">
+        <div class="card" style="border-top: 3px solid var(--o-success);">
             <div class="card-body d-flex align-items-center gap-3">
-                <div class="stat-icon" style="background: rgba(16, 185, 129, 0.15); color: var(--neon-green);">
+                <div class="stat-icon" style="background: rgba(40, 167, 69, 0.1); color: var(--o-success);">
                     <i class="bi bi-truck"></i>
                 </div>
                 <div>
-                    <div class="text-muted" style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em;">Entregados</div>
+                    <div style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--o-text-secondary);">Entregados</div>
                     <div class="fw-bold" style="font-size: 1.3rem;">{{ stats.delivered }}</div>
                 </div>
             </div>
@@ -66,8 +66,8 @@
     </div>
 </div>
 
-<!-- Filters -->
-<div class="card stat-card mb-3">
+<!-- Filters (Odoo style) -->
+<div class="card mb-3">
     <div class="card-body py-2">
         <form method="get" class="d-flex align-items-center gap-2 flex-wrap">
             <div class="search-box">
@@ -89,8 +89,8 @@
     </div>
 </div>
 
-<!-- Table -->
-<div class="card stat-card">
+<!-- Table (Odoo style) -->
+<div class="card">
     <div class="table-responsive">
         <table class="table table-hover mb-0">
             <thead>
@@ -136,7 +136,7 @@
                     </td>
                 </tr>
                 {% empty %}
-                <tr><td colspan="9" class="text-center text-muted py-4"><i class="bi bi-inbox me-2"></i>No hay pedidos de venta</td></tr>
+                <tr><td colspan="9" class="text-center py-4" style="color: var(--o-text-muted);"><i class="bi bi-inbox me-2"></i>No hay pedidos de venta</td></tr>
                 {% endfor %}
             </tbody>
         </table>

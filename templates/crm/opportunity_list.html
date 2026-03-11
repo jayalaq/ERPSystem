@@ -8,48 +8,125 @@
 
 {% block content %}
 <div class="page-header d-flex justify-content-between align-items-center">
-    <h4>Pipeline de Ventas</h4>
-    <a href="{% url 'crm:opportunity_create' %}" class="btn btn-primary"><i class="bi bi-plus-lg"></i> Nueva Oportunidad</a>
+    <h4><i class="bi bi-funnel me-2"></i>Pipeline de Ventas</h4>
+    <div class="d-flex gap-2 align-items-center">
+        <!-- View Toggle (Odoo style) -->
+        <div class="btn-group" role="group">
+            <button type="button" class="btn btn-sm btn-outline-secondary active" id="btnKanban" onclick="showView('kanban')">
+                <i class="bi bi-kanban"></i>
+            </button>
+            <button type="button" class="btn btn-sm btn-outline-secondary" id="btnList" onclick="showView('list')">
+                <i class="bi bi-list-ul"></i>
+            </button>
+        </div>
+        <a href="{% url 'crm:opportunity_create' %}" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i>Nueva Oportunidad</a>
+    </div>
 </div>
 
-<!-- Pipeline Summary -->
+<!-- Pipeline Summary (Odoo style status bar) -->
 <div class="row g-2 mb-4">
     {% for stage in pipeline %}
     <div class="col">
-        <div class="card stat-card text-center">
+        <div class="card text-center" style="border-top: 3px solid {% if stage.stage == 'prospecting' %}var(--o-info){% elif stage.stage == 'qualification' %}var(--o-action){% elif stage.stage == 'proposal' %}var(--o-brand){% elif stage.stage == 'negotiation' %}var(--o-warning){% elif stage.stage == 'closed_won' %}var(--o-success){% elif stage.stage == 'closed_lost' %}var(--o-danger){% else %}var(--o-border){% endif %};">
             <div class="card-body py-2">
-                <div class="text-muted" style="font-size:0.7rem;">{{ stage.stage|title }}</div>
-                <div class="fw-bold">{{ stage.count }}</div>
-                <div class="text-success" style="font-size:0.75rem;">S/ {{ stage.total|floatformat:0|intcomma }}</div>
+                <div style="font-size:0.7rem; color: var(--o-text-secondary);">{{ stage.stage|title }}</div>
+                <div class="fw-bold" style="font-size: 1.1rem; color: var(--o-text);">{{ stage.count }}</div>
+                <div style="font-size:0.75rem; color: var(--o-success);">S/ {{ stage.total|floatformat:0|intcomma }}</div>
             </div>
         </div>
     </div>
     {% endfor %}
 </div>
 
-<div class="card stat-card">
-    <div class="table-responsive">
-        <table class="table table-hover mb-0">
-            <thead>
-                <tr><th>Oportunidad</th><th>Cliente</th><th>Etapa</th><th>Prioridad</th><th class="text-end">Monto</th><th>Prob.</th><th>Asignado</th><th></th></tr>
-            </thead>
-            <tbody>
+<!-- ============================================ -->
+<!-- KANBAN VIEW (Odoo style)                     -->
+<!-- ============================================ -->
+<div id="viewKanban">
+    <div class="d-flex gap-3 overflow-auto pb-3" style="min-height: 400px;">
+        {% for stage in pipeline %}
+        <div class="o-kanban-group">
+            <div class="o-kanban-header">
+                <span>{{ stage.stage|title }}</span>
+                <span class="badge" style="background: {% if stage.stage == 'prospecting' %}var(--o-info){% elif stage.stage == 'qualification' %}var(--o-action){% elif stage.stage == 'proposal' %}var(--o-brand){% elif stage.stage == 'negotiation' %}var(--o-warning){% elif stage.stage == 'closed_won' %}var(--o-success){% elif stage.stage == 'closed_lost' %}var(--o-danger){% else %}var(--o-border){% endif %}; color: #fff;">
+                    {{ stage.count }}
+                </span>
+            </div>
+            <div class="o-kanban-column mt-2">
                 {% for opp in opportunities %}
-                <tr>
-                    <td class="fw-semibold">{{ opp.title }}</td>
-                    <td>{{ opp.customer.name }}</td>
-                    <td><span class="badge bg-{% if opp.stage == 'closed_won' %}success{% elif opp.stage == 'closed_lost' %}danger{% elif opp.stage == 'negotiation' %}warning{% else %}info{% endif %}">{{ opp.get_stage_display }}</span></td>
-                    <td><span class="badge bg-{% if opp.priority == 'urgent' %}danger{% elif opp.priority == 'high' %}warning{% else %}secondary{% endif %}">{{ opp.get_priority_display }}</span></td>
-                    <td class="text-end">S/ {{ opp.expected_amount|floatformat:2|intcomma }}</td>
-                    <td>{{ opp.probability }}%</td>
-                    <td>{{ opp.assigned_to|default:"-" }}</td>
-                    <td><a href="{% url 'crm:opportunity_edit' opp.pk %}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-pencil"></i></a></td>
-                </tr>
-                {% empty %}
-                <tr><td colspan="8" class="text-center text-muted py-4">No hay oportunidades</td></tr>
+                {% if opp.stage == stage.stage %}
+                <a href="{% url 'crm:opportunity_edit' opp.pk %}" class="text-decoration-none">
+                    <div class="o-kanban-card">
+                        <div class="card-title">{{ opp.title }}</div>
+                        <div class="card-subtitle">{{ opp.customer.name }}</div>
+                        <div class="d-flex justify-content-between align-items-center mt-2">
+                            <span class="card-amount">S/ {{ opp.expected_amount|floatformat:0|intcomma }}</span>
+                            <span style="font-size: 0.7rem; color: var(--o-text-muted);">{{ opp.probability }}%</span>
+                        </div>
+                        {% if opp.assigned_to %}
+                        <div class="d-flex align-items-center gap-1 mt-2" style="font-size: 0.7rem; color: var(--o-text-secondary);">
+                            <i class="bi bi-person-circle"></i>
+                            {{ opp.assigned_to }}
+                        </div>
+                        {% endif %}
+                        {% if opp.priority == 'urgent' or opp.priority == 'high' %}
+                        <div class="mt-1">
+                            <span class="badge bg-{% if opp.priority == 'urgent' %}danger{% else %}warning{% endif %}" style="font-size: 0.6rem;">
+                                {% if opp.priority == 'urgent' %}<i class="bi bi-exclamation-triangle-fill me-1"></i>{% endif %}{{ opp.get_priority_display }}
+                            </span>
+                        </div>
+                        {% endif %}
+                    </div>
+                </a>
+                {% endif %}
                 {% endfor %}
-            </tbody>
-        </table>
+                {% if stage.count == 0 %}
+                <div class="text-center py-4" style="font-size: 0.8rem; color: var(--o-text-muted);">
+                    Sin oportunidades
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
     </div>
 </div>
+
+<!-- ============================================ -->
+<!-- LIST VIEW                                    -->
+<!-- ============================================ -->
+<div id="viewList" style="display: none;">
+    <div class="card">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr><th>Oportunidad</th><th>Cliente</th><th>Etapa</th><th>Prioridad</th><th class="text-end">Monto</th><th>Prob.</th><th>Asignado</th><th></th></tr>
+                </thead>
+                <tbody>
+                    {% for opp in opportunities %}
+                    <tr>
+                        <td class="fw-semibold">{{ opp.title }}</td>
+                        <td>{{ opp.customer.name }}</td>
+                        <td><span class="badge bg-{% if opp.stage == 'closed_won' %}success{% elif opp.stage == 'closed_lost' %}danger{% elif opp.stage == 'negotiation' %}warning{% else %}info{% endif %}">{{ opp.get_stage_display }}</span></td>
+                        <td><span class="badge bg-{% if opp.priority == 'urgent' %}danger{% elif opp.priority == 'high' %}warning{% else %}secondary{% endif %}">{{ opp.get_priority_display }}</span></td>
+                        <td class="text-end">S/ {{ opp.expected_amount|floatformat:2|intcomma }}</td>
+                        <td>{{ opp.probability }}%</td>
+                        <td>{{ opp.assigned_to|default:"-" }}</td>
+                        <td><a href="{% url 'crm:opportunity_edit' opp.pk %}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-pencil"></i></a></td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="8" class="text-center py-4" style="color: var(--o-text-muted);">No hay oportunidades</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+function showView(view) {
+    document.getElementById('viewKanban').style.display = view === 'kanban' ? 'block' : 'none';
+    document.getElementById('viewList').style.display = view === 'list' ? 'block' : 'none';
+    document.getElementById('btnKanban').classList.toggle('active', view === 'kanban');
+    document.getElementById('btnList').classList.toggle('active', view === 'list');
+}
+</script>
 {% endblock %}

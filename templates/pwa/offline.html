@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#0a0e1a">
+    <meta name="theme-color" content="#714B67">
     <title>Sin conexion | NexusERP</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: #0a0e1a;
-            color: #e2e8f0;
+            background: #F0EEEE;
+            color: #212529;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
@@ -27,12 +27,12 @@
             width: 100px;
             height: 100px;
             margin: 0 auto 1.5rem;
-            background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(6, 182, 212, 0.1));
+            background: linear-gradient(135deg, rgba(113, 75, 103, 0.15), rgba(0, 160, 157, 0.1));
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            border: 2px solid rgba(99, 102, 241, 0.2);
+            border: 2px solid rgba(113, 75, 103, 0.2);
             animation: pulse 3s ease-in-out infinite;
         }
         .offline-icon svg { width: 48px; height: 48px; opacity: 0.7; }
@@ -40,13 +40,13 @@
             font-size: 1.4rem;
             font-weight: 700;
             margin-bottom: 0.5rem;
-            background: linear-gradient(135deg, #6366f1, #06b6d4);
+            background: linear-gradient(135deg, #714B67, #00A09D);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
         .subtitle {
-            color: #94a3b8;
+            color: #6C757D;
             font-size: 0.9rem;
             line-height: 1.5;
             margin-bottom: 1.5rem;
@@ -54,8 +54,8 @@
 
         /* Queue Status Card */
         .queue-card {
-            background: rgba(99, 102, 241, 0.08);
-            border: 1px solid rgba(99, 102, 241, 0.2);
+            background: rgba(113, 75, 103, 0.08);
+            border: 1px solid rgba(113, 75, 103, 0.2);
             border-radius: 12px;
             padding: 1rem 1.25rem;
             margin-bottom: 1.5rem;
@@ -68,18 +68,18 @@
             gap: 0.5rem;
             font-size: 0.85rem;
             font-weight: 600;
-            color: #818cf8;
+            color: #714B67;
             margin-bottom: 0.5rem;
         }
         .queue-header svg { width: 16px; height: 16px; }
         .queue-count {
             font-size: 1.75rem;
             font-weight: 700;
-            color: #e2e8f0;
+            color: #212529;
         }
         .queue-label {
             font-size: 0.8rem;
-            color: #94a3b8;
+            color: #6C757D;
         }
 
         /* Info Cards */
@@ -90,8 +90,8 @@
             margin-bottom: 1.5rem;
         }
         .info-card {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.06);
+            background: rgba(0, 0, 0, 0.02);
+            border: 1px solid rgba(0, 0, 0, 0.06);
             border-radius: 10px;
             padding: 0.875rem;
             text-align: left;
@@ -103,12 +103,12 @@
         .info-card-title {
             font-size: 0.75rem;
             font-weight: 600;
-            color: #e2e8f0;
+            color: #212529;
             margin-bottom: 0.2rem;
         }
         .info-card-desc {
             font-size: 0.7rem;
-            color: #64748b;
+            color: #868E96;
             line-height: 1.4;
         }
 
@@ -117,7 +117,7 @@
             align-items: center;
             gap: 0.5rem;
             padding: 0.7rem 1.75rem;
-            background: linear-gradient(135deg, #6366f1, #4f46e5);
+            background: #714B67;
             color: white;
             border: none;
             border-radius: 10px;
@@ -129,7 +129,7 @@
         }
         .retry-btn:hover {
             transform: translateY(-1px);
-            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.3);
+            box-shadow: 0 6px 20px rgba(113, 75, 103, 0.25);
         }
         .brand {
             margin-top: 2rem;
@@ -142,14 +142,14 @@
         .sunat-note {
             margin-top: 1.25rem;
             font-size: 0.75rem;
-            color: #64748b;
+            color: #868E96;
             line-height: 1.5;
             padding: 0.75rem;
             background: rgba(245, 158, 11, 0.05);
             border: 1px solid rgba(245, 158, 11, 0.15);
             border-radius: 8px;
         }
-        .sunat-note strong { color: #f59e0b; }
+        .sunat-note strong { color: #e68a00; }
         @keyframes pulse {
             0%, 100% { transform: scale(1); opacity: 1; }
             50% { transform: scale(1.03); opacity: 0.85; }
@@ -159,7 +159,7 @@
 <body>
     <div class="offline-container">
         <div class="offline-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="#6366f1" stroke-width="1.5">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="#714B67" opacity="0.8" stroke-width="1.5">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M8.288 15.038a5.25 5.25 0 017.424 0M5.106 11.856c3.807-3.808 9.98-3.808 13.788 0M1.924 8.674c5.565-5.565 14.587-5.565 20.152 0M12.53 18.22l-.53.53-.53-.53a.75.75 0 011.06 0z" />
                 <line x1="3" y1="3" x2="21" y2="21" stroke="#ef4444" stroke-width="2" stroke-linecap="round"/>
             </svg>

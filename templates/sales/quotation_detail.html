@@ -209,9 +209,9 @@
                     <div class="d-flex mb-3" style="gap: 12px;">
                         <div class="flex-shrink-0">
                             <div style="width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem;
-                                {% if activity.activity_type == 'status_change' %}background: rgba(99, 102, 241, 0.2); color: var(--primary);
-                                {% elif activity.activity_type == 'signature' %}background: rgba(16, 185, 129, 0.2); color: var(--neon-green);
-                                {% else %}background: var(--bg-surface); color: var(--text-muted);{% endif %}">
+                                {% if activity.activity_type == 'status_change' %}background: rgba(113, 75, 103, 0.15); color: var(--o-brand);
+                                {% elif activity.activity_type == 'signature' %}background: rgba(40, 167, 69, 0.15); color: var(--o-success);
+                                {% else %}background: var(--o-bg-100); color: var(--o-text-muted);{% endif %}">
                                 {% if activity.activity_type == 'status_change' %}<i class="bi bi-arrow-repeat"></i>
                                 {% elif activity.activity_type == 'signature' %}<i class="bi bi-pen"></i>
                                 {% elif activity.activity_type == 'email' %}<i class="bi bi-envelope"></i>
@@ -271,7 +271,7 @@
                 <hr style="border-color: var(--border-color);">
                 <div class="d-flex justify-content-between">
                     <span class="fw-bold" style="font-size: 1.1rem;">TOTAL</span>
-                    <span class="fw-bold" style="font-size: 1.2rem; color: var(--neon-green);">S/ {{ quotation.total|floatformat:2|intcomma }}</span>
+                    <span class="fw-bold" style="font-size: 1.2rem; color: var(--o-brand);">S/ {{ quotation.total|floatformat:2|intcomma }}</span>
                 </div>
             </div>
         </div>

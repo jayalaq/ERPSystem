@@ -4,6 +4,26 @@
 
 {% block extra_css %}
 <style>
+    /* Override light-theme aliases — POS terminal stays dark */
+    :root {
+        --bg-dark: #0a0e1a;
+        --bg-card: #111827;
+        --bg-surface: #0f1629;
+        --border-color: rgba(99, 102, 241, 0.15);
+        --text-primary: #e2e8f0;
+        --text-secondary: #94a3b8;
+        --text-muted: #64748b;
+        --primary: #6366f1;
+        --primary-light: #818cf8;
+        --primary-dark: #4f46e5;
+        --accent: #06b6d4;
+        --neon-green: #10b981;
+        --neon-orange: #f0ad4e;
+        --neon-red: #ef4444;
+        --glass-bg: rgba(15, 22, 41, 0.8);
+        --glass-border: rgba(99, 102, 241, 0.15);
+        --card-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+    }
     .main-content { margin-left: 0 !important; }
     .sidebar, .topbar { display: none !important; }
     body { overflow: hidden; }

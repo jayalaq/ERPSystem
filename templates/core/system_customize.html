@@ -60,22 +60,22 @@
                         <div class="col-md-4">
                             <label class="form-label">Color Principal</label>
                             <div class="d-flex gap-2 align-items-center">
-                                <input type="color" name="primary_color" class="form-control form-control-color" value="{{ configs.primary_color|default:'#6366f1' }}" id="id_primary_color">
-                                <input type="text" class="form-control form-control-sm" value="{{ configs.primary_color|default:'#6366f1' }}" id="txt_primary_color" readonly style="width:100px;">
+                                <input type="color" name="primary_color" class="form-control form-control-color" value="{{ configs.primary_color|default:'#714B67' }}" id="id_primary_color">
+                                <input type="text" class="form-control form-control-sm" value="{{ configs.primary_color|default:'#714B67' }}" id="txt_primary_color" readonly style="width:100px;">
                             </div>
                         </div>
                         <div class="col-md-4">
                             <label class="form-label">Color Acento</label>
                             <div class="d-flex gap-2 align-items-center">
-                                <input type="color" name="accent_color" class="form-control form-control-color" value="{{ configs.accent_color|default:'#06b6d4' }}" id="id_accent_color">
-                                <input type="text" class="form-control form-control-sm" value="{{ configs.accent_color|default:'#06b6d4' }}" id="txt_accent_color" readonly style="width:100px;">
+                                <input type="color" name="accent_color" class="form-control form-control-color" value="{{ configs.accent_color|default:'#00A09D' }}" id="id_accent_color">
+                                <input type="text" class="form-control form-control-sm" value="{{ configs.accent_color|default:'#00A09D' }}" id="txt_accent_color" readonly style="width:100px;">
                             </div>
                         </div>
                         <div class="col-md-4">
                             <label class="form-label">Color Sidebar</label>
                             <div class="d-flex gap-2 align-items-center">
-                                <input type="color" name="sidebar_color" class="form-control form-control-color" value="{{ configs.sidebar_color|default:'#070b14' }}" id="id_sidebar_color">
-                                <input type="text" class="form-control form-control-sm" value="{{ configs.sidebar_color|default:'#070b14' }}" id="txt_sidebar_color" readonly style="width:100px;">
+                                <input type="color" name="sidebar_color" class="form-control form-control-color" value="{{ configs.sidebar_color|default:'#714B67' }}" id="id_sidebar_color">
+                                <input type="text" class="form-control form-control-sm" value="{{ configs.sidebar_color|default:'#714B67' }}" id="txt_sidebar_color" readonly style="width:100px;">
                             </div>
                         </div>
                     </div>
@@ -102,12 +102,12 @@
             <div class="card">
                 <div class="card-header">Vista Previa</div>
                 <div class="card-body">
-                    <div class="p-3 rounded" id="preview-box" style="background: {{ configs.sidebar_color|default:'#070b14' }}; color: white;">
+                    <div class="p-3 rounded" id="preview-box" style="background: {{ configs.sidebar_color|default:'#714B67' }}; color: white;">
                         <div class="d-flex align-items-center gap-2 mb-2">
-                            <div id="preview-primary" style="width:24px; height:24px; background: {{ configs.primary_color|default:'#6366f1' }}; border-radius: 4px;"></div>
+                            <div id="preview-primary" style="width:24px; height:24px; background: {{ configs.primary_color|default:'#714B67' }}; border-radius: 4px;"></div>
                             <span style="font-size: 0.8rem; font-weight: 600;">{{ company.trade_name|default:company.name|default:'Mi Empresa' }}</span>
                         </div>
-                        <div id="preview-accent" style="border-left: 3px solid {{ configs.accent_color|default:'#06b6d4' }}; padding-left: 8px; font-size: 0.75rem; opacity: 0.8;">Menu activo</div>
+                        <div id="preview-accent" style="border-left: 3px solid {{ configs.accent_color|default:'#00A09D' }}; padding-left: 8px; font-size: 0.75rem; opacity: 0.8;">Menu activo</div>
                     </div>
                 </div>
             </div>

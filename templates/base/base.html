@@ -40,6 +40,31 @@
             --o-shadow-sm: 0 1px 2px rgba(0,0,0,0.06);
             --o-shadow: 0 1px 3px rgba(0,0,0,0.1);
             --o-shadow-lg: 0 4px 12px rgba(0,0,0,0.1);
+
+            /* Legacy variable aliases for backward compatibility */
+            --primary: var(--o-brand);
+            --primary-dark: var(--o-brand-dark);
+            --primary-light: var(--o-brand-light);
+            --accent: var(--o-action);
+            --accent-glow: rgba(0, 160, 157, 0.2);
+            --neon-green: var(--o-success);
+            --neon-pink: #E6186B;
+            --neon-orange: var(--o-warning);
+            --neon-red: var(--o-danger);
+            --bg-dark: var(--o-bg);
+            --bg-card: var(--o-bg-view);
+            --bg-card-hover: var(--o-bg-100);
+            --bg-surface: var(--o-bg-100);
+            --bg-sidebar: var(--o-brand);
+            --border-color: var(--o-border);
+            --border-glow: var(--o-border);
+            --text-primary: var(--o-text);
+            --text-secondary: var(--o-text-secondary);
+            --text-muted: var(--o-text-muted);
+            --glass-bg: var(--o-bg-view);
+            --glass-border: var(--o-border-light);
+            --card-shadow: var(--o-shadow-sm);
+            --glow-shadow: var(--o-shadow);
         }
 
         * { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }

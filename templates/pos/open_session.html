@@ -4,12 +4,12 @@
 <div class="row justify-content-center" style="min-height:70vh;align-items:center;">
     <div class="col-md-5 col-lg-4">
         <div class="stat-card position-relative" style="overflow:hidden;">
-            <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--primary),var(--accent));"></div>
+            <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--o-brand),var(--o-action));"></div>
             <div class="card-body text-center py-5 px-4">
-                <div style="width:72px;height:72px;border-radius:16px;background:linear-gradient(135deg,var(--primary),var(--accent));display:flex;align-items:center;justify-content:center;margin:0 auto 1.25rem;box-shadow:0 0 30px rgba(99,102,241,0.3);">
+                <div style="width:72px;height:72px;border-radius:16px;background:linear-gradient(135deg,var(--o-brand),var(--o-action));display:flex;align-items:center;justify-content:center;margin:0 auto 1.25rem;box-shadow:0 0 30px rgba(113,75,103,0.2);">
                     <i class="bi bi-display" style="font-size:1.8rem;color:#fff;"></i>
                 </div>
-                <h4 style="font-weight:800;color:#fff;margin-bottom:0.25rem;">Abrir Sesi&oacute;n de Caja</h4>
+                <h4 style="font-weight:800;color:var(--o-text);margin-bottom:0.25rem;">Abrir Sesi&oacute;n de Caja</h4>
                 <p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:1.5rem;">Seleccione la caja e ingrese el monto inicial para comenzar</p>
                 <form method="post" class="text-start">
                     {% csrf_token %}

@@ -14,7 +14,7 @@
     <div class="col-6 col-md-3">
         <div class="stat-card position-relative">
             <div class="card-body d-flex align-items-center gap-3">
-                <div class="stat-icon" style="background: rgba(99, 102, 241, 0.15); color: var(--primary-light);"><i class="bi bi-box-seam"></i></div>
+                <div class="stat-icon" style="background: rgba(113, 75, 103, 0.1); color: var(--o-brand);"><i class="bi bi-box-seam"></i></div>
                 <div>
                     <div class="text-muted" style="font-size: 0.7rem; text-transform: uppercase;">Total</div>
                     <div class="fw-bold" style="font-size: 1.3rem;">{{ stats.total }}</div>
@@ -47,7 +47,7 @@
     <div class="col-6 col-md-3">
         <div class="stat-card position-relative">
             <div class="card-body d-flex align-items-center gap-3">
-                <div class="stat-icon" style="background: rgba(16, 185, 129, 0.15); color: var(--neon-green);"><i class="bi bi-check-circle"></i></div>
+                <div class="stat-icon" style="background: rgba(40, 167, 69, 0.1); color: var(--o-success);"><i class="bi bi-check-circle"></i></div>
                 <div>
                     <div class="text-muted" style="font-size: 0.7rem; text-transform: uppercase;">Completados</div>
                     <div class="fw-bold" style="font-size: 1.3rem;">{{ stats.completed }}</div>
@@ -100,7 +100,7 @@
                         </span>
                     </td>
                     <td style="min-width: 120px;">
-                        <div class="progress" style="height: 6px; background: var(--bg-surface);">
+                        <div class="progress" style="height: 6px; background: var(--o-bg-100);">
                             <div class="progress-bar bg-{% if pick.progress_percent == 100 %}success{% elif pick.progress_percent > 0 %}warning{% else %}secondary{% endif %}" style="width: {{ pick.progress_percent }}%"></div>
                         </div>
                         <small class="text-muted">{{ pick.progress_percent }}%</small>

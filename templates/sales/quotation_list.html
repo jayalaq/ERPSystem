@@ -28,7 +28,7 @@
     <div class="col-6 col-md-3">
         <div class="stat-card position-relative">
             <div class="card-body d-flex align-items-center gap-3">
-                <div class="stat-icon" style="background: rgba(245, 158, 11, 0.15); color: var(--neon-orange);">
+                <div class="stat-icon" style="background: rgba(245, 158, 11, 0.1); color: var(--o-warning);">
                     <i class="bi bi-pencil-square"></i>
                 </div>
                 <div>
@@ -64,6 +64,15 @@
             </div>
         </div>
     </div>
+</div>
+
+<!-- Quick Filters (Odoo style) -->
+<div class="mb-2 d-flex align-items-center gap-1 flex-wrap">
+    <a href="?status=" class="o-filter-tag {% if not status_filter %}active{% endif %}">Todas</a>
+    <a href="?status=draft" class="o-filter-tag {% if status_filter == 'draft' %}active{% endif %}">Borradores</a>
+    <a href="?status=sent" class="o-filter-tag {% if status_filter == 'sent' %}active{% endif %}">Enviadas</a>
+    <a href="?status=accepted" class="o-filter-tag {% if status_filter == 'accepted' %}active{% endif %}">Aceptadas</a>
+    <a href="?status=rejected" class="o-filter-tag {% if status_filter == 'rejected' %}active{% endif %}">Rechazadas</a>
 </div>
 
 <!-- Filters -->

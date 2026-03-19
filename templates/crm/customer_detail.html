@@ -8,75 +8,132 @@
 
 {% block content %}
 <div class="page-header d-flex justify-content-between align-items-center">
-    <h4>{{ customer.name }}</h4>
+    <div>
+        <h4><i class="bi bi-person-circle me-2"></i>{{ customer.name }}</h4>
+        <span class="badge" style="background: var(--o-brand); font-size: 0.7rem;">{{ customer.get_customer_type_display }}</span>
+    </div>
     <div class="d-flex gap-2">
         <a href="{% url 'crm:interaction_create' %}?customer={{ customer.pk }}" class="btn btn-outline-primary btn-sm">
-            <i class="bi bi-chat-dots"></i> Nueva Interacción
+            <i class="bi bi-chat-dots me-1"></i>Nueva Interaccion
         </a>
         <a href="{% url 'crm:customer_edit' customer.pk %}" class="btn btn-primary btn-sm">
-            <i class="bi bi-pencil"></i> Editar
+            <i class="bi bi-pencil me-1"></i>Editar
         </a>
     </div>
 </div>
 
 <div class="row g-3">
-    <div class="col-md-4">
-        <div class="card stat-card">
+    <!-- Left Column: Info + Opportunities -->
+    <div class="col-lg-4">
+        <!-- Contact Card (Odoo style) -->
+        <div class="card stat-card mb-3">
             <div class="card-body">
-                <h6 class="fw-bold mb-3">Información General</h6>
-                <table class="table table-sm table-borderless">
-                    <tr><td class="text-muted">Tipo</td><td class="fw-semibold">{{ customer.get_customer_type_display }}</td></tr>
-                    <tr><td class="text-muted">{{ customer.doc_type }}</td><td class="fw-semibold">{{ customer.doc_number }}</td></tr>
-                    <tr><td class="text-muted">Email</td><td>{{ customer.email|default:"-" }}</td></tr>
-                    <tr><td class="text-muted">Teléfono</td><td>{{ customer.phone|default:"-" }}</td></tr>
-                    <tr><td class="text-muted">Celular</td><td>{{ customer.mobile|default:"-" }}</td></tr>
-                    <tr><td class="text-muted">Dirección</td><td>{{ customer.address|default:"-" }}</td></tr>
-                    <tr><td class="text-muted">Crédito</td><td>S/ {{ customer.credit_limit|floatformat:2 }} ({{ customer.credit_days }} días)</td></tr>
-                    <tr><td class="text-muted">Asignado</td><td>{{ customer.assigned_to|default:"-" }}</td></tr>
-                </table>
+                <div class="text-center mb-3">
+                    <div style="width: 64px; height: 64px; border-radius: 50%; background: var(--o-brand); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: 700; margin: 0 auto;">
+                        {{ customer.name|first }}
+                    </div>
+                    <h6 class="fw-bold mt-2 mb-0">{{ customer.name }}</h6>
+                    <small class="text-muted">{{ customer.doc_type }}: {{ customer.doc_number }}</small>
+                </div>
+                <hr style="border-color: var(--o-border);">
+                <div class="mb-2 d-flex align-items-start gap-2">
+                    <i class="bi bi-envelope text-muted" style="margin-top: 2px;"></i>
+                    <span>{{ customer.email|default:"-" }}</span>
+                </div>
+                <div class="mb-2 d-flex align-items-start gap-2">
+                    <i class="bi bi-telephone text-muted" style="margin-top: 2px;"></i>
+                    <span>{{ customer.phone|default:"-" }}</span>
+                </div>
+                <div class="mb-2 d-flex align-items-start gap-2">
+                    <i class="bi bi-phone text-muted" style="margin-top: 2px;"></i>
+                    <span>{{ customer.mobile|default:"-" }}</span>
+                </div>
+                <div class="mb-2 d-flex align-items-start gap-2">
+                    <i class="bi bi-geo-alt text-muted" style="margin-top: 2px;"></i>
+                    <span>{{ customer.address|default:"-" }}</span>
+                </div>
+                <hr style="border-color: var(--o-border);">
+                <div class="mb-2 d-flex justify-content-between">
+                    <small class="text-muted">Limite de Credito</small>
+                    <span class="fw-semibold">S/ {{ customer.credit_limit|floatformat:2 }}</span>
+                </div>
+                <div class="mb-2 d-flex justify-content-between">
+                    <small class="text-muted">Dias de Credito</small>
+                    <span>{{ customer.credit_days }} dias</span>
+                </div>
+                <div class="d-flex justify-content-between">
+                    <small class="text-muted">Asignado a</small>
+                    <span>{{ customer.assigned_to|default:"-" }}</span>
+                </div>
             </div>
         </div>
     </div>
-    <div class="col-md-8">
+
+    <!-- Right Column: Opportunities + Chatter -->
+    <div class="col-lg-8">
+        <!-- Opportunities Table -->
         <div class="card stat-card mb-3">
-            <div class="card-body">
-                <h6 class="fw-bold mb-3">Oportunidades</h6>
-                <div class="table-responsive">
-                    <table class="table table-sm">
-                        <thead><tr><th>Título</th><th>Etapa</th><th>Monto</th><th>Probabilidad</th></tr></thead>
-                        <tbody>
-                            {% for opp in opportunities %}
-                            <tr>
-                                <td>{{ opp.title }}</td>
-                                <td><span class="badge bg-info">{{ opp.get_stage_display }}</span></td>
-                                <td>S/ {{ opp.expected_amount|floatformat:2|intcomma }}</td>
-                                <td>{{ opp.probability }}%</td>
-                            </tr>
-                            {% empty %}
-                            <tr><td colspan="4" class="text-muted text-center">Sin oportunidades</td></tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-funnel me-2"></i>Oportunidades</span>
+                <a href="{% url 'crm:opportunity_create' %}?customer={{ customer.pk }}" class="btn btn-sm btn-outline-primary"><i class="bi bi-plus-lg me-1"></i>Nueva</a>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-sm table-hover mb-0">
+                    <thead><tr><th>Titulo</th><th>Etapa</th><th class="text-end">Monto</th><th class="text-center">Prob.</th></tr></thead>
+                    <tbody>
+                        {% for opp in opportunities %}
+                        <tr>
+                            <td class="fw-semibold">{{ opp.title }}</td>
+                            <td><span class="badge bg-{% if opp.stage == 'closed_won' %}success{% elif opp.stage == 'closed_lost' %}danger{% elif opp.stage == 'negotiation' %}warning{% else %}info{% endif %}">{{ opp.get_stage_display }}</span></td>
+                            <td class="text-end">S/ {{ opp.expected_amount|floatformat:2|intcomma }}</td>
+                            <td class="text-center">{{ opp.probability }}%</td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="4" class="text-muted text-center py-3">Sin oportunidades</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
         </div>
+
+        <!-- Odoo-style Chatter -->
         <div class="card stat-card">
+            <div class="card-header"><i class="bi bi-chat-dots me-2"></i>Interacciones</div>
             <div class="card-body">
-                <h6 class="fw-bold mb-3">Últimas Interacciones</h6>
-                {% for inter in interactions %}
-                <div class="d-flex gap-3 mb-3 pb-3 border-bottom">
-                    <div class="stat-icon bg-primary bg-opacity-10 text-primary" style="width:36px;height:36px;min-width:36px;">
-                        <i class="bi bi-{% if inter.interaction_type == 'call' %}telephone{% elif inter.interaction_type == 'email' %}envelope{% elif inter.interaction_type == 'meeting' %}calendar-event{% elif inter.interaction_type == 'whatsapp' %}whatsapp{% else %}chat{% endif %}" style="font-size:0.9rem;"></i>
-                    </div>
-                    <div>
-                        <div class="fw-semibold" style="font-size:0.875rem;">{{ inter.subject }}</div>
-                        <div class="text-muted" style="font-size:0.8rem;">{{ inter.description|truncatewords:20 }}</div>
-                        <div class="text-muted" style="font-size:0.75rem;">{{ inter.date|date:"d/m/Y H:i" }} - {{ inter.performed_by }}</div>
-                    </div>
+                <!-- Add interaction shortcut -->
+                <div class="d-flex gap-2 mb-3">
+                    <a href="{% url 'crm:interaction_create' %}?customer={{ customer.pk }}&type=call" class="btn btn-sm btn-outline-secondary"><i class="bi bi-telephone me-1"></i>Llamada</a>
+                    <a href="{% url 'crm:interaction_create' %}?customer={{ customer.pk }}&type=email" class="btn btn-sm btn-outline-secondary"><i class="bi bi-envelope me-1"></i>Email</a>
+                    <a href="{% url 'crm:interaction_create' %}?customer={{ customer.pk }}&type=meeting" class="btn btn-sm btn-outline-secondary"><i class="bi bi-calendar-event me-1"></i>Reunion</a>
+                    <a href="{% url 'crm:interaction_create' %}?customer={{ customer.pk }}&type=whatsapp" class="btn btn-sm btn-outline-secondary"><i class="bi bi-whatsapp me-1"></i>WhatsApp</a>
                 </div>
-                {% empty %}
-                <p class="text-muted text-center">Sin interacciones registradas</p>
-                {% endfor %}
+
+                <!-- Interaction timeline (Odoo chatter style) -->
+                <div class="o-chatter">
+                    {% for inter in interactions %}
+                    <div class="o-chatter-entry">
+                        <div class="o-chatter-avatar" style="background: {% if inter.interaction_type == 'call' %}var(--o-info){% elif inter.interaction_type == 'email' %}var(--o-brand){% elif inter.interaction_type == 'meeting' %}var(--o-action){% elif inter.interaction_type == 'whatsapp' %}#25D366{% else %}var(--o-text-muted){% endif %};">
+                            <i class="bi bi-{% if inter.interaction_type == 'call' %}telephone{% elif inter.interaction_type == 'email' %}envelope{% elif inter.interaction_type == 'meeting' %}calendar-event{% elif inter.interaction_type == 'whatsapp' %}whatsapp{% else %}chat{% endif %}"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <span class="fw-semibold" style="font-size: 0.85rem;">{{ inter.subject }}</span>
+                                    <span class="badge bg-light text-dark ms-1" style="font-size: 0.65rem;">{{ inter.get_interaction_type_display }}</span>
+                                </div>
+                                <small class="text-muted" style="font-size: 0.7rem; white-space: nowrap;">{{ inter.date|date:"d/m/Y H:i" }}</small>
+                            </div>
+                            <div class="text-muted" style="font-size: 0.8rem;">{{ inter.description|truncatewords:30 }}</div>
+                            <small class="text-muted" style="font-size: 0.7rem;"><i class="bi bi-person me-1"></i>{{ inter.performed_by }}</small>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="text-center text-muted py-4">
+                        <i class="bi bi-chat-dots" style="font-size: 2rem; opacity: 0.3;"></i>
+                        <p class="mb-0 mt-2" style="font-size: 0.85rem;">Sin interacciones registradas</p>
+                    </div>
+                    {% endfor %}
+                </div>
             </div>
         </div>
     </div>

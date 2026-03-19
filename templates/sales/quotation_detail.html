@@ -9,9 +9,6 @@
 <div class="page-header">
     <div>
         <h4><i class="bi bi-file-earmark-richtext me-2"></i>{{ quotation.number }}</h4>
-        <span class="badge bg-{% if quotation.status == 'accepted' %}success{% elif quotation.status == 'sent' %}info{% elif quotation.status == 'rejected' %}danger{% elif quotation.status == 'expired' %}warning{% else %}secondary{% endif %}" style="font-size: 0.75rem;">
-            {{ quotation.get_status_display }}
-        </span>
     </div>
     <div class="d-flex gap-2 flex-wrap">
         <a href="{% url 'sales:quotation_pdf' quotation.pk %}" class="btn btn-outline-secondary btn-sm" target="_blank">
@@ -30,6 +27,27 @@
             <i class="bi bi-box-arrow-up-right me-1"></i>Ver Pedido {{ quotation.sales_order.number }}
         </a>
         {% endif %}
+    </div>
+</div>
+
+<!-- Odoo-style Statusbar -->
+<div class="o-statusbar mb-3">
+    <div class="o-statusbar-buttons d-flex gap-2">
+        {% if quotation.status == 'draft' %}
+        <a href="{% url 'sales:quotation_send' quotation.pk %}" class="btn btn-primary btn-sm"><i class="bi bi-send me-1"></i>Enviar</a>
+        {% endif %}
+        {% if quotation.status in 'draft,sent,accepted' and not quotation.sales_order %}
+        <a href="{% url 'sales:quotation_convert_to_order' quotation.pk %}" class="btn btn-primary btn-sm" onclick="return confirm('Convertir en Pedido de Venta?')">
+            <i class="bi bi-arrow-right-circle me-1"></i>Convertir a Pedido
+        </a>
+        {% endif %}
+    </div>
+    <div class="o-statusbar-steps">
+        <span class="o-step {% if quotation.status == 'draft' %}active{% elif quotation.status != 'draft' %}done{% endif %}">Borrador</span>
+        <span class="o-step {% if quotation.status == 'sent' %}active{% elif quotation.status in 'accepted,rejected,expired' %}done{% endif %}">Enviada</span>
+        <span class="o-step {% if quotation.status == 'accepted' %}active{% elif quotation.sales_order %}done{% endif %}">Aceptada</span>
+        {% if quotation.status == 'rejected' %}<span class="o-step active" style="--step-color: var(--o-danger);">Rechazada</span>{% endif %}
+        {% if quotation.status == 'expired' %}<span class="o-step active" style="--step-color: var(--o-warning);">Expirada</span>{% endif %}
     </div>
 </div>
 
@@ -164,7 +182,7 @@
             <div class="card-body">
                 {% if quotation.signature %}
                 <div class="text-center mb-2">
-                    <img src="{{ quotation.signature }}" alt="Firma" style="max-width: 300px; max-height: 150px; border: 1px solid var(--border-color); border-radius: 8px; padding: 8px; background: #fff;">
+                    <img src="{{ quotation.signature }}" alt="Firma" style="max-width: 300px; max-height: 150px; border: 1px solid var(--o-border); border-radius: 8px; padding: 8px; background: #fff;">
                 </div>
                 <div class="text-center">
                     {% if quotation.signed_by %}<small class="text-muted">Firmado por: {{ quotation.signed_by }}</small><br>{% endif %}
@@ -179,7 +197,7 @@
                     </div>
                     <div class="mb-2">
                         <label class="form-label">Firma</label>
-                        <canvas id="signatureCanvas" width="500" height="200" style="border: 2px solid var(--border-color); border-radius: 8px; cursor: crosshair; background: #fff; display: block; width: 100%; touch-action: none;"></canvas>
+                        <canvas id="signatureCanvas" width="500" height="200" style="border: 2px solid var(--o-border); border-radius: 8px; cursor: crosshair; background: #fff; display: block; width: 100%; touch-action: none;"></canvas>
                         <input type="hidden" name="signature" id="signatureData">
                     </div>
                     <div class="d-flex gap-2">
@@ -268,7 +286,7 @@
                     <span class="text-muted">IGV (18%)</span>
                     <span>S/ {{ quotation.igv|floatformat:2|intcomma }}</span>
                 </div>
-                <hr style="border-color: var(--border-color);">
+                <hr style="border-color: var(--o-border);">
                 <div class="d-flex justify-content-between">
                     <span class="fw-bold" style="font-size: 1.1rem;">TOTAL</span>
                     <span class="fw-bold" style="font-size: 1.2rem; color: var(--o-brand);">S/ {{ quotation.total|floatformat:2|intcomma }}</span>

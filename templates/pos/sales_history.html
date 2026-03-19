@@ -3,7 +3,7 @@
 {% block title %}Historial de Ventas{% endblock %}
 {% block content %}
 <div class="page-header">
-    <h4><i class="bi bi-receipt me-2" style="color:var(--accent);"></i>Historial de Ventas</h4>
+    <h4><i class="bi bi-receipt me-2" style="color:var(--o-action);"></i>Historial de Ventas</h4>
     <a href="{% url 'pos:terminal' %}" class="btn btn-primary btn-sm">
         <i class="bi bi-display me-1"></i> Ir al POS
     </a>
@@ -18,7 +18,7 @@
                     <i class="bi bi-cash-stack"></i>
                 </div>
                 <div>
-                    <div style="font-size:0.7rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;">Total Ventas</div>
+                    <div style="font-size:0.7rem;color:var(--o-text-muted);text-transform:uppercase;letter-spacing:0.05em;">Total Ventas</div>
                     <div style="font-size:1.4rem;font-weight:800;color:var(--o-text);font-family:'JetBrains Mono',monospace;">S/ {{ total_ventas|floatformat:2|intcomma }}</div>
                 </div>
             </div>
@@ -31,7 +31,7 @@
                     <i class="bi bi-receipt"></i>
                 </div>
                 <div>
-                    <div style="font-size:0.7rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;">Comprobantes</div>
+                    <div style="font-size:0.7rem;color:var(--o-text-muted);text-transform:uppercase;letter-spacing:0.05em;">Comprobantes</div>
                     <div style="font-size:1.4rem;font-weight:800;color:var(--o-text);font-family:'JetBrains Mono',monospace;">{{ total_count }}</div>
                 </div>
             </div>
@@ -44,7 +44,7 @@
                     <i class="bi bi-graph-up-arrow"></i>
                 </div>
                 <div>
-                    <div style="font-size:0.7rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;">Ticket Promedio</div>
+                    <div style="font-size:0.7rem;color:var(--o-text-muted);text-transform:uppercase;letter-spacing:0.05em;">Ticket Promedio</div>
                     <div style="font-size:1.4rem;font-weight:800;color:var(--o-text);font-family:'JetBrains Mono',monospace;">
                         S/ {% if total_count > 0 %}{{ total_ventas|floatformat:2 }}{% else %}0.00{% endif %}
                     </div>
@@ -58,9 +58,9 @@
 <div class="card mb-3">
     <div class="card-body py-2">
         <form method="get" class="d-flex gap-2 align-items-center flex-wrap">
-            <label style="font-size:0.78rem;color:var(--text-muted);">Desde:</label>
+            <label style="font-size:0.78rem;color:var(--o-text-muted);">Desde:</label>
             <input type="date" name="from" value="{{ request.GET.from }}" class="form-control form-control-sm" style="max-width:155px;">
-            <label style="font-size:0.78rem;color:var(--text-muted);">Hasta:</label>
+            <label style="font-size:0.78rem;color:var(--o-text-muted);">Hasta:</label>
             <input type="date" name="to" value="{{ request.GET.to }}" class="form-control form-control-sm" style="max-width:155px;">
             <select name="doc_type" class="form-select form-select-sm" style="max-width:150px;">
                 <option value="">Todos los tipos</option>
@@ -98,7 +98,7 @@
                 {% for sale in sales %}
                 <tr>
                     <td>
-                        <span style="font-family:'JetBrains Mono',monospace;font-weight:600;color:var(--primary-light);">
+                        <span style="font-family:'JetBrains Mono',monospace;font-weight:600;color:var(--o-brand);">
                             {{ sale.series }}-{{ sale.correlative }}
                         </span>
                     </td>
@@ -120,7 +120,7 @@
                     </td>
                     <td style="font-size:0.78rem;">{{ sale.seller.get_full_name|default:sale.seller.username }}</td>
                     <td class="text-end" style="font-family:'JetBrains Mono',monospace;font-size:0.8rem;">S/ {{ sale.subtotal|floatformat:2 }}</td>
-                    <td class="text-end" style="font-family:'JetBrains Mono',monospace;font-size:0.8rem;color:var(--text-muted);">S/ {{ sale.igv|floatformat:2 }}</td>
+                    <td class="text-end" style="font-family:'JetBrains Mono',monospace;font-size:0.8rem;color:var(--o-text-muted);">S/ {{ sale.igv|floatformat:2 }}</td>
                     <td class="text-end" style="font-family:'JetBrains Mono',monospace;font-weight:700;">S/ {{ sale.total|floatformat:2 }}</td>
                     <td>
                         <span class="badge bg-{% if sale.status == 'completed' %}success{% elif sale.status == 'cancelled' %}danger{% else %}warning{% endif %}">
@@ -137,7 +137,7 @@
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="11" class="text-center py-5" style="color:var(--text-muted);">
+                    <td colspan="11" class="text-center py-5" style="color:var(--o-text-muted);">
                         <i class="bi bi-inbox" style="font-size:2rem;display:block;margin-bottom:0.5rem;opacity:0.3;"></i>
                         No hay ventas en el periodo seleccionado
                     </td>

@@ -3,74 +3,163 @@
 {% block title %}Comprobantes{% endblock %}
 {% block content %}
 <div class="page-header d-flex justify-content-between align-items-center">
-    <h4>Comprobantes Electrónicos</h4>
-    <a href="{% url 'accounting:invoice_create' %}" class="btn btn-primary"><i class="bi bi-plus-lg"></i> Nuevo Comprobante</a>
+    <h4><i class="bi bi-receipt me-2"></i>Comprobantes Electronicos</h4>
+    <div class="d-flex gap-2 align-items-center">
+        <div class="btn-group" role="group">
+            <button type="button" class="btn btn-sm btn-outline-secondary" id="btnKanban" onclick="showView('kanban')">
+                <i class="bi bi-kanban"></i>
+            </button>
+            <button type="button" class="btn btn-sm btn-outline-secondary active" id="btnList" onclick="showView('list')">
+                <i class="bi bi-list-ul"></i>
+            </button>
+        </div>
+        <a href="{% url 'accounting:invoice_create' %}" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i>Nuevo Comprobante</a>
+    </div>
 </div>
 
+<!-- Summary Stats -->
 <div class="row g-3 mb-4">
-    <div class="col-md-6">
+    <div class="col-md-3">
         <div class="card stat-card">
             <div class="card-body d-flex align-items-center gap-3">
-                <div class="stat-icon bg-success bg-opacity-10 text-success"><i class="bi bi-check-circle"></i></div>
-                <div><div class="text-muted" style="font-size:0.75rem;">Total Emitido</div><div class="fw-bold fs-5">S/ {{ total_issued|floatformat:2|intcomma }}</div></div>
+                <div class="stat-icon" style="background: rgba(113, 75, 103, 0.1); color: var(--o-brand);"><i class="bi bi-receipt"></i></div>
+                <div><div class="text-muted" style="font-size:0.7rem; text-transform: uppercase;">Total Emitido</div><div class="fw-bold fs-5">S/ {{ total_issued|floatformat:2|intcomma }}</div></div>
             </div>
         </div>
     </div>
-    <div class="col-md-6">
+    <div class="col-md-3">
         <div class="card stat-card">
             <div class="card-body d-flex align-items-center gap-3">
-                <div class="stat-icon bg-warning bg-opacity-10 text-warning"><i class="bi bi-clock"></i></div>
-                <div><div class="text-muted" style="font-size:0.75rem;">Pendiente</div><div class="fw-bold fs-5">S/ {{ total_pending|floatformat:2|intcomma }}</div></div>
+                <div class="stat-icon" style="background: rgba(245, 158, 11, 0.1); color: var(--o-warning);"><i class="bi bi-clock"></i></div>
+                <div><div class="text-muted" style="font-size:0.7rem; text-transform: uppercase;">Pendiente</div><div class="fw-bold fs-5">S/ {{ total_pending|floatformat:2|intcomma }}</div></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card">
+            <div class="card-body d-flex align-items-center gap-3">
+                <div class="stat-icon" style="background: rgba(40, 167, 69, 0.1); color: var(--o-success);"><i class="bi bi-check-circle"></i></div>
+                <div><div class="text-muted" style="font-size:0.7rem; text-transform: uppercase;">Aceptadas SUNAT</div><div class="fw-bold fs-5">{{ accepted_count|default:"0" }}</div></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card">
+            <div class="card-body d-flex align-items-center gap-3">
+                <div class="stat-icon" style="background: rgba(220, 53, 69, 0.1); color: var(--o-danger);"><i class="bi bi-x-circle"></i></div>
+                <div><div class="text-muted" style="font-size:0.7rem; text-transform: uppercase;">Rechazadas</div><div class="fw-bold fs-5">{{ rejected_count|default:"0" }}</div></div>
             </div>
         </div>
     </div>
 </div>
 
+<!-- Filters -->
 <div class="card stat-card mb-3">
     <div class="card-body py-2">
-        <form method="get" class="d-flex gap-2">
-            <select name="type" class="form-select form-select-sm" style="max-width:150px;">
-                <option value="">Todos</option>
+        <form method="get" class="d-flex gap-2 align-items-center flex-wrap">
+            <div class="search-box">
+                <i class="bi bi-search search-icon"></i>
+                <input type="text" name="q" class="form-control form-control-sm" placeholder="Buscar comprobante..." value="{{ request.GET.q }}" style="width: 200px;">
+            </div>
+            <select name="type" class="form-select form-select-sm" style="max-width:140px;" onchange="this.form.submit()">
+                <option value="">Todos los tipos</option>
                 <option value="01" {% if current_type == '01' %}selected{% endif %}>Factura</option>
                 <option value="03" {% if current_type == '03' %}selected{% endif %}>Boleta</option>
-                <option value="07" {% if current_type == '07' %}selected{% endif %}>N. Crédito</option>
-                <option value="08" {% if current_type == '08' %}selected{% endif %}>N. Débito</option>
+                <option value="07" {% if current_type == '07' %}selected{% endif %}>N. Credito</option>
+                <option value="08" {% if current_type == '08' %}selected{% endif %}>N. Debito</option>
             </select>
-            <select name="status" class="form-select form-select-sm" style="max-width:150px;">
+            <select name="status" class="form-select form-select-sm" style="max-width:140px;" onchange="this.form.submit()">
                 <option value="">Todos estados</option>
                 <option value="draft" {% if current_status == 'draft' %}selected{% endif %}>Borrador</option>
                 <option value="accepted" {% if current_status == 'accepted' %}selected{% endif %}>Aceptada</option>
                 <option value="rejected" {% if current_status == 'rejected' %}selected{% endif %}>Rechazada</option>
             </select>
-            <input type="text" name="q" class="form-control form-control-sm" placeholder="Buscar...">
             <button class="btn btn-sm btn-primary"><i class="bi bi-search"></i></button>
+            {% if request.GET.q or current_type or current_status %}
+            <a href="{% url 'accounting:invoice_list' %}" class="btn btn-sm btn-outline-secondary">Limpiar</a>
+            {% endif %}
         </form>
     </div>
 </div>
 
-<div class="card stat-card">
-    <div class="table-responsive">
-        <table class="table table-hover mb-0">
-            <thead><tr><th>Comprobante</th><th>Tipo</th><th>Cliente</th><th>Emisión</th><th class="text-end">Total</th><th>Estado</th><th>SUNAT</th><th></th></tr></thead>
-            <tbody>
+<!-- KANBAN VIEW -->
+<div id="viewKanban" style="display: none;">
+    <div class="d-flex gap-3 overflow-auto pb-3" style="min-height: 400px;">
+        {% for status_group in invoice_groups %}
+        <div class="o-kanban-group">
+            <div class="o-kanban-header">
+                <span>{{ status_group.label }}</span>
+                <span class="badge" style="background: {{ status_group.color }}; color: #fff;">{{ status_group.count }}</span>
+            </div>
+            <div class="o-kanban-column mt-2">
                 {% for inv in invoices %}
-                <tr>
-                    <td class="fw-semibold">{{ inv.series }}-{{ inv.correlative|stringformat:"08d" }}</td>
-                    <td><span class="badge bg-secondary">{{ inv.get_doc_type_display }}</span></td>
-                    <td>{{ inv.customer.name }}</td>
-                    <td>{{ inv.issue_date|date:"d/m/Y" }}</td>
-                    <td class="text-end fw-semibold">S/ {{ inv.total|floatformat:2|intcomma }}</td>
-                    <td><span class="badge bg-{% if inv.status == 'accepted' %}success{% elif inv.status == 'draft' %}warning{% elif inv.status == 'rejected' %}danger{% else %}secondary{% endif %}">{{ inv.get_status_display }}</span></td>
-                    <td>{{ inv.sunat_response_code|default:"-" }}</td>
-                    <td>
-                        <a href="{% url 'accounting:invoice_detail' inv.pk %}" class="btn btn-sm btn-outline-primary"><i class="bi bi-eye"></i></a>
-                    </td>
-                </tr>
-                {% empty %}
-                <tr><td colspan="8" class="text-center text-muted py-4">No hay comprobantes</td></tr>
+                {% if inv.status == status_group.status %}
+                <a href="{% url 'accounting:invoice_detail' inv.pk %}" class="text-decoration-none">
+                    <div class="o-kanban-card">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div class="card-title">{{ inv.series }}-{{ inv.correlative|stringformat:"08d" }}</div>
+                            <span class="badge bg-secondary" style="font-size: 0.6rem;">{{ inv.get_doc_type_display }}</span>
+                        </div>
+                        <div class="card-subtitle">{{ inv.customer.name }}</div>
+                        <div class="d-flex justify-content-between align-items-center mt-2">
+                            <span class="card-amount">S/ {{ inv.total|floatformat:2|intcomma }}</span>
+                            <span style="font-size: 0.7rem; color: var(--o-text-muted);">{{ inv.issue_date|date:"d/m" }}</span>
+                        </div>
+                    </div>
+                </a>
+                {% endif %}
                 {% endfor %}
-            </tbody>
-        </table>
+            </div>
+        </div>
+        {% empty %}
+        <!-- Fallback kanban columns if groups not provided -->
+        {% for status_val in "draft,issued,accepted,rejected"|make_list %}
+        {% endfor %}
+        {% endfor %}
     </div>
 </div>
+
+<!-- LIST VIEW -->
+<div id="viewList">
+    <div class="card stat-card">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead><tr><th>Comprobante</th><th>Tipo</th><th>Cliente</th><th>Emision</th><th class="text-end">Total</th><th>Estado</th><th>SUNAT</th><th></th></tr></thead>
+                <tbody>
+                    {% for inv in invoices %}
+                    <tr>
+                        <td><a href="{% url 'accounting:invoice_detail' inv.pk %}" class="fw-semibold">{{ inv.series }}-{{ inv.correlative|stringformat:"08d" }}</a></td>
+                        <td><span class="badge bg-secondary">{{ inv.get_doc_type_display }}</span></td>
+                        <td>{{ inv.customer.name }}</td>
+                        <td>{{ inv.issue_date|date:"d/m/Y" }}</td>
+                        <td class="text-end fw-semibold">S/ {{ inv.total|floatformat:2|intcomma }}</td>
+                        <td><span class="badge bg-{% if inv.status == 'accepted' %}success{% elif inv.status == 'draft' %}warning{% elif inv.status == 'rejected' %}danger{% else %}secondary{% endif %}">{{ inv.get_status_display }}</span></td>
+                        <td>{{ inv.sunat_response_code|default:"-" }}</td>
+                        <td>
+                            <a href="{% url 'accounting:invoice_detail' inv.pk %}" class="btn btn-sm btn-outline-primary"><i class="bi bi-eye"></i></a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="8" class="text-center text-muted py-4"><i class="bi bi-inbox me-2"></i>No hay comprobantes</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+function showView(view) {
+    document.getElementById('viewKanban').style.display = view === 'kanban' ? 'block' : 'none';
+    document.getElementById('viewList').style.display = view === 'list' ? 'block' : 'none';
+    document.getElementById('btnKanban').classList.toggle('active', view === 'kanban');
+    document.getElementById('btnList').classList.toggle('active', view === 'list');
+    localStorage.setItem('invoiceView', view);
+}
+// Restore saved view preference
+document.addEventListener('DOMContentLoaded', function() {
+    const saved = localStorage.getItem('invoiceView');
+    if (saved) showView(saved);
+});
+</script>
 {% endblock %}

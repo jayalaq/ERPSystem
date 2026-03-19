@@ -66,7 +66,16 @@
     </div>
 </div>
 
-<!-- Filters (Odoo style) -->
+<!-- Quick Filters (Odoo style) -->
+<div class="mb-2 d-flex align-items-center gap-1 flex-wrap">
+    <a href="?status=" class="o-filter-tag {% if not status_filter %}active{% endif %}">Todos</a>
+    <a href="?status=draft" class="o-filter-tag {% if status_filter == 'draft' %}active{% endif %}">Borradores</a>
+    <a href="?status=confirmed" class="o-filter-tag {% if status_filter == 'confirmed' %}active{% endif %}">Confirmados</a>
+    <a href="?status=in_process" class="o-filter-tag {% if status_filter == 'in_process' %}active{% endif %}">En Proceso</a>
+    <a href="?status=invoiced" class="o-filter-tag {% if status_filter == 'invoiced' %}active{% endif %}">Facturados</a>
+</div>
+
+<!-- Search & Filter -->
 <div class="card mb-3">
     <div class="card-body py-2">
         <form method="get" class="d-flex align-items-center gap-2 flex-wrap">
